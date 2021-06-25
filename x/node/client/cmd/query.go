@@ -168,7 +168,11 @@ func QueryNodes() *cobra.Command {
 
 				result, err := qsc.QueryNodesForProvider(
 					context.Background(),
-					nodetypes.NewQueryNodesForProviderRequest(address, status, pagination),
+					nodetypes.NewQueryNodesForProviderRequest(
+						address,
+						status,
+						pagination,
+					),
 				)
 				if err != nil {
 					return err
@@ -178,7 +182,10 @@ func QueryNodes() *cobra.Command {
 			} else {
 				result, err := qsc.QueryNodes(
 					context.Background(),
-					nodetypes.NewQueryNodesRequest(status, pagination),
+					nodetypes.NewQueryNodesRequest(
+						status,
+						pagination,
+					),
 				)
 				if err != nil {
 					return err
@@ -228,8 +235,8 @@ func QueryNodes() *cobra.Command {
 	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "nodes")
 
-	cmd.Flags().String(flagProvider, "", "nodes operating under a provider")
-	cmd.Flags().String(flagStatus, "Active", "nodes with status (Active|Inactive)")
+	cmd.Flags().String(flagProvider, "", "filter with provider address")
+	cmd.Flags().String(flagStatus, "Active", "filter with status (Active|Inactive)")
 
 	return cmd
 }
