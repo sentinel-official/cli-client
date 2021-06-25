@@ -2,7 +2,7 @@ package cmd
 
 const (
 	flagAddress      = "address"
-	flagStatus       = "status"
 	flagRating       = "rating"
+	flagStatus       = "status"
 	flagSubscription = "subscription"
 )
