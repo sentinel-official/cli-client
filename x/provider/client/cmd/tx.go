@@ -25,9 +25,10 @@ func GetTxCommand() *cobra.Command {
 
 func txRegister() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "register [name]",
-		Short: "Register a provider",
-		Args:  cobra.ExactArgs(1),
+		Use:    "register [name]",
+		Short:  "Register a provider",
+		Args:   cobra.ExactArgs(1),
+		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, err := client.GetClientTxContext(cmd)
 			if err != nil {
