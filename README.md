@@ -5,7 +5,7 @@
 [![Licence](https://img.shields.io/github/license/sentinel-official/cli-client.svg)](https://github.com/sentinel-official/cli-client/blob/development/LICENSE)
 [![LoC](https://tokei.rs/b1/github/sentinel-official/cli-client)](https://github.com/sentinel-official/cli-client)
 
-Download the latest version of CLI client software from the releases section [here](https://github.com/sentinel-official/dvpn-node/releases/latest "here").
+Download the latest version of CLI client software from the releases section [here](https://github.com/sentinel-official/cli-client/releases/latest "here").
 
 ## Install dependencies
 
@@ -63,6 +63,7 @@ port install wireguard-tools
         --keyring-backend file \
         --chain-id sentinelhub-2 \
         --node https://rpc.sentinel.co:443 \
+        --gas-prices 0.1udvpn \
         --from <KEY_NAME> <NODE_ADDRESS> <DEPOSIT>
     ```
 
@@ -85,6 +86,7 @@ port install wireguard-tools
         --keyring-backend file \
         --chain-id sentinelhub-2 \
         --node https://rpc.sentinel.co:443 \
+        --gas-prices 0.1udvpn \
         --yes \
         --from <KEY_NAME> <SUBSCRIPTION_ID> <NODE_ADDRESS>
     ```
