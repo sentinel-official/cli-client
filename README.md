@@ -5,7 +5,7 @@
 [![Licence](https://img.shields.io/github/license/sentinel-official/cli-client.svg)](https://github.com/sentinel-official/cli-client/blob/development/LICENSE)
 [![LoC](https://tokei.rs/b1/github/sentinel-official/cli-client)](https://github.com/sentinel-official/cli-client)
 
-Download the latest version of CLI client software from the releases section [here](https://github.com/sentinel-official/dvpn-node/releases/latest "here").
+Download the latest version of CLI client software from the releases section [here](https://github.com/sentinel-official/cli-client/releases/latest "here").
 
 ## Install dependencies
 
