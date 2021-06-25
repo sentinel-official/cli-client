@@ -7,13 +7,13 @@
 
 Download the latest version of CLI client software from the releases section [here](https://github.com/sentinel-official/dvpn-node/releases/latest "here").
 
-## Install WireGuard
+## Install dependencies
 
 ### Linux
 
 ```sh
 sudo apt-get update && \
-sudo apt install wireguard-tools
+sudo apt-get install resolvconf wireguard-tools
 ```
 
 ### Mac
