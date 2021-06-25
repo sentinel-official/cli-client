@@ -7,24 +7,32 @@
 
 Download the latest version of CLI client software from the releases section [here](https://github.com/sentinel-official/dvpn-node/releases/latest "here").
 
-## Install WireGuard
+## Install dependencies
 
 ### Linux
 
 ```sh
 sudo apt-get update && \
-sudo apt install wireguard-tools
+sudo apt-get install resolvconf wireguard-tools
 ```
 
 ### Mac
 
 ```sh
-TBU
+brew install wireguard-tools
+```
+
+or
+
+```sh
+port install wireguard-tools
 ```
 
 ## Connect to a dVPN node
 
 1. Create or recover a key
+
+    Need not perform this step again in case you have already done it once.
 
     ```sh
     sentinelcli keys add \
@@ -33,7 +41,7 @@ TBU
         <KEY_NAME>
     ```
 
-    Pass flag `--recover` to recover the key
+    Pass flag `--recover` to recover the key.
 
 2. Query the active nodes and choose one
 
@@ -50,16 +58,26 @@ TBU
 3. Subscribe to a node
 
     ```sh
-    sudo sentinelcli subscription subscribe-to-node \
+    sentinelcli tx subscription subscribe-to-node \
         --home "${HOME}/.sentinelcli" \
         --keyring-backend file \
         --chain-id sentinelhub-2 \
         --node https://rpc.sentinel.co:443 \
-        --from <KEY_NAME> \
-        <NODE_ADDRESS> <DEPOSIT>
+        --from <KEY_NAME> <NODE_ADDRESS> <DEPOSIT>
     ```
 
-4. Connect
+4. Query the active subscriptions of your account address
+
+    ```sh
+    sentinelcli query subscriptions \
+        --home "${HOME}/.sentinelcli" \
+        --node https://rpc.sentinel.co:443 \
+        --status Active \
+        --page 1 \
+        --address <ACCOUNT_ADDRESS>
+    ```
+
+5. Connect
 
     ```sh
     sudo sentinelcli connect \
@@ -68,8 +86,7 @@ TBU
         --chain-id sentinelhub-2 \
         --node https://rpc.sentinel.co:443 \
         --yes \
-        --from <KEY_NAME> \
-        <SUBSCRIPTION_ID> <NODE_ADDRESS>
+        --from <KEY_NAME> <SUBSCRIPTION_ID> <NODE_ADDRESS>
     ```
 
 ## Disconnect from a dVPN node
