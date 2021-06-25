@@ -19,7 +19,13 @@ sudo apt-get install resolvconf wireguard-tools
 ### Mac
 
 ```sh
-TBU
+brew install wireguard-tools
+```
+
+or
+
+```sh
+port install wireguard-tools
 ```
 
 ## Connect to a dVPN node
