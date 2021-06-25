@@ -94,8 +94,8 @@ func ConnectCmd() *cobra.Command {
 			}
 
 			var (
-				statusFilePath = filepath.Join(ctx.HomeDir, "status.json")
 				status         = clienttypes.NewStatus()
+				statusFilePath = filepath.Join(ctx.HomeDir, "status.json")
 			)
 
 			if err := status.LoadFromPath(statusFilePath); err != nil {
