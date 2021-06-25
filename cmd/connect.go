@@ -301,7 +301,7 @@ func ConnectCmd() *cobra.Command {
 
 	flags.AddTxFlagsToCmd(cmd)
 
-	cmd.PersistentFlags().String(flags.FlagChainID, "", "the network chain identity")
+	cmd.Flags().String(flags.FlagChainID, "", "the network chain identity")
 
 	return cmd
 }

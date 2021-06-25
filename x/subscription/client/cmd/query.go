@@ -13,6 +13,7 @@ import (
 	subscriptiontypes "github.com/sentinel-official/hub/x/subscription/types"
 	"github.com/spf13/cobra"
 
+	netutil "github.com/sentinel-official/cli-client/utils/net"
 	"github.com/sentinel-official/cli-client/x/subscription/types"
 )
 
@@ -80,7 +81,7 @@ func QuerySubscription() *cobra.Command {
 					item.Node,
 					item.Price.Raw().String(),
 					item.Deposit.Raw().String(),
-					fmt.Sprintf("%d", item.Free),
+					netutil.ToReadable(item.Free, 2),
 					item.Status,
 				},
 			)
@@ -188,7 +189,7 @@ func QuerySubscriptions() *cobra.Command {
 						items[i].Node,
 						items[i].Price.Raw().String(),
 						items[i].Deposit.Raw().String(),
-						fmt.Sprintf("%d", items[i].Free),
+						netutil.ToReadable(items[i].Free, 2),
 						items[i].Status,
 					},
 				)
@@ -254,8 +255,8 @@ func QueryQuota() *cobra.Command {
 			table.Append(
 				[]string{
 					item.Address,
-					fmt.Sprintf("%d", item.Allocated),
-					fmt.Sprintf("%d", item.Consumed),
+					netutil.ToReadable(item.Allocated, 2),
+					netutil.ToReadable(item.Consumed, 2),
 				},
 			)
 
@@ -315,8 +316,8 @@ func QueryQuotas() *cobra.Command {
 				table.Append(
 					[]string{
 						items[i].Address,
-						fmt.Sprintf("%d", items[i].Allocated),
-						fmt.Sprintf("%d", items[i].Consumed),
+						netutil.ToReadable(items[i].Allocated, 2),
+						netutil.ToReadable(items[i].Consumed, 2),
 					},
 				)
 			}

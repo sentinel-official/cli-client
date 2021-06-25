@@ -69,7 +69,7 @@ func QuerySession() *cobra.Command {
 					item.Node,
 					item.Address,
 					item.Duration.String(),
-					fmt.Sprintf("%d+%d", item.Bandwidth.Download, item.Bandwidth.Upload),
+					item.Bandwidth.String(),
 					item.Status,
 				},
 			)
@@ -174,7 +174,7 @@ func QuerySessions() *cobra.Command {
 						items[i].Node,
 						items[i].Address,
 						items[i].Duration.String(),
-						fmt.Sprintf("%d+%d", items[i].Bandwidth.Download, items[i].Bandwidth.Upload),
+						items[i].Bandwidth.String(),
 						items[i].Status,
 					},
 				)
