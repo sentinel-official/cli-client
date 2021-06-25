@@ -50,13 +50,12 @@ TBU
 3. Subscribe to a node
 
     ```sh
-    sudo sentinelcli subscription subscribe-to-node \
+    sudo sentinelcli tx subscription subscribe-to-node \
         --home "${HOME}/.sentinelcli" \
         --keyring-backend file \
         --chain-id sentinelhub-2 \
         --node https://rpc.sentinel.co:443 \
-        --from <KEY_NAME> \
-        <NODE_ADDRESS> <DEPOSIT>
+        --from <KEY_NAME> <NODE_ADDRESS> <DEPOSIT>
     ```
 
 4. Connect
@@ -68,8 +67,7 @@ TBU
         --chain-id sentinelhub-2 \
         --node https://rpc.sentinel.co:443 \
         --yes \
-        --from <KEY_NAME> \
-        <SUBSCRIPTION_ID> <NODE_ADDRESS>
+        --from <KEY_NAME> <SUBSCRIPTION_ID> <NODE_ADDRESS>
     ```
 
 ## Disconnect from a dVPN node
