@@ -63,6 +63,7 @@ port install wireguard-tools
         --keyring-backend file \
         --chain-id sentinelhub-2 \
         --node https://rpc.sentinel.co:443 \
+        --gas-prices 0.1udvpn \
         --from <KEY_NAME> <NODE_ADDRESS> <DEPOSIT>
     ```
 
@@ -85,6 +86,7 @@ port install wireguard-tools
         --keyring-backend file \
         --chain-id sentinelhub-2 \
         --node https://rpc.sentinel.co:443 \
+        --gas-prices 0.1udvpn \
         --yes \
         --from <KEY_NAME> <SUBSCRIPTION_ID> <NODE_ADDRESS>
     ```
