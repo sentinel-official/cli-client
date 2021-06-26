@@ -31,6 +31,7 @@ var (
 		"Speed test",
 		"Peers",
 		"Handshake",
+		"Version",
 		"Status",
 	}
 )
@@ -117,6 +118,7 @@ func QueryNode() *cobra.Command {
 					item.Bandwidth.String(),
 					fmt.Sprintf("%d", item.Peers),
 					fmt.Sprintf("%t", item.Handshake.Enable),
+					item.Version,
 					item.Status,
 				},
 			)
@@ -222,6 +224,7 @@ func QueryNodes() *cobra.Command {
 							item.Bandwidth.String(),
 							fmt.Sprintf("%d", item.Peers),
 							fmt.Sprintf("%t", item.Handshake.Enable),
+							item.Version,
 							item.Status,
 						},
 					)
