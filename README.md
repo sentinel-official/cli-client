@@ -13,7 +13,7 @@ Download the latest version of CLI client software from the releases section [he
 
 ```sh
 sudo apt-get update && \
-sudo apt-get install resolvconf wireguard-tools
+sudo apt-get install openresolv wireguard-tools
 ```
 
 ### Mac
