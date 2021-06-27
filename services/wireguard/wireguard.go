@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/alessio/shellescape"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/viper"
 
@@ -41,7 +42,7 @@ func (w *WireGuard) IsUp() bool {
 	}
 
 	output, err := exec.Command("wg", strings.Split(
-		fmt.Sprintf("show %s", iFace), " ")...).CombinedOutput()
+		fmt.Sprintf("show %s", shellescape.Quote(iFace)), " ")...).CombinedOutput()
 	if err != nil {
 		return false
 	}
@@ -56,7 +57,7 @@ func (w *WireGuard) Up() error {
 	var (
 		path = filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
 		cmd  = exec.Command("wg-quick", strings.Split(
-			fmt.Sprintf("up %s", path), " ")...)
+			fmt.Sprintf("up %s", shellescape.Quote(path)), " ")...)
 	)
 
 	cmd.Stdout = os.Stdout
@@ -71,7 +72,7 @@ func (w *WireGuard) Down() error {
 	var (
 		path = filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
 		cmd  = exec.Command("wg-quick", strings.Split(
-			fmt.Sprintf("down %s", path), " ")...)
+			fmt.Sprintf("down %s", shellescape.Quote(path)), " ")...)
 	)
 
 	cmd.Stdout = os.Stdout
@@ -95,7 +96,7 @@ func (w *WireGuard) Transfer() (int64, int64, error) {
 	}
 
 	output, err := exec.Command("wg", strings.Split(
-		fmt.Sprintf("show %s transfer", iFace), " ")...).Output()
+		fmt.Sprintf("show %s transfer", shellescape.Quote(iFace)), " ")...).Output()
 	if err != nil {
 		return 0, 0, err
 	}
