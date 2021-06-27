@@ -12,7 +12,10 @@ func (w *WireGuard) PreUp() error {
 }
 
 func (w *WireGuard) RealInterface() (string, error) {
-	nameFile, err := os.Open(fmt.Sprintf("/var/run/wireguard/%s.name", w.cfg.Name))
+	nameFile, err := os.Open(
+		fmt.Sprintf("/var/run/wireguard/%s.name"),
+		shellescape.Quote(w.cfg.Name),
+	)
 	if err != nil {
 		return "", err
 	}

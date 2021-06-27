@@ -31,6 +31,7 @@ var (
 		"Speed test",
 		"Peers",
 		"Handshake",
+		"Version",
 		"Status",
 	}
 )
@@ -117,6 +118,7 @@ func QueryNode() *cobra.Command {
 					item.Bandwidth.String(),
 					fmt.Sprintf("%d", item.Peers),
 					fmt.Sprintf("%t", item.Handshake.Enable),
+					item.Version,
 					item.Status,
 				},
 			)
@@ -197,20 +199,24 @@ func QueryNodes() *cobra.Command {
 			}
 
 			var (
-				wg    = sync.WaitGroup{}
+				group = sync.WaitGroup{}
+				mutex = sync.Mutex{}
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
 			table.SetHeader(header)
 			for i := 0; i < len(items); i++ {
-				wg.Add(1)
+				group.Add(1)
 				go func(i int) {
-					defer wg.Done()
+					defer group.Done()
 
 					var (
 						info, _ = fetchNodeInfo(items[i].RemoteURL)
 						item    = types.NewNodeFromRaw(&items[i]).WithInfo(info)
 					)
+
+					mutex.Lock()
+					defer mutex.Unlock()
 
 					table.Append(
 						[]string{
@@ -222,13 +228,14 @@ func QueryNodes() *cobra.Command {
 							item.Bandwidth.String(),
 							fmt.Sprintf("%d", item.Peers),
 							fmt.Sprintf("%t", item.Handshake.Enable),
+							item.Version,
 							item.Status,
 						},
 					)
 				}(i)
 			}
 
-			wg.Wait()
+			group.Wait()
 
 			table.Render()
 			return nil

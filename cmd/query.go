@@ -4,6 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
 
+	depositcmd "github.com/sentinel-official/cli-client/x/deposit/client/cmd"
 	nodecmd "github.com/sentinel-official/cli-client/x/node/client/cmd"
 	plancmd "github.com/sentinel-official/cli-client/x/plan/client/cmd"
 	providercmd "github.com/sentinel-official/cli-client/x/provider/client/cmd"
@@ -21,6 +22,8 @@ func QueryCommand() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
+	cmd.AddCommand(depositcmd.QueryDeposit())
+	cmd.AddCommand(depositcmd.QueryDeposits())
 	cmd.AddCommand(nodecmd.QueryNode())
 	cmd.AddCommand(nodecmd.QueryNodes())
 	cmd.AddCommand(providercmd.QueryProvider())
