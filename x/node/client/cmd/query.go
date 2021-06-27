@@ -36,7 +36,7 @@ var (
 	}
 )
 
-func fetchNodeInfo(remote string) (info types.Info, err error) {
+func fetchNodeInfo(remote string, timeout time.Duration) (info types.Info, err error) {
 	var (
 		body       clienttypes.Response
 		endpoint   = strings.Trim(remote, "/") + "/status"
@@ -46,7 +46,7 @@ func fetchNodeInfo(remote string) (info types.Info, err error) {
 					InsecureSkipVerify: true,
 				},
 			},
-			Timeout: 5 * time.Second,
+			Timeout: timeout,
 		}
 	)
 
@@ -89,6 +89,11 @@ func QueryNode() *cobra.Command {
 				return err
 			}
 
+			timeout, err := cmd.Flags().GetDuration(clienttypes.FlagTimeout)
+			if err != nil {
+				return err
+			}
+
 			var (
 				qsc = nodetypes.NewQueryServiceClient(ctx)
 			)
@@ -102,7 +107,7 @@ func QueryNode() *cobra.Command {
 			}
 
 			var (
-				info, _ = fetchNodeInfo(result.Node.RemoteURL)
+				info, _ = fetchNodeInfo(result.Node.RemoteURL, timeout)
 				item    = types.NewNodeFromRaw(&result.Node).WithInfo(info)
 				table   = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
@@ -130,6 +135,8 @@ func QueryNode() *cobra.Command {
 
 	flags.AddQueryFlagsToCmd(cmd)
 
+	cmd.Flags().Duration(clienttypes.FlagTimeout, 15*time.Second, "time limit for requests made by the HTTP client")
+
 	return cmd
 }
 
@@ -149,6 +156,11 @@ func QueryNodes() *cobra.Command {
 			}
 
 			s, err := cmd.Flags().GetString(flagStatus)
+			if err != nil {
+				return err
+			}
+
+			timeout, err := cmd.Flags().GetDuration(clienttypes.FlagTimeout)
 			if err != nil {
 				return err
 			}
@@ -211,7 +223,7 @@ func QueryNodes() *cobra.Command {
 					defer group.Done()
 
 					var (
-						info, _ = fetchNodeInfo(items[i].RemoteURL)
+						info, _ = fetchNodeInfo(items[i].RemoteURL, timeout)
 						item    = types.NewNodeFromRaw(&items[i]).WithInfo(info)
 					)
 
@@ -247,6 +259,7 @@ func QueryNodes() *cobra.Command {
 
 	cmd.Flags().String(flagProvider, "", "filter with provider address")
 	cmd.Flags().String(flagStatus, "Active", "filter with status (Active|Inactive)")
+	cmd.Flags().Duration(clienttypes.FlagTimeout, 15*time.Second, "time limit for requests made by the HTTP client")
 
 	return cmd
 }

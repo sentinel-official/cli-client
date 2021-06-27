@@ -93,6 +93,11 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
+			timeout, err := cmd.Flags().GetDuration(clienttypes.FlagTimeout)
+			if err != nil {
+				return err
+			}
+
 			var (
 				status         = clienttypes.NewStatus()
 				statusFilePath = filepath.Join(ctx.HomeDir, "status.json")
@@ -205,7 +210,7 @@ func ConnectCmd() *cobra.Command {
 							InsecureSkipVerify: true,
 						},
 					},
-					Timeout: 15 * time.Second,
+					Timeout: timeout,
 				}
 			)
 
@@ -304,6 +309,7 @@ func ConnectCmd() *cobra.Command {
 	flags.AddTxFlagsToCmd(cmd)
 
 	cmd.Flags().String(flags.FlagChainID, "", "the network chain identity")
+	cmd.Flags().Duration(clienttypes.FlagTimeout, 15*time.Second, "time limit for requests made by the HTTP client")
 
 	return cmd
 }
