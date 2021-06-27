@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/alessio/shellescape"
 )
 
 func (w *WireGuard) PreUp() error {
@@ -13,9 +15,7 @@ func (w *WireGuard) PreUp() error {
 
 func (w *WireGuard) RealInterface() (string, error) {
 	nameFile, err := os.Open(
-		fmt.Sprintf("/var/run/wireguard/%s.name"),
-		shellescape.Quote(w.cfg.Name),
-	)
+		fmt.Sprintf("/var/run/wireguard/%s.name", shellescape.Quote(w.cfg.Name)))
 	if err != nil {
 		return "", err
 	}
