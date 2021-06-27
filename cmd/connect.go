@@ -214,6 +214,8 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
+			defer resp.Body.Close()
+
 			if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
 				return err
 			}
@@ -247,8 +249,8 @@ func ConnectCmd() *cobra.Command {
 					Name: wireguardtypes.DefaultInterface,
 					Interface: wireguardtypes.Interface{
 						Addresses: []wireguardtypes.IPNet{
-							{v4, 32},
-							{v6, 128},
+							{IP: v4, Net: 32},
+							{IP: v6, Net: 128},
 						},
 						ListenPort: listenPort,
 						PrivateKey: *wgPrivateKey,
@@ -260,8 +262,8 @@ func ConnectCmd() *cobra.Command {
 						{
 							PublicKey: *endpointWGPublicKey,
 							AllowedIPs: []wireguardtypes.IPNet{
-								{net.ParseIP("0.0.0.0"), 0},
-								{net.ParseIP("::"), 0},
+								{IP: net.ParseIP("0.0.0.0")},
+								{IP: net.ParseIP("::")},
 							},
 							Endpoint: wireguardtypes.Endpoint{
 								Host: endpointHost.String(),
