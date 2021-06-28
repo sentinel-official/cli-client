@@ -29,6 +29,7 @@ var (
 		"Price",
 		"Country",
 		"Speed test",
+		"Latency",
 		"Peers",
 		"Handshake",
 		"Version",
@@ -48,6 +49,7 @@ func fetchNodeInfo(remote string, timeout time.Duration) (info types.Info, err e
 			},
 			Timeout: timeout,
 		}
+		startTime = time.Now()
 	)
 
 	resp, err := httpclient.Get(endpoint)
@@ -55,6 +57,7 @@ func fetchNodeInfo(remote string, timeout time.Duration) (info types.Info, err e
 		return info, err
 	}
 
+	info.Latency = time.Since(startTime)
 	defer resp.Body.Close()
 
 	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
@@ -121,6 +124,7 @@ func QueryNode() *cobra.Command {
 					item.Price.Raw().String(),
 					item.Location.Country,
 					item.Bandwidth.String(),
+					item.Latency.Truncate(1 * time.Millisecond).String(),
 					fmt.Sprintf("%d", item.Peers),
 					fmt.Sprintf("%t", item.Handshake.Enable),
 					item.Version,
@@ -238,6 +242,7 @@ func QueryNodes() *cobra.Command {
 							item.Price.Raw().String(),
 							item.Location.Country,
 							item.Bandwidth.String(),
+							item.Latency.Truncate(1 * time.Millisecond).String(),
 							fmt.Sprintf("%d", item.Peers),
 							fmt.Sprintf("%t", item.Handshake.Enable),
 							item.Version,

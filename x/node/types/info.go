@@ -27,6 +27,7 @@ type (
 		IntervalSetSessions    time.Duration         `json:"interval_set_sessions"`
 		IntervalUpdateSessions time.Duration         `json:"interval_update_sessions"`
 		IntervalUpdateStatus   time.Duration         `json:"interval_update_status"`
+		Latency                time.Duration         `json:"latency"`
 		Location               Location              `json:"location"`
 		Moniker                string                `json:"moniker"`
 		Operator               string                `json:"operator"`
