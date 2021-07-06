@@ -53,6 +53,10 @@ func (w *WireGuard) IsUp() bool {
 	return true
 }
 
+func (w *WireGuard) PreUp() error {
+	return w.cfg.WriteToFile(w.Home())
+}
+
 func (w *WireGuard) Up() error {
 	var (
 		path = filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
@@ -89,7 +93,7 @@ func (w *WireGuard) PostDown() error {
 	return nil
 }
 
-func (w *WireGuard) Transfer() (int64, int64, error) {
+func (w *WireGuard) Transfer() (u int64, d int64, err error) {
 	iFace, err := w.RealInterface()
 	if err != nil {
 		return 0, 0, err
