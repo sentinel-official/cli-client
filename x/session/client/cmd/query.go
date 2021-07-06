@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -68,7 +69,7 @@ func QuerySession() *cobra.Command {
 					fmt.Sprintf("%d", item.Subscription),
 					item.Node,
 					item.Address,
-					item.Duration.String(),
+					item.Duration.Truncate(1 * time.Second).String(),
 					item.Bandwidth.String(),
 					item.Status,
 				},
@@ -173,7 +174,7 @@ func QuerySessions() *cobra.Command {
 						fmt.Sprintf("%d", items[i].Subscription),
 						items[i].Node,
 						items[i].Address,
-						items[i].Duration.String(),
+						items[i].Duration.Truncate(1 * time.Second).String(),
 						items[i].Bandwidth.String(),
 						items[i].Status,
 					},
