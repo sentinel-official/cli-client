@@ -1,5 +1,6 @@
 package types
 
 const (
-	FlagTimeout = "timeout"
+	FlagTimeout  = "timeout"
+	FlagResolver = "resolver"
 )
