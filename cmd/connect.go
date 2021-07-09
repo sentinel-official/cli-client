@@ -98,10 +98,25 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
+			ss, err := cmd.Flags().GetStringArray(clienttypes.FlagResolver)
+			if err != nil {
+				return err
+			}
+
 			var (
+				resolvers      []net.IP
 				status         = clienttypes.NewStatus()
 				statusFilePath = filepath.Join(ctx.HomeDir, "status.json")
 			)
+
+			for _, s := range ss {
+				ip := net.ParseIP(s)
+				if ip == nil {
+					return fmt.Errorf("provided resolver ip %s is invalid", s)
+				}
+
+				resolvers = append(resolvers, ip)
+			}
 
 			if err := status.LoadFromPath(statusFilePath); err != nil {
 				return err
@@ -237,8 +252,8 @@ func ConnectCmd() *cobra.Command {
 			}
 
 			var (
-				v4                  = net.IP(result[0:4])
-				v6                  = net.IP(result[4:20])
+				ipv4Address         = net.IP(result[0:4])
+				ipv6Address         = net.IP(result[4:20])
 				endpointHost        = net.IP(result[20:24])
 				endpointPort        = binary.BigEndian.Uint16(result[24:26])
 				endpointWGPublicKey = wireguardtypes.NewKey(result[26:58])
@@ -254,14 +269,15 @@ func ConnectCmd() *cobra.Command {
 					Name: wireguardtypes.DefaultInterface,
 					Interface: wireguardtypes.Interface{
 						Addresses: []wireguardtypes.IPNet{
-							{IP: v4, Net: 32},
-							{IP: v6, Net: 128},
+							{IP: ipv4Address, Net: 32},
+							{IP: ipv6Address, Net: 128},
 						},
 						ListenPort: listenPort,
 						PrivateKey: *wgPrivateKey,
-						DNS: []net.IP{
-							net.ParseIP("10.8.0.1"),
-						},
+						DNS: append(
+							[]net.IP{net.ParseIP("10.8.0.1")},
+							resolvers...,
+						),
 					},
 					Peers: []wireguardtypes.Peer{
 						{
@@ -309,6 +325,7 @@ func ConnectCmd() *cobra.Command {
 	flags.AddTxFlagsToCmd(cmd)
 
 	cmd.Flags().String(flags.FlagChainID, "", "the network chain identity")
+	cmd.Flags().StringArray(clienttypes.FlagResolver, nil, "provide additional DNS servers")
 	cmd.Flags().Duration(clienttypes.FlagTimeout, 15*time.Second, "time limit for requests made by the HTTP client")
 
 	return cmd
