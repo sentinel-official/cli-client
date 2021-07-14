@@ -195,9 +195,10 @@ func txUpdateQuota() *cobra.Command {
 
 func txCancel() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "cancel [id]",
-		Short: "Cancel a subscription",
-		Args:  cobra.ExactArgs(1),
+		Use:    "cancel [id]",
+		Short:  "Cancel a subscription",
+		Args:   cobra.ExactArgs(1),
+		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -217,7 +218,7 @@ func txCancel() *cobra.Command {
 				return err
 			}
 
-			return tx.GenerateOrBroadcastTxCLI(ctx, cmd.Flags(), msg)
+			return nil
 		},
 	}
 
