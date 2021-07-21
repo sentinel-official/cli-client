@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/alessio/shellescape v1.4.1
 	github.com/cosmos/cosmos-sdk v0.42.5
+	github.com/cosmos/go-bip39 v1.0.0
 	github.com/go-kit/kit v0.10.0
 	github.com/gorilla/mux v1.8.0
 	github.com/olekukonko/tablewriter v0.0.5

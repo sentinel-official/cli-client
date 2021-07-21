@@ -13,6 +13,7 @@ import (
 
 	"github.com/sentinel-official/cli-client/context"
 	"github.com/sentinel-official/cli-client/middlewares"
+	keysrest "github.com/sentinel-official/cli-client/rest/keys"
 	servicerest "github.com/sentinel-official/cli-client/rest/service"
 	"github.com/sentinel-official/cli-client/types"
 	configtypes "github.com/sentinel-official/cli-client/types/config"
@@ -59,6 +60,7 @@ func StartCmd() *cobra.Command {
 				Handler(http.FileServer(http.Dir(buildPath)))
 
 			prefixRouter.Use(middlewares.AddHeaders)
+			keysrest.RegisterRoutes(prefixRouter, ctx)
 			servicerest.RegisterRoutes(prefixRouter, ctx)
 
 			router := cors.New(

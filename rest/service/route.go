@@ -9,13 +9,13 @@ import (
 )
 
 func RegisterRoutes(r *mux.Router, ctx *context.Context) *mux.Router {
-	r.Name("ServiceConnect").
+	r.Name("Connect").
 		Methods(http.MethodPost).Path("/connect").
 		Handler(HandlerConnect(ctx))
-	r.Name("ServiceDisconnect").
+	r.Name("Disconnect").
 		Methods(http.MethodPost).Path("/disconnect").
 		Handler(HandlerDisconnect(ctx))
-	r.Name("ServiceStatus").
+	r.Name("Status").
 		Methods(http.MethodGet).Path("/status").
 		Handler(HandlerStatus(ctx))
 
