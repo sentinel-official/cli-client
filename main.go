@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os"
+	"path/filepath"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -16,6 +17,7 @@ import (
 
 	"github.com/sentinel-official/cli-client/cmd"
 	"github.com/sentinel-official/cli-client/types"
+	configtypes "github.com/sentinel-official/cli-client/types/config"
 )
 
 func main() {
@@ -24,9 +26,19 @@ func main() {
 		Use:          "sentinelcli",
 		SilenceUsage: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			home := viper.GetString(flags.FlagHome)
-			if _, err := os.Stat(home); err != nil {
+			var (
+				home       = viper.GetString(flags.FlagHome)
+				configPath = filepath.Join(home, "config.toml")
+			)
+
+			if _, err := os.Stat(configPath); err != nil {
 				if err := os.MkdirAll(home, 0700); err != nil {
+					return err
+				}
+
+				config := configtypes.NewConfig().
+					WithDefaultValues()
+				if err := config.SaveToPath(configPath); err != nil {
 					return err
 				}
 			}
@@ -56,12 +68,13 @@ func main() {
 		cmd.ConnectCmd(),
 		cmd.DisconnectCmd(),
 		cmd.QueryCommand(),
+		cmd.StartCmd(),
 		cmd.TxCommand(),
 		keys.Commands(types.DefaultHomeDirectory),
 		version.NewVersionCommand(),
 	)
 
-	root.PersistentFlags().String(flags.FlagHome, types.DefaultHomeDirectory, "application home directory")
+	root.PersistentFlags().String(flags.FlagHome, types.DefaultHomeDirectory, "home directory of the application")
 	_ = viper.BindPFlag(flags.FlagHome, root.PersistentFlags().Lookup(flags.FlagHome))
 
 	_ = root.ExecuteContext(

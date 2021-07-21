@@ -30,6 +30,7 @@ import (
 	"github.com/sentinel-official/cli-client/services/wireguard"
 	wireguardtypes "github.com/sentinel-official/cli-client/services/wireguard/types"
 	clienttypes "github.com/sentinel-official/cli-client/types"
+	resttypes "github.com/sentinel-official/cli-client/types/rest"
 	netutil "github.com/sentinel-official/cli-client/utils/net"
 )
 
@@ -214,7 +215,7 @@ func ConnectCmd() *cobra.Command {
 			}
 
 			var (
-				body     clienttypes.Response
+				body     resttypes.Response
 				endpoint = fmt.Sprintf(
 					"%s/accounts/%s/sessions/%d",
 					strings.Trim(node.RemoteURL, "/"), ctx.FromAddress, session.Id,

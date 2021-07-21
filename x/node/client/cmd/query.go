@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/cobra"
 
 	clienttypes "github.com/sentinel-official/cli-client/types"
+	resttypes "github.com/sentinel-official/cli-client/types/rest"
 	"github.com/sentinel-official/cli-client/x/node/types"
 )
 
@@ -39,7 +40,7 @@ var (
 
 func fetchNodeInfo(remote string, timeout time.Duration) (info types.Info, err error) {
 	var (
-		body       clienttypes.Response
+		body       resttypes.Response
 		endpoint   = strings.Trim(remote, "/") + "/status"
 		httpclient = &http.Client{
 			Transport: &http.Transport{
