@@ -1,7 +1,9 @@
 package keys
 
 import (
+	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -166,8 +168,53 @@ func HandlerAddKey(ctx *context.Context) http.HandlerFunc {
 	}
 }
 
-func HandlerSignTx(_ *context.Context) http.HandlerFunc {
+func HandlerSignBytes(ctx *context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var (
+			config = ctx.Config()
+			vars   = mux.Vars(r)
+		)
+
+		bytes, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			restutils.WriteErrorToResponse(
+				w, http.StatusInternalServerError,
+				resttypes.NewError(1001, err.Error()),
+			)
+			return
+		}
+
+		defer r.Body.Close()
+
+		kr, err := keyring.New(
+			version.Name,
+			config.Keyring.Backend,
+			ctx.Home(),
+			strings.NewReader(""),
+		)
+		if err != nil {
+			restutils.WriteErrorToResponse(
+				w, http.StatusInternalServerError,
+				resttypes.NewError(1002, err.Error()),
+			)
+			return
+		}
+
+		signature, pubKey, err := kr.Sign(vars["name"], bytes)
+		if err != nil {
+			restutils.WriteErrorToResponse(
+				w, http.StatusInternalServerError,
+				resttypes.NewError(1003, err.Error()),
+			)
+			return
+		}
+
+		restutils.WriteResultToResponse(w, http.StatusOK,
+			&ResponseSignTx{
+				PubKey:    hex.EncodeToString(pubKey.Bytes()),
+				Signature: signature,
+			},
+		)
 	}
 }
 

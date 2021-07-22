@@ -18,9 +18,9 @@ func RegisterRoutes(r *mux.Router, ctx *context.Context) {
 	r.Name("AddKey").
 		Methods(http.MethodPost).Path("/keys").
 		HandlerFunc(HandlerAddKey(ctx))
-	r.Name("SignTx").
+	r.Name("SignBytes").
 		Methods(http.MethodPost).Path("/keys/{name}/sign").
-		HandlerFunc(HandlerSignTx(ctx))
+		HandlerFunc(HandlerSignBytes(ctx))
 	r.Name("DeleteKey").
 		Methods(http.MethodDelete).Path("/keys/{name}").
 		HandlerFunc(HandlerDeleteKey(ctx))

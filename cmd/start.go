@@ -6,8 +6,11 @@ import (
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/std"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/sentinel-official/hub"
+	hubparams "github.com/sentinel-official/hub/params"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -47,9 +50,14 @@ func StartCmd() *cobra.Command {
 				return err
 			}
 
+			encoding := hubparams.MakeEncodingConfig()
+			std.RegisterInterfaces(encoding.InterfaceRegistry)
+			hub.ModuleBasics.RegisterInterfaces(encoding.InterfaceRegistry)
+
 			var (
 				ctx = context.NewContext().
-					WithConfig(config)
+					WithConfig(config).
+					WithEncoding(&encoding)
 
 				muxRouter    = mux.NewRouter()
 				prefixRouter = muxRouter.PathPrefix(types.APIPathPrefix).Subrouter()
@@ -66,7 +74,7 @@ func StartCmd() *cobra.Command {
 			router := cors.New(
 				cors.Options{
 					AllowedOrigins: strings.Split(config.CORS.AllowedOrigins, ","),
-					AllowedMethods: []string{http.MethodPost},
+					AllowedMethods: []string{http.MethodDelete, http.MethodGet, http.MethodPost},
 					AllowedHeaders: []string{"Content-Type"},
 				},
 			).Handler(muxRouter)
