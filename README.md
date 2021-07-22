@@ -9,26 +9,26 @@
 
 ### Linux
 
-```sh
+``` sh
 sudo apt-get update && \
 sudo apt-get install openresolv wireguard-tools
 ```
 
 ### Mac
 
-```sh
+``` sh
 brew install wireguard-tools
 ```
 
 or
 
-```sh
+``` sh
 port install wireguard-tools
 ```
 
 ## Install Sentinel CLI client
 
-```sh
+``` sh
 curl --silent https://raw.githubusercontent.com/sentinel-official/cli-client/development/scripts/install.sh | sh
 ```
 
@@ -38,10 +38,10 @@ curl --silent https://raw.githubusercontent.com/sentinel-official/cli-client/dev
 
     Need not perform this step again in case you have already done it once.
 
-    ```sh
+    ``` sh
     sentinelcli keys add \
         --home "${HOME}/.sentinelcli" \
-        --keyring-backend file \
+        --keyring-backend os \
         <KEY_NAME>
     ```
 
@@ -49,7 +49,7 @@ curl --silent https://raw.githubusercontent.com/sentinel-official/cli-client/dev
 
 2. Query the active nodes and choose one
 
-    ```sh
+    ``` sh
     sentinelcli query nodes \
         --home "${HOME}/.sentinelcli" \
         --node https://rpc.sentinel.co:443 \
@@ -61,10 +61,10 @@ curl --silent https://raw.githubusercontent.com/sentinel-official/cli-client/dev
 
 3. Subscribe to a node
 
-    ```sh
+    ``` sh
     sentinelcli tx subscription subscribe-to-node \
         --home "${HOME}/.sentinelcli" \
-        --keyring-backend file \
+        --keyring-backend os \
         --chain-id sentinelhub-2 \
         --node https://rpc.sentinel.co:443 \
         --gas-prices 0.1udvpn \
@@ -73,7 +73,7 @@ curl --silent https://raw.githubusercontent.com/sentinel-official/cli-client/dev
 
 4. Query the active subscriptions of your account address
 
-    ```sh
+    ``` sh
     sentinelcli query subscriptions \
         --home "${HOME}/.sentinelcli" \
         --node https://rpc.sentinel.co:443 \
@@ -84,10 +84,10 @@ curl --silent https://raw.githubusercontent.com/sentinel-official/cli-client/dev
 
 5. Connect
 
-    ```sh
+    ``` sh
     sudo sentinelcli connect \
         --home "${HOME}/.sentinelcli" \
-        --keyring-backend file \
+        --keyring-backend os \
         --chain-id sentinelhub-2 \
         --node https://rpc.sentinel.co:443 \
         --gas-prices 0.1udvpn \
@@ -99,7 +99,7 @@ curl --silent https://raw.githubusercontent.com/sentinel-official/cli-client/dev
 
 1. Disconnect
 
-    ```sh
+    ``` sh
     sudo sentinelcli disconnect \
         --home "${HOME}/.sentinelcli"
     ```
