@@ -3,11 +3,12 @@ package cmd
 import (
 	"context"
 	"fmt"
+	clienttypes "github.com/sentinel-official/cli-client/types"
+	"github.com/sentinel-official/cli-client/utils"
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/olekukonko/tablewriter"
 	hubtypes "github.com/sentinel-official/hub/types"
 	plantypes "github.com/sentinel-official/hub/x/plan/types"
 	"github.com/spf13/cobra"
@@ -33,6 +34,11 @@ func QueryPlan() *cobra.Command {
 		Short: "Query a plan",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			ctx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
@@ -56,12 +62,12 @@ func QueryPlan() *cobra.Command {
 			}
 
 			var (
-				item  = types.NewPlanFromRaw(&result.Plan)
-				table = tablewriter.NewWriter(cmd.OutOrStdout())
+				item       = types.NewPlanFromRaw(&result.Plan)
+				outputRows [][]string
 			)
 
-			table.SetHeader(header)
-			table.Append(
+			outputRows = append(
+				outputRows,
 				[]string{
 					fmt.Sprintf("%d", item.ID),
 					item.Provider,
@@ -72,7 +78,10 @@ func QueryPlan() *cobra.Command {
 				},
 			)
 
-			table.Render()
+			err = utils.WriteOutput(header, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}
@@ -107,10 +116,16 @@ func QueryPlans() *cobra.Command {
 				return err
 			}
 
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			var (
-				items  types.Plans
-				qsc    = plantypes.NewQueryServiceClient(ctx)
-				status = hubtypes.StatusFromString(s)
+				items      types.Plans
+				qsc        = plantypes.NewQueryServiceClient(ctx)
+				status     = hubtypes.StatusFromString(s)
+				outputRows [][]string
 			)
 
 			if provider != "" {
@@ -147,11 +162,9 @@ func QueryPlans() *cobra.Command {
 				items = append(items, types.NewPlansFromRaw(result.Plans)...)
 			}
 
-			table := tablewriter.NewWriter(cmd.OutOrStdout())
-			table.SetHeader(header)
-
 			for i := 0; i < len(items); i++ {
-				table.Append(
+				outputRows = append(
+					outputRows,
 					[]string{
 						fmt.Sprintf("%d", items[i].ID),
 						items[i].Provider,
@@ -163,7 +176,10 @@ func QueryPlans() *cobra.Command {
 				)
 			}
 
-			table.Render()
+			err = utils.WriteOutput(header, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}

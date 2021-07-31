@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"context"
+	clienttypes "github.com/sentinel-official/cli-client/types"
+	"github.com/sentinel-official/cli-client/utils"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/olekukonko/tablewriter"
 	hubtypes "github.com/sentinel-official/hub/types"
 	providertypes "github.com/sentinel-official/hub/x/provider/types"
 	"github.com/spf13/cobra"
@@ -28,6 +29,11 @@ func QueryProvider() *cobra.Command {
 		Short: "Query a provider",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			ctx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
@@ -51,12 +57,12 @@ func QueryProvider() *cobra.Command {
 			}
 
 			var (
-				item  = types.NewProviderFromRaw(&result.Provider)
-				table = tablewriter.NewWriter(cmd.OutOrStdout())
+				item       = types.NewProviderFromRaw(&result.Provider)
+				outputRows [][]string
 			)
 
-			table.SetHeader(header)
-			table.Append(
+			outputRows = append(
+				outputRows,
 				[]string{
 					item.Name,
 					item.Address,
@@ -65,7 +71,10 @@ func QueryProvider() *cobra.Command {
 				},
 			)
 
-			table.Render()
+			err = utils.WriteOutput(header, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}
@@ -80,6 +89,11 @@ func QueryProviders() *cobra.Command {
 		Use:   "providers",
 		Short: "Query providers",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			ctx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
@@ -103,13 +117,13 @@ func QueryProviders() *cobra.Command {
 			}
 
 			var (
-				items = types.NewProvidersFromRaw(result.Providers)
-				table = tablewriter.NewWriter(cmd.OutOrStdout())
+				items      = types.NewProvidersFromRaw(result.Providers)
+				outputRows [][]string
 			)
 
-			table.SetHeader(header)
 			for i := 0; i < len(items); i++ {
-				table.Append(
+				outputRows = append(
+					outputRows,
 					[]string{
 						items[i].Name,
 						items[i].Address,
@@ -119,7 +133,10 @@ func QueryProviders() *cobra.Command {
 				)
 			}
 
-			table.Render()
+			err = utils.WriteOutput(header, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}

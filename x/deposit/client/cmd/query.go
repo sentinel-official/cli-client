@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"context"
+	clienttypes "github.com/sentinel-official/cli-client/types"
+	"github.com/sentinel-official/cli-client/utils"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/olekukonko/tablewriter"
 	deposittypes "github.com/sentinel-official/hub/x/deposit/types"
 	"github.com/spf13/cobra"
 
@@ -26,6 +27,11 @@ func QueryDeposit() *cobra.Command {
 		Short: "Query a deposit",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			ctx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
@@ -49,19 +55,22 @@ func QueryDeposit() *cobra.Command {
 			}
 
 			var (
-				item  = types.NewDepositFromRaw(&result.Deposit)
-				table = tablewriter.NewWriter(cmd.OutOrStdout())
+				item       = types.NewDepositFromRaw(&result.Deposit)
+				outputRows [][]string
 			)
 
-			table.SetHeader(header)
-			table.Append(
+			outputRows = append(
+				outputRows,
 				[]string{
 					item.Address,
 					item.Amount.Raw().String(),
 				},
 			)
 
-			table.Render()
+			err = utils.WriteOutput(header, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}
@@ -76,6 +85,11 @@ func QueryDeposits() *cobra.Command {
 		Use:   "deposits",
 		Short: "Query deposits",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			ctx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
@@ -99,13 +113,13 @@ func QueryDeposits() *cobra.Command {
 			}
 
 			var (
-				items = types.NewDepositsFromRaw(result.Deposits)
-				table = tablewriter.NewWriter(cmd.OutOrStdout())
+				items      = types.NewDepositsFromRaw(result.Deposits)
+				outputRows [][]string
 			)
 
-			table.SetHeader(header)
 			for i := 0; i < len(items); i++ {
-				table.Append(
+				outputRows = append(
+					outputRows,
 					[]string{
 						items[i].Address,
 						items[i].Amount.Raw().String(),
@@ -113,7 +127,10 @@ func QueryDeposits() *cobra.Command {
 				)
 			}
 
-			table.Render()
+			err = utils.WriteOutput(header, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}

@@ -3,13 +3,14 @@ package cmd
 import (
 	"context"
 	"fmt"
+	clienttypes "github.com/sentinel-official/cli-client/types"
+	"github.com/sentinel-official/cli-client/utils"
 	"strconv"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/olekukonko/tablewriter"
 	hubtypes "github.com/sentinel-official/hub/types"
 	sessiontypes "github.com/sentinel-official/hub/x/session/types"
 	"github.com/spf13/cobra"
@@ -35,6 +36,11 @@ func QuerySession() *cobra.Command {
 		Short: "Query a session",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			ctx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
@@ -58,12 +64,12 @@ func QuerySession() *cobra.Command {
 			}
 
 			var (
-				item  = types.NewSessionFromRaw(&result.Session)
-				table = tablewriter.NewWriter(cmd.OutOrStdout())
+				item       = types.NewSessionFromRaw(&result.Session)
+				outputRows [][]string
 			)
 
-			table.SetHeader(header)
-			table.Append(
+			outputRows = append(
+				outputRows,
 				[]string{
 					fmt.Sprintf("%d", item.ID),
 					fmt.Sprintf("%d", item.Subscription),
@@ -75,7 +81,10 @@ func QuerySession() *cobra.Command {
 				},
 			)
 
-			table.Render()
+			err = utils.WriteOutput(header, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}
@@ -110,9 +119,15 @@ func QuerySessions() *cobra.Command {
 				return err
 			}
 
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			var (
-				items types.Sessions
-				qc    = sessiontypes.NewQueryServiceClient(ctx)
+				items      types.Sessions
+				qc         = sessiontypes.NewQueryServiceClient(ctx)
+				outputRows [][]string
 			)
 
 			if subscription != 0 {
@@ -164,11 +179,9 @@ func QuerySessions() *cobra.Command {
 				items = append(items, types.NewSessionsFromRaw(result.Sessions)...)
 			}
 
-			table := tablewriter.NewWriter(cmd.OutOrStdout())
-			table.SetHeader(header)
-
 			for i := 0; i < len(items); i++ {
-				table.Append(
+				outputRows = append(
+					outputRows,
 					[]string{
 						fmt.Sprintf("%d", items[i].ID),
 						fmt.Sprintf("%d", items[i].Subscription),
@@ -181,7 +194,10 @@ func QuerySessions() *cobra.Command {
 				)
 			}
 
-			table.Render()
+			err = utils.WriteOutput(header, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}

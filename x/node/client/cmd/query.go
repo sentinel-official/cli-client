@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/sentinel-official/cli-client/utils"
 	"net/http"
 	"strings"
 	"sync"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/olekukonko/tablewriter"
 	hubtypes "github.com/sentinel-official/hub/types"
 	nodetypes "github.com/sentinel-official/hub/x/node/types"
 	"github.com/spf13/cobra"
@@ -97,6 +97,11 @@ func QueryNode() *cobra.Command {
 				return err
 			}
 
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			var (
 				qsc = nodetypes.NewQueryServiceClient(ctx)
 			)
@@ -110,13 +115,13 @@ func QueryNode() *cobra.Command {
 			}
 
 			var (
-				info, _ = fetchNodeInfo(result.Node.RemoteURL, timeout)
-				item    = types.NewNodeFromRaw(&result.Node).WithInfo(info)
-				table   = tablewriter.NewWriter(cmd.OutOrStdout())
+				info, _    = fetchNodeInfo(result.Node.RemoteURL, timeout)
+				item       = types.NewNodeFromRaw(&result.Node).WithInfo(info)
+				outputRows [][]string
 			)
 
-			table.SetHeader(header)
-			table.Append(
+			outputRows = append(
+				outputRows,
 				[]string{
 					item.Moniker,
 					item.Address,
@@ -132,7 +137,10 @@ func QueryNode() *cobra.Command {
 				},
 			)
 
-			table.Render()
+			err = utils.WriteOutput(header, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}
@@ -170,6 +178,11 @@ func QueryNodes() *cobra.Command {
 			}
 
 			pagination, err := client.ReadPageRequest(cmd.Flags())
+			if err != nil {
+				return err
+			}
+
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
 			if err != nil {
 				return err
 			}
@@ -215,12 +228,11 @@ func QueryNodes() *cobra.Command {
 			}
 
 			var (
-				group = sync.WaitGroup{}
-				mutex = sync.Mutex{}
-				table = tablewriter.NewWriter(cmd.OutOrStdout())
+				group      = sync.WaitGroup{}
+				mutex      = sync.Mutex{}
+				outputRows [][]string
 			)
 
-			table.SetHeader(header)
 			for i := 0; i < len(items); i++ {
 				group.Add(1)
 				go func(i int) {
@@ -234,7 +246,8 @@ func QueryNodes() *cobra.Command {
 					mutex.Lock()
 					defer mutex.Unlock()
 
-					table.Append(
+					outputRows = append(
+						outputRows,
 						[]string{
 							item.Moniker,
 							item.Address,
@@ -254,7 +267,10 @@ func QueryNodes() *cobra.Command {
 
 			group.Wait()
 
-			table.Render()
+			err = utils.WriteOutput(header, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}

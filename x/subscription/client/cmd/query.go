@@ -3,12 +3,13 @@ package cmd
 import (
 	"context"
 	"fmt"
+	clienttypes "github.com/sentinel-official/cli-client/types"
+	"github.com/sentinel-official/cli-client/utils"
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/olekukonko/tablewriter"
 	hubtypes "github.com/sentinel-official/hub/types"
 	subscriptiontypes "github.com/sentinel-official/hub/x/subscription/types"
 	"github.com/spf13/cobra"
@@ -43,6 +44,12 @@ func QuerySubscription() *cobra.Command {
 		Short: "Query a subscription",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			ctx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
@@ -66,12 +73,12 @@ func QuerySubscription() *cobra.Command {
 			}
 
 			var (
-				item  = types.NewSubscriptionFromRaw(&result.Subscription)
-				table = tablewriter.NewWriter(cmd.OutOrStdout())
+				item       = types.NewSubscriptionFromRaw(&result.Subscription)
+				outputRows [][]string
 			)
 
-			table.SetHeader(subscriptionHeader)
-			table.Append(
+			outputRows = append(
+				outputRows,
 				[]string{
 					fmt.Sprintf("%d", item.ID),
 					item.Owner,
@@ -86,7 +93,10 @@ func QuerySubscription() *cobra.Command {
 				},
 			)
 
-			table.Render()
+			err = utils.WriteOutput(subscriptionHeader, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}
@@ -126,9 +136,15 @@ func QuerySubscriptions() *cobra.Command {
 				return err
 			}
 
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			var (
-				items types.Subscriptions
-				qsc   = subscriptiontypes.NewQueryServiceClient(ctx)
+				items      types.Subscriptions
+				qsc        = subscriptiontypes.NewQueryServiceClient(ctx)
+				outputRows [][]string
 			)
 
 			if bech32Address != "" {
@@ -175,11 +191,9 @@ func QuerySubscriptions() *cobra.Command {
 				items = append(items, types.NewSubscriptionsFromRaw(result.Subscriptions)...)
 			}
 
-			table := tablewriter.NewWriter(cmd.OutOrStdout())
-			table.SetHeader(subscriptionHeader)
-
 			for i := 0; i < len(items); i++ {
-				table.Append(
+				outputRows = append(
+					outputRows,
 					[]string{
 						fmt.Sprintf("%d", items[i].ID),
 						items[i].Owner,
@@ -195,7 +209,10 @@ func QuerySubscriptions() *cobra.Command {
 				)
 			}
 
-			table.Render()
+			err = utils.WriteOutput(subscriptionHeader, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}
@@ -216,6 +233,11 @@ func QueryQuota() *cobra.Command {
 		Short: "Query a quota",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			ctx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
@@ -247,12 +269,13 @@ func QueryQuota() *cobra.Command {
 			}
 
 			var (
-				item  = types.NewQuotaFromRaw(&result.Quota)
-				table = tablewriter.NewWriter(cmd.OutOrStdout())
+				item       = types.NewQuotaFromRaw(&result.Quota)
+				outputRows [][]string
 			)
 
-			table.SetHeader(quotaHeader)
-			table.Append(
+			outputRows = append(
+				outputRows,
+
 				[]string{
 					item.Address,
 					netutil.ToReadable(item.Allocated, 2),
@@ -260,7 +283,10 @@ func QueryQuota() *cobra.Command {
 				},
 			)
 
-			table.Render()
+			err = utils.WriteOutput(quotaHeader, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}
@@ -276,6 +302,11 @@ func QueryQuotas() *cobra.Command {
 		Short: "Query quotas of a subscription",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			outputFormat, err := cmd.Flags().GetString(clienttypes.FlagOutput)
+			if err != nil {
+				return err
+			}
+
 			ctx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
@@ -307,13 +338,13 @@ func QueryQuotas() *cobra.Command {
 			}
 
 			var (
-				items = types.NewQuotasFromRaw(result.Quotas)
-				table = tablewriter.NewWriter(cmd.OutOrStdout())
+				items      = types.NewQuotasFromRaw(result.Quotas)
+				outputRows [][]string
 			)
 
-			table.SetHeader(quotaHeader)
 			for i := 0; i < len(items); i++ {
-				table.Append(
+				outputRows = append(
+					outputRows,
 					[]string{
 						items[i].Address,
 						netutil.ToReadable(items[i].Allocated, 2),
@@ -322,7 +353,10 @@ func QueryQuotas() *cobra.Command {
 				)
 			}
 
-			table.Render()
+			err = utils.WriteOutput(quotaHeader, outputRows, outputFormat)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}
