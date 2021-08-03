@@ -225,22 +225,6 @@ func HandlerDeleteKey(ctx *context.Context) http.HandlerFunc {
 			vars   = mux.Vars(r)
 		)
 
-		request, err := NewRequestAddKey(r)
-		if err != nil {
-			restutils.WriteErrorToResponse(
-				w, http.StatusBadRequest,
-				resttypes.NewError(1001, err.Error()),
-			)
-			return
-		}
-		if err := request.Validate(); err != nil {
-			restutils.WriteErrorToResponse(
-				w, http.StatusBadRequest,
-				resttypes.NewError(1002, err.Error()),
-			)
-			return
-		}
-
 		kr, err := keyring.New(
 			version.Name,
 			config.Keyring.Backend,
@@ -250,7 +234,7 @@ func HandlerDeleteKey(ctx *context.Context) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1003, err.Error()),
+				resttypes.NewError(1001, err.Error()),
 			)
 			return
 		}
@@ -258,8 +242,9 @@ func HandlerDeleteKey(ctx *context.Context) http.HandlerFunc {
 		if err := kr.Delete(vars["name"]); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1004, err.Error()),
+				resttypes.NewError(1002, err.Error()),
 			)
+			return
 		}
 
 		restutils.WriteResultToResponse(w, http.StatusOK, nil)
