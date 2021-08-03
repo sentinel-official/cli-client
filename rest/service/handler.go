@@ -156,6 +156,7 @@ func HandlerConnect(ctx *context.Context) http.HandlerFunc {
 				w, http.StatusInternalServerError,
 				resttypes.NewError(1008, err.Error()),
 			)
+			return
 		}
 
 		if err := service.PreUp(); err != nil {
@@ -163,18 +164,21 @@ func HandlerConnect(ctx *context.Context) http.HandlerFunc {
 				w, http.StatusInternalServerError,
 				resttypes.NewError(1009, err.Error()),
 			)
+			return
 		}
 		if err := service.Up(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
 				resttypes.NewError(1010, err.Error()),
 			)
+			return
 		}
 		if err := service.PostUp(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
 				resttypes.NewError(1011, err.Error()),
 			)
+			return
 		}
 
 		restutils.WriteResultToResponse(w, http.StatusOK, nil)
@@ -212,18 +216,21 @@ func HandlerDisconnect(ctx *context.Context) http.HandlerFunc {
 						w, http.StatusInternalServerError,
 						resttypes.NewError(1002, err.Error()),
 					)
+					return
 				}
 				if err := service.Down(); err != nil {
 					restutils.WriteErrorToResponse(
 						w, http.StatusInternalServerError,
 						resttypes.NewError(1003, err.Error()),
 					)
+					return
 				}
 				if err := service.PostDown(); err != nil {
 					restutils.WriteErrorToResponse(
 						w, http.StatusInternalServerError,
 						resttypes.NewError(1004, err.Error()),
 					)
+					return
 				}
 			}
 		}
@@ -233,6 +240,7 @@ func HandlerDisconnect(ctx *context.Context) http.HandlerFunc {
 				w, http.StatusInternalServerError,
 				resttypes.NewError(1005, err.Error()),
 			)
+			return
 		}
 
 		restutils.WriteResultToResponse(w, http.StatusOK, nil)
