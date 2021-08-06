@@ -1,4 +1,4 @@
-package service
+package requests
 
 import (
 	"encoding/json"
@@ -6,11 +6,15 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/pkg/errors"
 	hubtypes "github.com/sentinel-official/hub/types"
 )
 
-type RequestConnect struct {
+type Connect struct {
+	Backend  string `json:"backend"`
+	Password string `json:"password"`
+
 	ID   uint64 `json:"id"`
 	From string `json:"from"`
 	To   string `json:"to"`
@@ -20,8 +24,8 @@ type RequestConnect struct {
 	Resolvers []net.IP `json:"resolvers"`
 }
 
-func NewRequestConnect(r *http.Request) (*RequestConnect, error) {
-	var v RequestConnect
+func NewConnect(r *http.Request) (*Connect, error) {
+	var v Connect
 	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
 		return nil, err
 	}
@@ -29,7 +33,23 @@ func NewRequestConnect(r *http.Request) (*RequestConnect, error) {
 	return &v, nil
 }
 
-func (r *RequestConnect) Validate() error {
+func (r *Connect) Validate() error {
+	if r.Backend == "" {
+		return errors.New("backend cannot be empty")
+	}
+	if r.Backend != keyring.BackendFile && r.Backend != keyring.BackendOS && r.Backend != keyring.BackendTest {
+		return fmt.Errorf("backend must be one of [%s, %s, %s]",
+			keyring.BackendFile, keyring.BackendOS, keyring.BackendTest)
+	}
+	if r.Backend == keyring.BackendFile {
+		if r.Password == "" {
+			return errors.New("password cannot be empty")
+		}
+		if len(r.Password) < 8 {
+			return fmt.Errorf("password length cannot be less than %d", 8)
+		}
+	}
+
 	if r.ID == 0 {
 		return errors.New("id cannot be zero")
 	}

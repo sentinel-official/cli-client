@@ -1,4 +1,4 @@
-package service
+package handlers
 
 import (
 	"encoding/binary"
@@ -7,29 +7,26 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
-
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	"github.com/cosmos/cosmos-sdk/version"
 
 	"github.com/sentinel-official/cli-client/context"
+	restrequests "github.com/sentinel-official/cli-client/rest/requests"
+	restresponses "github.com/sentinel-official/cli-client/rest/responses"
 	"github.com/sentinel-official/cli-client/services/wireguard"
 	wireguardtypes "github.com/sentinel-official/cli-client/services/wireguard/types"
-	"github.com/sentinel-official/cli-client/types"
+	clitypes "github.com/sentinel-official/cli-client/types"
 	resttypes "github.com/sentinel-official/cli-client/types/rest"
 	netutils "github.com/sentinel-official/cli-client/utils/net"
 	restutils "github.com/sentinel-official/cli-client/utils/rest"
 )
 
-func HandlerConnect(ctx *context.Context) http.HandlerFunc {
+func Connect(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var (
-			config         = ctx.Config()
-			status         = types.NewStatus()
-			statusFilePath = filepath.Join(ctx.Home(), types.StatusFilename)
+			status         = clitypes.NewStatus()
+			statusFilePath = filepath.Join(ctx.Home(), clitypes.StatusFilename)
 		)
 
-		request, err := NewRequestConnect(r)
+		req, err := restrequests.NewConnect(r)
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
@@ -37,7 +34,7 @@ func HandlerConnect(ctx *context.Context) http.HandlerFunc {
 			)
 			return
 		}
-		if err := request.Validate(); err != nil {
+		if err := req.Validate(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
 				resttypes.NewError(1002, err.Error()),
@@ -60,39 +57,17 @@ func HandlerConnect(ctx *context.Context) http.HandlerFunc {
 						&wireguardtypes.Config{
 							Name: status.IFace,
 						},
-					)
+					).
+					WithHome(ctx.Home())
 			)
 
 			if service.IsUp() {
 				restutils.WriteErrorToResponse(
 					w, http.StatusBadRequest,
-					resttypes.NewError(1004, fmt.Sprintf("service is already running in interface %s", status.IFace)),
+					resttypes.NewError(1004, fmt.Sprintf("service is already running on interface %s", status.IFace)),
 				)
 				return
 			}
-		}
-
-		kr, err := keyring.New(
-			version.Name,
-			config.Keyring.Backend,
-			ctx.Home(),
-			strings.NewReader(""),
-		)
-		if err != nil {
-			restutils.WriteErrorToResponse(
-				w, http.StatusInternalServerError,
-				resttypes.NewError(1005, err.Error()),
-			)
-			return
-		}
-
-		key, err := kr.Key(request.From)
-		if err != nil {
-			restutils.WriteErrorToResponse(
-				w, http.StatusInternalServerError,
-				resttypes.NewError(1006, err.Error()),
-			)
-			return
 		}
 
 		listenPort, err := netutils.GetFreeUDPPort()
@@ -110,31 +85,31 @@ func HandlerConnect(ctx *context.Context) http.HandlerFunc {
 				Interface: wireguardtypes.Interface{
 					Addresses: []wireguardtypes.IPNet{
 						{
-							IP:  net.IP(request.Info[0 : 0+4]),
+							IP:  net.IP(req.Info[0 : 0+4]),
 							Net: 32,
 						},
 						{
-							IP:  net.IP(request.Info[4 : 4+16]),
+							IP:  net.IP(req.Info[4 : 4+16]),
 							Net: 128,
 						},
 					},
 					ListenPort: listenPort,
-					PrivateKey: *wireguardtypes.NewKey(request.Keys[0]),
+					PrivateKey: *wireguardtypes.NewKey(req.Keys[0]),
 					DNS: append(
 						[]net.IP{net.ParseIP("10.8.0.1")},
-						request.Resolvers...,
+						req.Resolvers...,
 					),
 				},
 				Peers: []wireguardtypes.Peer{
 					{
-						PublicKey: *wireguardtypes.NewKey(request.Info[26 : 26+32]),
+						PublicKey: *wireguardtypes.NewKey(req.Info[26 : 26+32]),
 						AllowedIPs: []wireguardtypes.IPNet{
 							{IP: net.ParseIP("0.0.0.0")},
 							{IP: net.ParseIP("::")},
 						},
 						Endpoint: wireguardtypes.Endpoint{
-							Host: net.IP(request.Info[20 : 20+4]).String(),
-							Port: binary.BigEndian.Uint16(request.Info[24 : 24+2]),
+							Host: net.IP(req.Info[20 : 20+4]).String(),
+							Port: binary.BigEndian.Uint16(req.Info[24 : 24+2]),
 						},
 						PersistentKeepalive: 15,
 					},
@@ -142,13 +117,12 @@ func HandlerConnect(ctx *context.Context) http.HandlerFunc {
 			}
 
 			service = wireguard.NewWireGuard().
-				WithConfig(wireGuardConfig)
+				WithConfig(wireGuardConfig).
+				WithHome(ctx.Home())
 		)
 
-		status = status.
-			WithID(request.ID).
-			WithFrom(key.GetAddress().String()).
-			WithTo(request.To).
+		status = clitypes.NewStatus().
+			WithID(req.ID).
 			WithIFace(wireGuardConfig.Name)
 
 		if err := status.SaveToPath(statusFilePath); err != nil {
@@ -185,11 +159,11 @@ func HandlerConnect(ctx *context.Context) http.HandlerFunc {
 	}
 }
 
-func HandlerDisconnect(ctx *context.Context) http.HandlerFunc {
+func Disconnect(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var (
-			status         = types.NewStatus()
-			statusFilePath = filepath.Join(ctx.Home(), types.StatusFilename)
+			status         = clitypes.NewStatus()
+			statusFilePath = filepath.Join(ctx.Home(), clitypes.StatusFilename)
 		)
 
 		if err := status.LoadFromPath(statusFilePath); err != nil {
@@ -207,7 +181,8 @@ func HandlerDisconnect(ctx *context.Context) http.HandlerFunc {
 						&wireguardtypes.Config{
 							Name: status.IFace,
 						},
-					)
+					).
+					WithHome(ctx.Home())
 			)
 
 			if service.IsUp() {
@@ -247,11 +222,11 @@ func HandlerDisconnect(ctx *context.Context) http.HandlerFunc {
 	}
 }
 
-func HandlerStatus(ctx *context.Context) http.HandlerFunc {
+func GetStatus(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var (
-			status         = types.NewStatus()
-			statusFilePath = filepath.Join(ctx.Home(), types.StatusFilename)
+			status         = clitypes.NewStatus()
+			statusFilePath = filepath.Join(ctx.Home(), clitypes.StatusFilename)
 		)
 
 		if err := status.LoadFromPath(statusFilePath); err != nil {
@@ -269,7 +244,8 @@ func HandlerStatus(ctx *context.Context) http.HandlerFunc {
 						&wireguardtypes.Config{
 							Name: status.IFace,
 						},
-					)
+					).
+					WithHome(ctx.Home())
 			)
 
 			if service.IsUp() {
@@ -283,10 +259,9 @@ func HandlerStatus(ctx *context.Context) http.HandlerFunc {
 				}
 
 				restutils.WriteResultToResponse(w, http.StatusOK,
-					&ResponseStatus{
-						From:     status.From,
+					&restresponses.GetStatus{
 						ID:       status.ID,
-						To:       status.To,
+						IFace:    status.IFace,
 						Upload:   upload,
 						Download: download,
 					},
