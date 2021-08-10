@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"time"
@@ -11,9 +10,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/olekukonko/tablewriter"
 	hubtypes "github.com/sentinel-official/hub/types"
-	sessiontypes "github.com/sentinel-official/hub/x/session/types"
 	"github.com/spf13/cobra"
 
+	"github.com/sentinel-official/cli-client/context"
+	clitypes "github.com/sentinel-official/cli-client/types"
 	"github.com/sentinel-official/cli-client/x/session/types"
 )
 
@@ -35,7 +35,7 @@ func QuerySession() *cobra.Command {
 		Short: "Query a session",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -45,20 +45,13 @@ func QuerySession() *cobra.Command {
 				return err
 			}
 
-			var (
-				qsc = sessiontypes.NewQueryServiceClient(ctx)
-			)
-
-			result, err := qsc.QuerySession(
-				context.Background(),
-				sessiontypes.NewQuerySessionRequest(id),
-			)
+			result, err := qc.QuerySession(id)
 			if err != nil {
 				return err
 			}
 
 			var (
-				item  = types.NewSessionFromRaw(&result.Session)
+				item  = types.NewSessionFromRaw(result)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
@@ -80,7 +73,8 @@ func QuerySession() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }
@@ -90,7 +84,7 @@ func QuerySessions() *cobra.Command {
 		Use:   "sessions",
 		Short: "Query sessions",
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -112,22 +106,18 @@ func QuerySessions() *cobra.Command {
 
 			var (
 				items types.Sessions
-				qc    = sessiontypes.NewQueryServiceClient(ctx)
 			)
 
 			if subscription != 0 {
 				result, err := qc.QuerySessionsForSubscription(
-					context.Background(),
-					sessiontypes.NewQuerySessionsForSubscriptionRequest(
-						subscription,
-						pagination,
-					),
+					subscription,
+					pagination,
 				)
 				if err != nil {
 					return err
 				}
 
-				items = append(items, types.NewSessionsFromRaw(result.Sessions)...)
+				items = append(items, types.NewSessionsFromRaw(result)...)
 			} else if bech32Address != "" {
 				address, err := sdk.AccAddressFromBech32(bech32Address)
 				if err != nil {
@@ -140,28 +130,24 @@ func QuerySessions() *cobra.Command {
 				}
 
 				result, err := qc.QuerySessionsForAddress(
-					context.Background(),
-					sessiontypes.NewQuerySessionsForAddressRequest(
-						address,
-						hubtypes.StatusFromString(status),
-						pagination,
-					),
+					address,
+					hubtypes.StatusFromString(status),
+					pagination,
 				)
 				if err != nil {
 					return err
 				}
 
-				items = append(items, types.NewSessionsFromRaw(result.Sessions)...)
+				items = append(items, types.NewSessionsFromRaw(result)...)
 			} else {
 				result, err := qc.QuerySessions(
-					context.Background(),
-					sessiontypes.NewQuerySessionsRequest(pagination),
+					pagination,
 				)
 				if err != nil {
 					return err
 				}
 
-				items = append(items, types.NewSessionsFromRaw(result.Sessions)...)
+				items = append(items, types.NewSessionsFromRaw(result)...)
 			}
 
 			table := tablewriter.NewWriter(cmd.OutOrStdout())
@@ -186,8 +172,10 @@ func QuerySessions() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "sessions")
+
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	cmd.Flags().String(flagAddress, "", "filter with account address")
 	cmd.Flags().Uint64(flagSubscription, 0, "filter with subscription identity")

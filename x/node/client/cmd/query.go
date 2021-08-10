@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -17,7 +16,8 @@ import (
 	nodetypes "github.com/sentinel-official/hub/x/node/types"
 	"github.com/spf13/cobra"
 
-	clienttypes "github.com/sentinel-official/cli-client/types"
+	"github.com/sentinel-official/cli-client/context"
+	clitypes "github.com/sentinel-official/cli-client/types"
 	resttypes "github.com/sentinel-official/cli-client/types/rest"
 	"github.com/sentinel-official/cli-client/x/node/types"
 )
@@ -83,7 +83,7 @@ func QueryNode() *cobra.Command {
 		Short: "Query a node",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -93,26 +93,19 @@ func QueryNode() *cobra.Command {
 				return err
 			}
 
-			timeout, err := cmd.Flags().GetDuration(clienttypes.FlagTimeout)
+			timeout, err := cmd.Flags().GetDuration(clitypes.FlagTimeout)
+			if err != nil {
+				return err
+			}
+
+			result, err := qc.QueryNode(address)
 			if err != nil {
 				return err
 			}
 
 			var (
-				qsc = nodetypes.NewQueryServiceClient(ctx)
-			)
-
-			result, err := qsc.QueryNode(
-				context.Background(),
-				nodetypes.NewQueryNodeRequest(address),
-			)
-			if err != nil {
-				return err
-			}
-
-			var (
-				info, _ = fetchNodeInfo(result.Node.RemoteURL, timeout)
-				item    = types.NewNodeFromRaw(&result.Node).WithInfo(info)
+				info, _ = fetchNodeInfo(result.RemoteURL, timeout)
+				item    = types.NewNodeFromRaw(result).WithInfo(info)
 				table   = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
@@ -138,9 +131,7 @@ func QueryNode() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
-
-	cmd.Flags().Duration(clienttypes.FlagTimeout, 15*time.Second, "time limit for requests made by the HTTP client")
+	clitypes.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }
@@ -150,7 +141,7 @@ func QueryNodes() *cobra.Command {
 		Use:   "nodes",
 		Short: "Query nodes",
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -165,7 +156,7 @@ func QueryNodes() *cobra.Command {
 				return err
 			}
 
-			timeout, err := cmd.Flags().GetDuration(clienttypes.FlagTimeout)
+			timeout, err := cmd.Flags().GetDuration(clitypes.FlagTimeout)
 			if err != nil {
 				return err
 			}
@@ -177,7 +168,6 @@ func QueryNodes() *cobra.Command {
 
 			var (
 				items  []nodetypes.Node
-				qsc    = nodetypes.NewQueryServiceClient(ctx)
 				status = hubtypes.StatusFromString(s)
 			)
 
@@ -187,32 +177,26 @@ func QueryNodes() *cobra.Command {
 					return err
 				}
 
-				result, err := qsc.QueryNodesForProvider(
-					context.Background(),
-					nodetypes.NewQueryNodesForProviderRequest(
-						address,
-						status,
-						pagination,
-					),
+				result, err := qc.QueryNodesForProvider(
+					address,
+					status,
+					pagination,
 				)
 				if err != nil {
 					return err
 				}
 
-				items = append(items, result.Nodes...)
+				items = append(items, result...)
 			} else {
-				result, err := qsc.QueryNodes(
-					context.Background(),
-					nodetypes.NewQueryNodesRequest(
-						status,
-						pagination,
-					),
+				result, err := qc.QueryNodes(
+					status,
+					pagination,
 				)
 				if err != nil {
 					return err
 				}
 
-				items = append(items, result.Nodes...)
+				items = append(items, result...)
 			}
 
 			var (
@@ -260,12 +244,11 @@ func QueryNodes() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "nodes")
+	clitypes.AddQueryFlagsToCmd(cmd)
 
 	cmd.Flags().String(flagProvider, "", "filter with provider address")
 	cmd.Flags().String(flagStatus, "Active", "filter with status (Active|Inactive)")
-	cmd.Flags().Duration(clienttypes.FlagTimeout, 15*time.Second, "time limit for requests made by the HTTP client")
 
 	return cmd
 }

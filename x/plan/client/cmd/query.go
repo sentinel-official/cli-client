@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -9,10 +8,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/olekukonko/tablewriter"
 	hubtypes "github.com/sentinel-official/hub/types"
-	plantypes "github.com/sentinel-official/hub/x/plan/types"
 	"github.com/spf13/cobra"
 
-	netutil "github.com/sentinel-official/cli-client/utils/net"
+	"github.com/sentinel-official/cli-client/context"
+	clitypes "github.com/sentinel-official/cli-client/types"
+	netutils "github.com/sentinel-official/cli-client/utils/net"
 	"github.com/sentinel-official/cli-client/x/plan/types"
 )
 
@@ -33,7 +33,7 @@ func QueryPlan() *cobra.Command {
 		Short: "Query a plan",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -43,20 +43,13 @@ func QueryPlan() *cobra.Command {
 				return err
 			}
 
-			var (
-				qsc = plantypes.NewQueryServiceClient(ctx)
-			)
-
-			result, err := qsc.QueryPlan(
-				context.Background(),
-				plantypes.NewQueryPlanRequest(id),
-			)
+			result, err := qc.QueryPlan(id)
 			if err != nil {
 				return err
 			}
 
 			var (
-				item  = types.NewPlanFromRaw(&result.Plan)
+				item  = types.NewPlanFromRaw(result)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
@@ -66,7 +59,7 @@ func QueryPlan() *cobra.Command {
 					fmt.Sprintf("%d", item.ID),
 					item.Provider,
 					item.Price.Raw().String(),
-					netutil.ToReadable(item.Bytes, 2),
+					netutils.ToReadable(item.Bytes, 2),
 					item.Validity.String(),
 					item.Status,
 				},
@@ -77,7 +70,8 @@ func QueryPlan() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }
@@ -87,7 +81,7 @@ func QueryPlans() *cobra.Command {
 		Use:   "plans",
 		Short: "Query plans",
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -109,7 +103,6 @@ func QueryPlans() *cobra.Command {
 
 			var (
 				items  types.Plans
-				qsc    = plantypes.NewQueryServiceClient(ctx)
 				status = hubtypes.StatusFromString(s)
 			)
 
@@ -119,32 +112,26 @@ func QueryPlans() *cobra.Command {
 					return err
 				}
 
-				result, err := qsc.QueryPlansForProvider(
-					context.Background(),
-					plantypes.NewQueryPlansForProviderRequest(
-						address,
-						status,
-						pagination,
-					),
+				result, err := qc.QueryPlansForProvider(
+					address,
+					status,
+					pagination,
 				)
 				if err != nil {
 					return err
 				}
 
-				items = append(items, types.NewPlansFromRaw(result.Plans)...)
+				items = append(items, types.NewPlansFromRaw(result)...)
 			} else {
-				result, err := qsc.QueryPlans(
-					context.Background(),
-					plantypes.NewQueryPlansRequest(
-						status,
-						pagination,
-					),
+				result, err := qc.QueryPlans(
+					status,
+					pagination,
 				)
 				if err != nil {
 					return err
 				}
 
-				items = append(items, types.NewPlansFromRaw(result.Plans)...)
+				items = append(items, types.NewPlansFromRaw(result)...)
 			}
 
 			table := tablewriter.NewWriter(cmd.OutOrStdout())
@@ -156,7 +143,7 @@ func QueryPlans() *cobra.Command {
 						fmt.Sprintf("%d", items[i].ID),
 						items[i].Provider,
 						items[i].Price.Raw().String(),
-						netutil.ToReadable(items[i].Bytes, 2),
+						netutils.ToReadable(items[i].Bytes, 2),
 						items[i].Validity.String(),
 						items[i].Status,
 					},
@@ -168,8 +155,10 @@ func QueryPlans() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "plans")
+
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	cmd.Flags().String(flagProvider, "", "filter with provider address")
 	cmd.Flags().String(flagStatus, "Active", "filter with status")
