@@ -1,22 +1,28 @@
 package cmd
 
 import (
+	"bufio"
+	"fmt"
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
 	hubtypes "github.com/sentinel-official/hub/types"
 	"github.com/sentinel-official/hub/x/subscription/types"
+
+	"github.com/sentinel-official/cli-client/context"
+	clitypes "github.com/sentinel-official/cli-client/types"
 )
 
 func GetTxCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "subscription",
 		Short: "Subscription related subcommands",
+		DisableFlagParsing:         true,
+		SuggestionsMinimumDistance: 2,
+		RunE:                       client.ValidateCmd,
 	}
 
 	cmd.AddCommand(
@@ -36,7 +42,16 @@ func txSubscribeToNode() *cobra.Command {
 		Short: "Subscribe to a node",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientTxContext(cmd)
+			cc, err := context.NewClientContextFromCmd(cmd)
+			if err != nil {
+				return err
+			}
+
+			var (
+				reader = bufio.NewReader(cmd.InOrStdin())
+			)
+
+			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
@@ -52,7 +67,7 @@ func txSubscribeToNode() *cobra.Command {
 			}
 
 			msg := types.NewMsgSubscribeToNodeRequest(
-				ctx.FromAddress,
+				from,
 				address,
 				deposit,
 			)
@@ -60,11 +75,18 @@ func txSubscribeToNode() *cobra.Command {
 				return err
 			}
 
-			return tx.GenerateOrBroadcastTxCLI(ctx, cmd.Flags(), msg)
+			result, err := cc.SignAndBroadcastTx(password, msg)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(result)
+			return nil
 		},
 	}
 
-	flags.AddTxFlagsToCmd(cmd)
+	clitypes.AddTxFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -75,7 +97,16 @@ func txSubscribeToPlan() *cobra.Command {
 		Short: "Subscribe to a plan",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientTxContext(cmd)
+			cc, err := context.NewClientContextFromCmd(cmd)
+			if err != nil {
+				return err
+			}
+
+			var (
+				reader = bufio.NewReader(cmd.InOrStdin())
+			)
+
+			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
@@ -86,7 +117,7 @@ func txSubscribeToPlan() *cobra.Command {
 			}
 
 			msg := types.NewMsgSubscribeToPlanRequest(
-				ctx.FromAddress,
+				from,
 				id,
 				args[1],
 			)
@@ -94,11 +125,18 @@ func txSubscribeToPlan() *cobra.Command {
 				return err
 			}
 
-			return tx.GenerateOrBroadcastTxCLI(ctx, cmd.Flags(), msg)
+			result, err := cc.SignAndBroadcastTx(password, msg)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(result)
+			return nil
 		},
 	}
 
-	flags.AddTxFlagsToCmd(cmd)
+	clitypes.AddTxFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -109,7 +147,16 @@ func txAddQuota() *cobra.Command {
 		Short: "Add a quota for subscription",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientTxContext(cmd)
+			cc, err := context.NewClientContextFromCmd(cmd)
+			if err != nil {
+				return err
+			}
+
+			var (
+				reader = bufio.NewReader(cmd.InOrStdin())
+			)
+
+			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
@@ -130,7 +177,7 @@ func txAddQuota() *cobra.Command {
 			}
 
 			msg := types.NewMsgAddQuotaRequest(
-				ctx.FromAddress,
+				from,
 				id,
 				address,
 				sdk.NewInt(bytes),
@@ -139,11 +186,18 @@ func txAddQuota() *cobra.Command {
 				return err
 			}
 
-			return tx.GenerateOrBroadcastTxCLI(ctx, cmd.Flags(), msg)
+			result, err := cc.SignAndBroadcastTx(password, msg)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(result)
+			return nil
 		},
 	}
 
-	flags.AddTxFlagsToCmd(cmd)
+	clitypes.AddTxFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -154,7 +208,16 @@ func txUpdateQuota() *cobra.Command {
 		Short: "Update a quota for subscription",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientTxContext(cmd)
+			cc, err := context.NewClientContextFromCmd(cmd)
+			if err != nil {
+				return err
+			}
+
+			var (
+				reader = bufio.NewReader(cmd.InOrStdin())
+			)
+
+			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
@@ -175,7 +238,7 @@ func txUpdateQuota() *cobra.Command {
 			}
 
 			msg := types.NewMsgUpdateQuotaRequest(
-				ctx.FromAddress,
+				from,
 				id,
 				address,
 				sdk.NewInt(bytes),
@@ -184,11 +247,18 @@ func txUpdateQuota() *cobra.Command {
 				return err
 			}
 
-			return tx.GenerateOrBroadcastTxCLI(ctx, cmd.Flags(), msg)
+			result, err := cc.SignAndBroadcastTx(password, msg)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(result)
+			return nil
 		},
 	}
 
-	flags.AddTxFlagsToCmd(cmd)
+	clitypes.AddTxFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -200,7 +270,16 @@ func txCancel() *cobra.Command {
 		Args:   cobra.ExactArgs(1),
 		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientTxContext(cmd)
+			cc, err := context.NewClientContextFromCmd(cmd)
+			if err != nil {
+				return err
+			}
+
+			var (
+				reader = bufio.NewReader(cmd.InOrStdin())
+			)
+
+			_, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
@@ -211,7 +290,7 @@ func txCancel() *cobra.Command {
 			}
 
 			msg := types.NewMsgCancelRequest(
-				ctx.FromAddress,
+				from,
 				id,
 			)
 			if err := msg.ValidateBasic(); err != nil {
@@ -222,7 +301,8 @@ func txCancel() *cobra.Command {
 		},
 	}
 
-	flags.AddTxFlagsToCmd(cmd)
+	clitypes.AddTxFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
