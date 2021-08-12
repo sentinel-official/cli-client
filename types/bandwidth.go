@@ -5,7 +5,7 @@ import (
 
 	hubtypes "github.com/sentinel-official/hub/types"
 
-	netutil "github.com/sentinel-official/cli-client/utils/net"
+	netutils "github.com/sentinel-official/cli-client/utils/net"
 )
 
 type Bandwidth struct {
@@ -14,9 +14,10 @@ type Bandwidth struct {
 }
 
 func (b Bandwidth) String() string {
-	return fmt.Sprintf("%s+%s",
-		netutil.ToReadable(b.Upload, 2),
-		netutil.ToReadable(b.Download, 2),
+	return fmt.Sprintf(
+		"%s+%s",
+		netutils.ToReadable(b.Upload, 2),
+		netutils.ToReadable(b.Download, 2),
 	)
 }
 

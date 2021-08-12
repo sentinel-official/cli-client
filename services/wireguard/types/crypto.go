@@ -45,6 +45,10 @@ func NewPrivateKey() (*Key, error) {
 	return key, nil
 }
 
+func (k *Key) Bytes() []byte {
+	return k[:]
+}
+
 func (k *Key) String() string {
 	return base64.StdEncoding.EncodeToString(k[:])
 }

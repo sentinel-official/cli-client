@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -10,10 +9,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/olekukonko/tablewriter"
 	hubtypes "github.com/sentinel-official/hub/types"
-	subscriptiontypes "github.com/sentinel-official/hub/x/subscription/types"
 	"github.com/spf13/cobra"
 
-	netutil "github.com/sentinel-official/cli-client/utils/net"
+	"github.com/sentinel-official/cli-client/context"
+	clitypes "github.com/sentinel-official/cli-client/types"
+	netutils "github.com/sentinel-official/cli-client/utils/net"
 	"github.com/sentinel-official/cli-client/x/subscription/types"
 )
 
@@ -43,7 +43,7 @@ func QuerySubscription() *cobra.Command {
 		Short: "Query a subscription",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -53,20 +53,13 @@ func QuerySubscription() *cobra.Command {
 				return err
 			}
 
-			var (
-				qsc = subscriptiontypes.NewQueryServiceClient(ctx)
-			)
-
-			result, err := qsc.QuerySubscription(
-				context.Background(),
-				subscriptiontypes.NewQuerySubscriptionRequest(id),
-			)
+			result, err := qc.QuerySubscription(id)
 			if err != nil {
 				return err
 			}
 
 			var (
-				item  = types.NewSubscriptionFromRaw(&result.Subscription)
+				item  = types.NewSubscriptionFromRaw(result)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
@@ -81,7 +74,7 @@ func QuerySubscription() *cobra.Command {
 					item.Node,
 					item.Price.Raw().String(),
 					item.Deposit.Raw().String(),
-					netutil.ToReadable(item.Free, 2),
+					netutils.ToReadable(item.Free, 2),
 					item.Status,
 				},
 			)
@@ -91,7 +84,8 @@ func QuerySubscription() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }
@@ -101,7 +95,7 @@ func QuerySubscriptions() *cobra.Command {
 		Use:   "subscriptions",
 		Short: "Query subscriptions",
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -128,7 +122,6 @@ func QuerySubscriptions() *cobra.Command {
 
 			var (
 				items types.Subscriptions
-				qsc   = subscriptiontypes.NewQueryServiceClient(ctx)
 			)
 
 			if bech32Address != "" {
@@ -137,42 +130,33 @@ func QuerySubscriptions() *cobra.Command {
 					return err
 				}
 
-				result, err := qsc.QuerySubscriptionsForAddress(
-					context.Background(),
-					subscriptiontypes.NewQuerySubscriptionsForAddressRequest(
-						address,
-						hubtypes.StatusFromString(status),
-						pagination,
-					),
+				result, err := qc.QuerySubscriptionsForAddress(
+					address,
+					hubtypes.StatusFromString(status),
+					pagination,
 				)
 				if err != nil {
 					return err
 				}
 
-				items = append(items, types.NewSubscriptionsFromRaw(result.Subscriptions)...)
+				items = append(items, types.NewSubscriptionsFromRaw(result)...)
 			} else if plan != 0 {
-				result, err := qsc.QuerySubscriptionsForPlan(
-					context.Background(),
-					subscriptiontypes.NewQuerySubscriptionsForPlanRequest(
-						plan,
-						pagination,
-					),
+				result, err := qc.QuerySubscriptionsForPlan(
+					plan,
+					pagination,
 				)
 				if err != nil {
 					return err
 				}
 
-				items = append(items, types.NewSubscriptionsFromRaw(result.Subscriptions)...)
+				items = append(items, types.NewSubscriptionsFromRaw(result)...)
 			} else {
-				result, err := qsc.QuerySubscriptions(
-					context.Background(),
-					subscriptiontypes.NewQuerySubscriptionsRequest(pagination),
-				)
+				result, err := qc.QuerySubscriptions(pagination)
 				if err != nil {
 					return err
 				}
 
-				items = append(items, types.NewSubscriptionsFromRaw(result.Subscriptions)...)
+				items = append(items, types.NewSubscriptionsFromRaw(result)...)
 			}
 
 			table := tablewriter.NewWriter(cmd.OutOrStdout())
@@ -189,7 +173,7 @@ func QuerySubscriptions() *cobra.Command {
 						items[i].Node,
 						items[i].Price.Raw().String(),
 						items[i].Deposit.Raw().String(),
-						netutil.ToReadable(items[i].Free, 2),
+						netutils.ToReadable(items[i].Free, 2),
 						items[i].Status,
 					},
 				)
@@ -200,8 +184,10 @@ func QuerySubscriptions() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "subscriptions")
+
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	cmd.Flags().String(flagAddress, "", "filter with account address")
 	cmd.Flags().Uint64(flagPlan, 0, "filter with plan identity")
@@ -216,7 +202,7 @@ func QueryQuota() *cobra.Command {
 		Short: "Query a quota",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -231,23 +217,16 @@ func QueryQuota() *cobra.Command {
 				return err
 			}
 
-			var (
-				qsc = subscriptiontypes.NewQueryServiceClient(ctx)
-			)
-
-			result, err := qsc.QueryQuota(
-				context.Background(),
-				subscriptiontypes.NewQueryQuotaRequest(
-					id,
-					address,
-				),
+			result, err := qc.QueryQuota(
+				id,
+				address,
 			)
 			if err != nil {
 				return err
 			}
 
 			var (
-				item  = types.NewQuotaFromRaw(&result.Quota)
+				item  = types.NewQuotaFromRaw(result)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
@@ -255,8 +234,8 @@ func QueryQuota() *cobra.Command {
 			table.Append(
 				[]string{
 					item.Address,
-					netutil.ToReadable(item.Allocated, 2),
-					netutil.ToReadable(item.Consumed, 2),
+					netutils.ToReadable(item.Allocated, 2),
+					netutils.ToReadable(item.Consumed, 2),
 				},
 			)
 
@@ -265,7 +244,8 @@ func QueryQuota() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }
@@ -276,7 +256,7 @@ func QueryQuotas() *cobra.Command {
 		Short: "Query quotas of a subscription",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -291,23 +271,16 @@ func QueryQuotas() *cobra.Command {
 				return err
 			}
 
-			var (
-				qsc = subscriptiontypes.NewQueryServiceClient(ctx)
-			)
-
-			result, err := qsc.QueryQuotas(
-				context.Background(),
-				subscriptiontypes.NewQueryQuotasRequest(
-					id,
-					pagination,
-				),
+			result, err := qc.QueryQuotas(
+				id,
+				pagination,
 			)
 			if err != nil {
 				return err
 			}
 
 			var (
-				items = types.NewQuotasFromRaw(result.Quotas)
+				items = types.NewQuotasFromRaw(result)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
@@ -316,8 +289,8 @@ func QueryQuotas() *cobra.Command {
 				table.Append(
 					[]string{
 						items[i].Address,
-						netutil.ToReadable(items[i].Allocated, 2),
-						netutil.ToReadable(items[i].Consumed, 2),
+						netutils.ToReadable(items[i].Allocated, 2),
+						netutils.ToReadable(items[i].Consumed, 2),
 					},
 				)
 			}
@@ -327,8 +300,10 @@ func QueryQuotas() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "quotas")
+
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }

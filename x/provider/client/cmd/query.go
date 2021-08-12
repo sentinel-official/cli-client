@@ -1,15 +1,14 @@
 package cmd
 
 import (
-	"context"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/olekukonko/tablewriter"
 	hubtypes "github.com/sentinel-official/hub/types"
-	providertypes "github.com/sentinel-official/hub/x/provider/types"
 	"github.com/spf13/cobra"
 
+	"github.com/sentinel-official/cli-client/context"
+	clitypes "github.com/sentinel-official/cli-client/types"
 	"github.com/sentinel-official/cli-client/x/provider/types"
 )
 
@@ -28,7 +27,7 @@ func QueryProvider() *cobra.Command {
 		Short: "Query a provider",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -38,20 +37,13 @@ func QueryProvider() *cobra.Command {
 				return err
 			}
 
-			var (
-				qsc = providertypes.NewQueryServiceClient(ctx)
-			)
-
-			result, err := qsc.QueryProvider(
-				context.Background(),
-				providertypes.NewQueryProviderRequest(address),
-			)
+			result, err := qc.QueryProvider(address)
 			if err != nil {
 				return err
 			}
 
 			var (
-				item  = types.NewProviderFromRaw(&result.Provider)
+				item  = types.NewProviderFromRaw(result)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
@@ -70,7 +62,8 @@ func QueryProvider() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }
@@ -80,7 +73,7 @@ func QueryProviders() *cobra.Command {
 		Use:   "providers",
 		Short: "Query providers",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -90,20 +83,13 @@ func QueryProviders() *cobra.Command {
 				return err
 			}
 
-			var (
-				qsc = providertypes.NewQueryServiceClient(ctx)
-			)
-
-			result, err := qsc.QueryProviders(
-				context.Background(),
-				providertypes.NewQueryProvidersRequest(pagination),
-			)
+			result, err := qc.QueryProviders(pagination)
 			if err != nil {
 				return err
 			}
 
 			var (
-				items = types.NewProvidersFromRaw(result.Providers)
+				items = types.NewProvidersFromRaw(result)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
@@ -124,8 +110,10 @@ func QueryProviders() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "providers")
+
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }

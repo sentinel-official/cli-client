@@ -1,23 +1,29 @@
 package cmd
 
 import (
+	"bufio"
+	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
 	hubtypes "github.com/sentinel-official/hub/types"
 	"github.com/sentinel-official/hub/x/plan/types"
+
+	"github.com/sentinel-official/cli-client/context"
+	clitypes "github.com/sentinel-official/cli-client/types"
 )
 
 func GetTxCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plan",
 		Short: "plan related subcommands",
+		DisableFlagParsing:         true,
+		SuggestionsMinimumDistance: 2,
+		RunE:                       client.ValidateCmd,
 	}
 
 	cmd.AddCommand(
@@ -36,7 +42,16 @@ func txAdd() *cobra.Command {
 		Short: "Add a plan",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientTxContext(cmd)
+			cc, err := context.NewClientContextFromCmd(cmd)
+			if err != nil {
+				return err
+			}
+
+			var (
+				reader = bufio.NewReader(cmd.InOrStdin())
+			)
+
+			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
@@ -57,7 +72,7 @@ func txAdd() *cobra.Command {
 			}
 
 			msg := types.NewMsgAddRequest(
-				ctx.FromAddress.Bytes(),
+				from.Bytes(),
 				price,
 				validity,
 				sdk.NewInt(bytes),
@@ -66,11 +81,18 @@ func txAdd() *cobra.Command {
 				return err
 			}
 
-			return tx.GenerateOrBroadcastTxCLI(ctx, cmd.Flags(), msg)
+			result, err := cc.SignAndBroadcastTx(password, msg)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(result)
+			return nil
 		},
 	}
 
-	flags.AddTxFlagsToCmd(cmd)
+	clitypes.AddTxFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -81,7 +103,16 @@ func txSetStatus() *cobra.Command {
 		Short: "Set a plan status",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientTxContext(cmd)
+			cc, err := context.NewClientContextFromCmd(cmd)
+			if err != nil {
+				return err
+			}
+
+			var (
+				reader = bufio.NewReader(cmd.InOrStdin())
+			)
+
+			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
@@ -92,7 +123,7 @@ func txSetStatus() *cobra.Command {
 			}
 
 			msg := types.NewMsgSetStatusRequest(
-				ctx.FromAddress.Bytes(),
+				from.Bytes(),
 				id,
 				hubtypes.StatusFromString(args[1]),
 			)
@@ -100,11 +131,18 @@ func txSetStatus() *cobra.Command {
 				return err
 			}
 
-			return tx.GenerateOrBroadcastTxCLI(ctx, cmd.Flags(), msg)
+			result, err := cc.SignAndBroadcastTx(password, msg)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(result)
+			return nil
 		},
 	}
 
-	flags.AddTxFlagsToCmd(cmd)
+	clitypes.AddTxFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -115,7 +153,16 @@ func txAddNode() *cobra.Command {
 		Short: "Add a node for plan",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientTxContext(cmd)
+			cc, err := context.NewClientContextFromCmd(cmd)
+			if err != nil {
+				return err
+			}
+
+			var (
+				reader = bufio.NewReader(cmd.InOrStdin())
+			)
+
+			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
@@ -131,7 +178,7 @@ func txAddNode() *cobra.Command {
 			}
 
 			msg := types.NewMsgAddNodeRequest(
-				ctx.FromAddress.Bytes(),
+				from.Bytes(),
 				id,
 				node,
 			)
@@ -139,11 +186,18 @@ func txAddNode() *cobra.Command {
 				return err
 			}
 
-			return tx.GenerateOrBroadcastTxCLI(ctx, cmd.Flags(), msg)
+			result, err := cc.SignAndBroadcastTx(password, msg)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(result)
+			return nil
 		},
 	}
 
-	flags.AddTxFlagsToCmd(cmd)
+	clitypes.AddTxFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -154,7 +208,16 @@ func txRemoveNode() *cobra.Command {
 		Short: "Remove a node for plan",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientTxContext(cmd)
+			cc, err := context.NewClientContextFromCmd(cmd)
+			if err != nil {
+				return err
+			}
+
+			var (
+				reader = bufio.NewReader(cmd.InOrStdin())
+			)
+
+			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
@@ -170,7 +233,7 @@ func txRemoveNode() *cobra.Command {
 			}
 
 			msg := types.NewMsgRemoveNodeRequest(
-				ctx.FromAddress,
+				from,
 				id,
 				node,
 			)
@@ -178,11 +241,18 @@ func txRemoveNode() *cobra.Command {
 				return err
 			}
 
-			return tx.GenerateOrBroadcastTxCLI(ctx, cmd.Flags(), msg)
+			result, err := cc.SignAndBroadcastTx(password, msg)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(result)
+			return nil
 		},
 	}
 
-	flags.AddTxFlagsToCmd(cmd)
+	clitypes.AddTxFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }

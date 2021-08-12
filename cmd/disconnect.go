@@ -1,15 +1,10 @@
 package cmd
 
 import (
-	"os"
-	"path/filepath"
-
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
 
-	"github.com/sentinel-official/cli-client/services/wireguard"
-	wireguardtypes "github.com/sentinel-official/cli-client/services/wireguard/types"
-	clienttypes "github.com/sentinel-official/cli-client/types"
+	"github.com/sentinel-official/cli-client/context"
+	clitypes "github.com/sentinel-official/cli-client/types"
 )
 
 func DisconnectCmd() *cobra.Command {
@@ -17,48 +12,36 @@ func DisconnectCmd() *cobra.Command {
 		Use:   "disconnect",
 		Short: "Disconnect from a node",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientTxContext(cmd)
+			cc, err := context.NewClientContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
-			var (
-				status         = clienttypes.NewStatus()
-				statusFilePath = filepath.Join(ctx.HomeDir, "status.json")
-			)
-
-			if err := status.LoadFromPath(statusFilePath); err != nil {
+			status, err := cc.GetStatus()
+			if err != nil {
 				return err
 			}
 
 			if status.IFace != "" {
-				var (
-					service = wireguard.NewWireGuard().
-						WithConfig(
-							&wireguardtypes.Config{
-								Name: status.IFace,
-							},
-						)
-				)
-
-				if service.IsUp() {
-					if err := service.PreDown(); err != nil {
-						return err
-					}
-					if err := service.Down(); err != nil {
-						return err
-					}
-					if err := service.PostDown(); err != nil {
-						return err
-					}
+				if err := cc.Disconnect(); err != nil {
+					return err
 				}
-
-				return os.Remove(statusFilePath)
 			}
 
 			return nil
 		},
 	}
+
+	clitypes.AddFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagBroadcastMode)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagChainID)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagFrom)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagGas)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagGasPrices)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagKeyringBackend)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagKeyringHome)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagMemo)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagRPCAddress)
 
 	return cmd
 }

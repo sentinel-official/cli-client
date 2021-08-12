@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
 	nodecmd "github.com/sentinel-official/cli-client/x/node/client/cmd"
@@ -26,8 +25,6 @@ func TxCommand() *cobra.Command {
 	cmd.AddCommand(providercmd.GetTxCommand())
 	cmd.AddCommand(subscriptioncmd.GetTxCommand())
 	cmd.AddCommand(sessioncmd.GetTxCommand())
-
-	cmd.PersistentFlags().String(flags.FlagChainID, "", "the network chain identity")
 
 	return cmd
 }

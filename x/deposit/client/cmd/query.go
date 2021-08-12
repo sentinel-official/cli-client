@@ -1,15 +1,14 @@
 package cmd
 
 import (
-	"context"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/olekukonko/tablewriter"
-	deposittypes "github.com/sentinel-official/hub/x/deposit/types"
 	"github.com/spf13/cobra"
 
+	"github.com/sentinel-official/cli-client/context"
+	clitypes "github.com/sentinel-official/cli-client/types"
 	"github.com/sentinel-official/cli-client/x/deposit/types"
 )
 
@@ -26,7 +25,7 @@ func QueryDeposit() *cobra.Command {
 		Short: "Query a deposit",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -36,20 +35,13 @@ func QueryDeposit() *cobra.Command {
 				return err
 			}
 
-			var (
-				qsc = deposittypes.NewQueryServiceClient(ctx)
-			)
-
-			result, err := qsc.QueryDeposit(
-				context.Background(),
-				deposittypes.NewQueryDepositRequest(address),
-			)
+			result, err := qc.QueryDeposit(address)
 			if err != nil {
 				return err
 			}
 
 			var (
-				item  = types.NewDepositFromRaw(&result.Deposit)
+				item  = types.NewDepositFromRaw(result)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
@@ -66,7 +58,8 @@ func QueryDeposit() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }
@@ -76,7 +69,7 @@ func QueryDeposits() *cobra.Command {
 		Use:   "deposits",
 		Short: "Query deposits",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, err := client.GetClientQueryContext(cmd)
+			qc, err := context.NewQueryContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -86,20 +79,13 @@ func QueryDeposits() *cobra.Command {
 				return err
 			}
 
-			var (
-				qsc = deposittypes.NewQueryServiceClient(ctx)
-			)
-
-			result, err := qsc.QueryDeposits(
-				context.Background(),
-				deposittypes.NewQueryDepositsRequest(pagination),
-			)
+			result, err := qc.QueryDeposits(pagination)
 			if err != nil {
 				return err
 			}
 
 			var (
-				items = types.NewDepositsFromRaw(result.Deposits)
+				items = types.NewDepositsFromRaw(result)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
@@ -118,8 +104,10 @@ func QueryDeposits() *cobra.Command {
 		},
 	}
 
-	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "deposits")
+
+	clitypes.AddQueryFlagsToCmd(cmd)
+	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }
