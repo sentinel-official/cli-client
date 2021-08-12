@@ -6,15 +6,13 @@ import (
 )
 
 const (
-	APIPathPrefix   = "/api/v1"
-	BuildFolderName = "build"
-	ConfigFilename  = "config.toml"
-	StatusFilename  = "status.json"
-	TokenLength     = 32
+	APIPathPrefix  = "/api/v1"
+	StatusFilename = "status.json"
+	Listen         = "127.0.0.1:11112"
 )
 
 var (
-	DefaultHomeDirectory = func() string {
+	Home = func() string {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			panic(err)

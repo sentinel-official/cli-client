@@ -9,8 +9,6 @@ import (
 	"strings"
 
 	"github.com/alessio/shellescape"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/spf13/viper"
 
 	"github.com/sentinel-official/cli-client/services/wireguard/types"
 	clienttypes "github.com/sentinel-official/cli-client/types"
@@ -23,6 +21,7 @@ var (
 type WireGuard struct {
 	cfg  *types.Config
 	info []byte
+	home string
 }
 
 func NewWireGuard() *WireGuard {
@@ -31,8 +30,8 @@ func NewWireGuard() *WireGuard {
 
 func (w *WireGuard) WithConfig(v *types.Config) *WireGuard { w.cfg = v; return w }
 func (w *WireGuard) WithInfo(v []byte) *WireGuard          { w.info = v; return w }
+func (w *WireGuard) WithHome(v string) *WireGuard          { w.home = v; return w }
 
-func (w *WireGuard) Home() string { return viper.GetString(flags.FlagHome) }
 func (w *WireGuard) Info() []byte { return w.info }
 
 func (w *WireGuard) IsUp() bool {
@@ -54,12 +53,12 @@ func (w *WireGuard) IsUp() bool {
 }
 
 func (w *WireGuard) PreUp() error {
-	return w.cfg.WriteToFile(w.Home())
+	return w.cfg.WriteToFile(w.home)
 }
 
 func (w *WireGuard) Up() error {
 	var (
-		path = filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
+		path = filepath.Join(w.home, fmt.Sprintf("%s.conf", w.cfg.Name))
 		cmd  = exec.Command("wg-quick", strings.Split(
 			fmt.Sprintf("up %s", shellescape.Quote(path)), " ")...)
 	)
@@ -74,7 +73,7 @@ func (w *WireGuard) PreDown() error { return nil }
 
 func (w *WireGuard) Down() error {
 	var (
-		path = filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
+		path = filepath.Join(w.home, fmt.Sprintf("%s.conf", w.cfg.Name))
 		cmd  = exec.Command("wg-quick", strings.Split(
 			fmt.Sprintf("down %s", shellescape.Quote(path)), " ")...)
 	)
@@ -85,7 +84,7 @@ func (w *WireGuard) Down() error {
 }
 
 func (w *WireGuard) PostDown() error {
-	path := filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
+	path := filepath.Join(w.home, fmt.Sprintf("%s.conf", w.cfg.Name))
 	if _, err := os.Stat(path); err == nil {
 		return os.Remove(path)
 	}

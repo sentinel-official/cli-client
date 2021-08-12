@@ -1,87 +1,114 @@
 package cmd
 
 import (
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/std"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
-	"github.com/sentinel-official/hub"
-	hubparams "github.com/sentinel-official/hub/params"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/sentinel-official/cli-client/context"
-	"github.com/sentinel-official/cli-client/middlewares"
-	keysrest "github.com/sentinel-official/cli-client/rest/keys"
-	servicerest "github.com/sentinel-official/cli-client/rest/service"
-	"github.com/sentinel-official/cli-client/types"
-	configtypes "github.com/sentinel-official/cli-client/types/config"
-	randutils "github.com/sentinel-official/cli-client/utils/rand"
+	restmiddlewares "github.com/sentinel-official/cli-client/rest/middlewares"
+	restmodules "github.com/sentinel-official/cli-client/rest/modules"
+	clitypes "github.com/sentinel-official/cli-client/types"
 )
 
 func StartCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start",
-		Short: "Start REST API server",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			var (
-				home       = viper.GetString(flags.FlagHome)
-				configPath = filepath.Join(home, types.ConfigFilename)
-				buildPath  = filepath.Join(home, types.BuildFolderName)
-			)
-
-			v := viper.New()
-			v.SetConfigFile(configPath)
-
-			config, err := configtypes.ReadInConfig(v)
+		Short: "Start the management server",
+		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, _ []string) error {
+			home, err := cmd.Flags().GetString(clitypes.FlagHome)
 			if err != nil {
 				return err
 			}
-			if err := config.Validate(); err != nil {
+
+			if err := os.MkdirAll(home, os.ModePerm); err != nil {
 				return err
 			}
 
-			config.Token = randutils.RandomStringHex(types.TokenLength)
-			if err := config.SaveToPath(configPath); err != nil {
+			tty, err := cmd.Flags().GetBool(clitypes.FlagTTY)
+			if err != nil {
 				return err
 			}
 
-			encoding := hubparams.MakeEncodingConfig()
-			std.RegisterInterfaces(encoding.InterfaceRegistry)
-			hub.ModuleBasics.RegisterInterfaces(encoding.InterfaceRegistry)
+			if !tty {
+				os.Stderr, os.Stdin, os.Stdout = nil, nil, nil
+			}
+
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			home, err := cmd.Flags().GetString(clitypes.FlagHome)
+			if err != nil {
+				return err
+			}
+
+			listen, err := cmd.Flags().GetString(clitypes.FlagListen)
+			if err != nil {
+				return err
+			}
+
+			withKeyring, err := cmd.Flags().GetBool(clitypes.FlagWithKeyring)
+			if err != nil {
+				return err
+			}
+
+			withService, err := cmd.Flags().GetBool(clitypes.FlagWithService)
+			if err != nil {
+				return err
+			}
 
 			var (
-				ctx = context.NewContext().
-					WithConfig(config).
-					WithEncoding(&encoding)
-
+				ctx = context.NewServiceContext().
+					WithHome(home)
 				muxRouter    = mux.NewRouter()
-				prefixRouter = muxRouter.PathPrefix(types.APIPathPrefix).Subrouter()
+				prefixRouter = muxRouter.
+					PathPrefix(clitypes.APIPathPrefix).
+					Subrouter()
 			)
 
-			muxRouter.Use(middlewares.Log)
-			muxRouter.PathPrefix("/").
-				Handler(http.FileServer(http.Dir(buildPath)))
+			muxRouter.Use(restmiddlewares.Log)
+			prefixRouter.Use(restmiddlewares.AddHeaders)
 
-			prefixRouter.Use(middlewares.AddHeaders)
-			keysrest.RegisterRoutes(prefixRouter, ctx)
-			servicerest.RegisterRoutes(prefixRouter, ctx)
+			if withKeyring {
+				restmodules.RegisterKeyring(prefixRouter, &ctx)
+			}
+			if withService {
+				restmodules.RegisterService(prefixRouter, &ctx)
+			}
+
+			if err := ioutil.WriteFile(
+				filepath.Join(home, "url.txt"),
+				[]byte("http"+"://"+listen+clitypes.APIPathPrefix),
+				os.ModePerm,
+			); err != nil {
+				return err
+			}
 
 			router := cors.New(
 				cors.Options{
-					AllowedOrigins: strings.Split(config.CORS.AllowedOrigins, ","),
-					AllowedMethods: []string{http.MethodDelete, http.MethodGet, http.MethodPost},
+					AllowedOrigins: []string{"*"},
+					AllowedMethods: []string{http.MethodPost},
 					AllowedHeaders: []string{"Content-Type"},
 				},
 			).Handler(muxRouter)
 
-			return http.ListenAndServe(config.ListenOn, router)
+			log.Printf("Listening on %s", listen)
+			return http.ListenAndServe(listen, router)
 		},
 	}
+
+	cmd.Flags().Bool(clitypes.FlagWithKeyring, false, "include the endpoints of keyring module")
+	cmd.Flags().Bool(clitypes.FlagWithService, false, "include the endpoints of service module")
+	cmd.Flags().Bool(clitypes.FlagTTY, false, "enable the standard error, input and output")
+	cmd.Flags().String(clitypes.FlagListen, clitypes.Listen, "listen address of the server")
+	cmd.Flags().String(clitypes.FlagHome, clitypes.Home, "home directory of the server")
 
 	return cmd
 }

@@ -1,7 +1,7 @@
 package keyring
 
 import (
-	"encoding/hex"
+	"encoding/base64"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 )
@@ -15,8 +15,8 @@ type Key struct {
 func NewKeyFromRaw(v keyring.Info) Key {
 	return Key{
 		Name:    v.GetName(),
-		PubKey:  hex.EncodeToString(v.GetPubKey().Bytes()),
-		Address: hex.EncodeToString(v.GetAddress().Bytes()),
+		PubKey:  base64.StdEncoding.EncodeToString(v.GetPubKey().Bytes()),
+		Address: base64.StdEncoding.EncodeToString(v.GetAddress().Bytes()),
 	}
 }
 

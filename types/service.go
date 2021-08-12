@@ -19,20 +19,16 @@ type Service interface {
 }
 
 type Status struct {
-	From  string `json:"from"`
 	ID    uint64 `json:"id"`
 	IFace string `json:"iface"`
-	To    string `json:"to"`
 }
 
 func NewStatus() *Status {
 	return &Status{}
 }
 
-func (s *Status) WithFrom(v string) *Status  { s.From = v; return s }
 func (s *Status) WithID(v uint64) *Status    { s.ID = v; return s }
 func (s *Status) WithIFace(v string) *Status { s.IFace = v; return s }
-func (s *Status) WithTo(v string) *Status    { s.To = v; return s }
 
 func (s *Status) LoadFromPath(path string) error {
 	if _, err := os.Stat(path); err != nil {
