@@ -547,5 +547,6 @@ func (c *ClientContext) SignAndBroadcastTx(password string, messages ...sdk.Msg)
 		return nil, err
 	}
 
+	res.Logs = nil
 	return res, nil
 }
