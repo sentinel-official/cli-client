@@ -2,7 +2,6 @@ package requests
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -31,15 +30,14 @@ func (r *GeyKey) Validate() error {
 		return errors.New("backend cannot be empty")
 	}
 	if r.Backend != keyring.BackendFile && r.Backend != keyring.BackendOS && r.Backend != keyring.BackendTest {
-		return fmt.Errorf("backend must be one of [%s, %s, %s]",
-			keyring.BackendFile, keyring.BackendOS, keyring.BackendTest)
+		return errors.New("backend must be either file, os, or test")
 	}
 	if r.Backend == keyring.BackendFile {
 		if r.Password == "" {
 			return errors.New("password cannot be empty")
 		}
 		if len(r.Password) < 8 {
-			return fmt.Errorf("password length cannot be less than %d", 8)
+			return errors.New("password length cannot be less than 8 characters")
 		}
 	}
 
@@ -69,22 +67,21 @@ func (r *GeyKeys) Validate() error {
 		return errors.New("backend cannot be empty")
 	}
 	if r.Backend != keyring.BackendFile && r.Backend != keyring.BackendOS && r.Backend != keyring.BackendTest {
-		return fmt.Errorf("backend must be one of [%s, %s, %s]",
-			keyring.BackendFile, keyring.BackendOS, keyring.BackendTest)
+		return errors.New("backend must be either file, os, or test")
 	}
 	if r.Backend == keyring.BackendFile {
 		if r.Password == "" {
 			return errors.New("password cannot be empty")
 		}
 		if len(r.Password) < 8 {
-			return fmt.Errorf("password length cannot be less than %d", 8)
+			return errors.New("password length cannot be less than 8 characters")
 		}
 	}
 
 	return nil
 }
 
-type SignBytes struct {
+type GenerateSignature struct {
 	Backend  string `json:"backend"`
 	Password string `json:"password"`
 
@@ -92,8 +89,8 @@ type SignBytes struct {
 	Bytes []byte `json:"bytes"`
 }
 
-func NewSignBytes(r *http.Request) (*SignBytes, error) {
-	var v SignBytes
+func NewGenerateSignature(r *http.Request) (*GenerateSignature, error) {
+	var v GenerateSignature
 	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
 		return nil, err
 	}
@@ -101,20 +98,19 @@ func NewSignBytes(r *http.Request) (*SignBytes, error) {
 	return &v, nil
 }
 
-func (r *SignBytes) Validate() error {
+func (r *GenerateSignature) Validate() error {
 	if r.Backend == "" {
 		return errors.New("backend cannot be empty")
 	}
 	if r.Backend != keyring.BackendFile && r.Backend != keyring.BackendOS && r.Backend != keyring.BackendTest {
-		return fmt.Errorf("backend must be one of [%s, %s, %s]",
-			keyring.BackendFile, keyring.BackendOS, keyring.BackendTest)
+		return errors.New("backend must be either file, os, or test")
 	}
 	if r.Backend == keyring.BackendFile {
 		if r.Password == "" {
 			return errors.New("password cannot be empty")
 		}
 		if len(r.Password) < 8 {
-			return fmt.Errorf("password length cannot be less than %d", 8)
+			return errors.New("password length cannot be less than 8 characters")
 		}
 	}
 
@@ -151,15 +147,14 @@ func (r *AddKey) Validate() error {
 		return errors.New("backend cannot be empty")
 	}
 	if r.Backend != keyring.BackendFile && r.Backend != keyring.BackendOS && r.Backend != keyring.BackendTest {
-		return fmt.Errorf("backend must be one of [%s, %s, %s]",
-			keyring.BackendFile, keyring.BackendOS, keyring.BackendTest)
+		return errors.New("backend must be either file, os, or test")
 	}
 	if r.Backend == keyring.BackendFile {
 		if r.Password == "" {
 			return errors.New("password cannot be empty")
 		}
 		if len(r.Password) < 8 {
-			return fmt.Errorf("password length cannot be less than %d", 8)
+			return errors.New("password length cannot be less than 8 characters")
 		}
 	}
 
@@ -170,7 +165,7 @@ func (r *AddKey) Validate() error {
 		return errors.New("mnemonic cannot be empty")
 	}
 	if !bip39.IsMnemonicValid(r.Mnemonic) {
-		return fmt.Errorf("invalid mnemonic %s", r.Mnemonic)
+		return errors.New("invalid mnemonic")
 	}
 
 	return nil
@@ -197,15 +192,14 @@ func (r *DeleteKey) Validate() error {
 		return errors.New("backend cannot be empty")
 	}
 	if r.Backend != keyring.BackendFile && r.Backend != keyring.BackendOS && r.Backend != keyring.BackendTest {
-		return fmt.Errorf("backend must be one of [%s, %s, %s]",
-			keyring.BackendFile, keyring.BackendOS, keyring.BackendTest)
+		return errors.New("backend must be either file, os, or test")
 	}
 	if r.Backend == keyring.BackendFile {
 		if r.Password == "" {
 			return errors.New("password cannot be empty")
 		}
 		if len(r.Password) < 8 {
-			return fmt.Errorf("password length cannot be less than %d", 8)
+			return errors.New("password length cannot be less than 8 characters")
 		}
 	}
 

@@ -2,7 +2,6 @@ package requests
 
 import (
 	"encoding/json"
-	"fmt"
 	"net"
 	"net/http"
 
@@ -38,20 +37,19 @@ func (r *Connect) Validate() error {
 		return errors.New("backend cannot be empty")
 	}
 	if r.Backend != keyring.BackendFile && r.Backend != keyring.BackendOS && r.Backend != keyring.BackendTest {
-		return fmt.Errorf("backend must be one of [%s, %s, %s]",
-			keyring.BackendFile, keyring.BackendOS, keyring.BackendTest)
+		return errors.New("backend must be either file, os, or test")
 	}
 	if r.Backend == keyring.BackendFile {
 		if r.Password == "" {
 			return errors.New("password cannot be empty")
 		}
 		if len(r.Password) < 8 {
-			return fmt.Errorf("password length cannot be less than %d", 8)
+			return errors.New("password length cannot be less than 8 characters")
 		}
 	}
 
 	if r.ID == 0 {
-		return errors.New("id cannot be zero")
+		return errors.New("id cannot be 0")
 	}
 	if r.From == "" {
 		return errors.New("from cannot be empty")
@@ -66,17 +64,17 @@ func (r *Connect) Validate() error {
 	if r.Info == nil {
 		return errors.New("info cannot be nil")
 	}
-	if len(r.Info) != 4+16+4+2+32 {
-		return fmt.Errorf("info length must be %d bytes", 4+16+4+2+32)
+	if len(r.Info) != 58 {
+		return errors.New("info length must be 58 bytes")
 	}
 	if r.Keys == nil {
 		return errors.New("keys cannot be nil")
 	}
 	if len(r.Keys) != 1 {
-		return fmt.Errorf("keys length must be %d", 1)
+		return errors.New("keys length must be 1")
 	}
 	if len(r.Keys[0]) != 32 {
-		return fmt.Errorf("key at index %d length must be %d bytes", 0, 32)
+		return errors.New("key at index 0 length must be 32 bytes")
 	}
 
 	return nil

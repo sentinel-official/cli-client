@@ -315,15 +315,15 @@ func (c *ClientContext) DeleteKey(password, name string) error {
 	return nil
 }
 
-func (c *ClientContext) SignBytes(password, name string, data []byte) (*restresponses.SignBytes, error) {
+func (c *ClientContext) GenerateSignature(password, name string, data []byte) (*restresponses.GenerateSignature, error) {
 	var (
 		resp     resttypes.Response
-		result   restresponses.SignBytes
-		endpoint = c.KeyringURL + restroutes.SignBytes
+		result   restresponses.GenerateSignature
+		endpoint = c.KeyringURL + restroutes.GenerateSignature
 	)
 
 	buf, err := json.Marshal(
-		&restrequests.SignBytes{
+		&restrequests.GenerateSignature{
 			Backend:  c.KeyringBackend,
 			Password: password,
 			Name:     name,
@@ -518,7 +518,7 @@ func (c *ClientContext) SignAndBroadcastTx(password string, messages ...sdk.Msg)
 		return nil, err
 	}
 
-	result, err := c.SignBytes(password, c.From, buf)
+	result, err := c.GenerateSignature(password, c.From, buf)
 	if err != nil {
 		return nil, err
 	}

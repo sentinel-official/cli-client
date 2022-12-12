@@ -20,9 +20,9 @@ func RegisterKeyring(r *mux.Router, ctx *context.ServerContext) {
 	r.Name(routes.AddKey).
 		Methods(http.MethodPost).Path(routes.AddKey).
 		HandlerFunc(handlers.AddKey(ctx))
-	r.Name(routes.SignBytes).
-		Methods(http.MethodPost).Path(routes.SignBytes).
-		HandlerFunc(handlers.SignBytes(ctx))
+	r.Name(routes.GenerateSignature).
+		Methods(http.MethodPost).Path(routes.GenerateSignature).
+		HandlerFunc(handlers.GenerateSignature(ctx))
 	r.Name(routes.Delete).
 		Methods(http.MethodPost).Path(routes.Delete).
 		HandlerFunc(handlers.DeleteKey(ctx))

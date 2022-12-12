@@ -179,9 +179,9 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 	}
 }
 
-func SignBytes(ctx *context.ServerContext) http.HandlerFunc {
+func GenerateSignature(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		req, err := restrequests.NewSignBytes(r)
+		req, err := restrequests.NewGenerateSignature(r)
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
@@ -221,7 +221,7 @@ func SignBytes(ctx *context.ServerContext) http.HandlerFunc {
 		}
 
 		restutils.WriteResultToResponse(w, http.StatusOK,
-			&restresponses.SignBytes{
+			&restresponses.GenerateSignature{
 				PubKey:    base64.StdEncoding.EncodeToString(pubKey.Bytes()),
 				Signature: base64.StdEncoding.EncodeToString(signature),
 			},
