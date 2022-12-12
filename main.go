@@ -23,7 +23,7 @@ func main() {
 			var (
 				config = hub.MakeEncodingConfig()
 				ctx    = client.Context{}.
-					WithJSONMarshaler(config.Marshaler).
+					WithCodec(config.Marshaler).
 					WithInterfaceRegistry(config.InterfaceRegistry).
 					WithTxConfig(config.TxConfig).
 					WithLegacyAmino(config.Amino)

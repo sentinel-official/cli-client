@@ -288,25 +288,6 @@ func (c *QueryContext) QuerySessions(pagination *query.PageRequest) (sessiontype
 	return result.Sessions, nil
 }
 
-func (c *QueryContext) QuerySessionsForSubscription(id uint64, pagination *query.PageRequest) (sessiontypes.Sessions, error) {
-	var (
-		qsc         = sessiontypes.NewQueryServiceClient(c)
-		result, err = qsc.QuerySessionsForSubscription(
-			context.Background(),
-			sessiontypes.NewQuerySessionsForSubscriptionRequest(
-				id,
-				pagination,
-			),
-		)
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Sessions, nil
-}
-
 func (c *QueryContext) QuerySessionsForAddress(address sdk.AccAddress, status hubtypes.Status, pagination *query.PageRequest) (sessiontypes.Sessions, error) {
 	var (
 		qsc         = sessiontypes.NewQueryServiceClient(c)
@@ -371,25 +352,6 @@ func (c *QueryContext) QuerySubscriptionsForAddress(address sdk.AccAddress, stat
 			subscriptiontypes.NewQuerySubscriptionsForAddressRequest(
 				address,
 				status,
-				pagination,
-			),
-		)
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Subscriptions, nil
-}
-
-func (c *QueryContext) QuerySubscriptionsForPlan(id uint64, pagination *query.PageRequest) (subscriptiontypes.Subscriptions, error) {
-	var (
-		qsc         = subscriptiontypes.NewQueryServiceClient(c)
-		result, err = qsc.QuerySubscriptionsForPlan(
-			context.Background(),
-			subscriptiontypes.NewQuerySubscriptionsForPlanRequest(
-				id,
 				pagination,
 			),
 		)

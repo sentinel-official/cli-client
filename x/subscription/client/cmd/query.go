@@ -105,11 +105,6 @@ func QuerySubscriptions() *cobra.Command {
 				return err
 			}
 
-			plan, err := cmd.Flags().GetUint64(flagPlan)
-			if err != nil {
-				return err
-			}
-
 			status, err := cmd.Flags().GetString(flagStatus)
 			if err != nil {
 				return err
@@ -133,16 +128,6 @@ func QuerySubscriptions() *cobra.Command {
 				result, err := qc.QuerySubscriptionsForAddress(
 					address,
 					hubtypes.StatusFromString(status),
-					pagination,
-				)
-				if err != nil {
-					return err
-				}
-
-				items = append(items, types.NewSubscriptionsFromRaw(result)...)
-			} else if plan != 0 {
-				result, err := qc.QuerySubscriptionsForPlan(
-					plan,
 					pagination,
 				)
 				if err != nil {
@@ -190,7 +175,6 @@ func QuerySubscriptions() *cobra.Command {
 	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	cmd.Flags().String(flagAddress, "", "filter with account address")
-	cmd.Flags().Uint64(flagPlan, 0, "filter with plan identity")
 	cmd.Flags().String(flagStatus, "Active", "filter with status (Active|Inactive)")
 
 	return cmd

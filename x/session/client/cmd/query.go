@@ -89,11 +89,6 @@ func QuerySessions() *cobra.Command {
 				return err
 			}
 
-			subscription, err := cmd.Flags().GetUint64(flagSubscription)
-			if err != nil {
-				return err
-			}
-
 			bech32Address, err := cmd.Flags().GetString(flagAddress)
 			if err != nil {
 				return err
@@ -108,17 +103,7 @@ func QuerySessions() *cobra.Command {
 				items types.Sessions
 			)
 
-			if subscription != 0 {
-				result, err := qc.QuerySessionsForSubscription(
-					subscription,
-					pagination,
-				)
-				if err != nil {
-					return err
-				}
-
-				items = append(items, types.NewSessionsFromRaw(result)...)
-			} else if bech32Address != "" {
+			if bech32Address != "" {
 				address, err := sdk.AccAddressFromBech32(bech32Address)
 				if err != nil {
 					return err
@@ -178,7 +163,6 @@ func QuerySessions() *cobra.Command {
 	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	cmd.Flags().String(flagAddress, "", "filter with account address")
-	cmd.Flags().Uint64(flagSubscription, 0, "filter with subscription identity")
 	cmd.Flags().String(flagStatus, "Active", "filter with status (Active|Inactive)")
 
 	return cmd
