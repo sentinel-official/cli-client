@@ -25,7 +25,7 @@ VERSION=$(
 
 FILE_NAME="sentinelcli-${VERSION}-${OS}-amd64"
 FILE_PATH="$(mktemp -d)/${FILE_NAME}"
-ASSET_URL="https://github.com/sentinel-official/cli-client/releases/download/v${VERSION}/${FILE_NAME}"
+ASSET_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/v${VERSION}/${FILE_NAME}"
 
 curl --location --output "${FILE_PATH}" "${ASSET_URL}"
 chmod +x "${FILE_PATH}" &&
