@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 )
 
@@ -18,24 +17,24 @@ type Service interface {
 	Transfer() (int64, int64, error)
 }
 
-type Status struct {
+type ServiceStatus struct {
 	ID    uint64 `json:"id"`
 	IFace string `json:"iface"`
 }
 
-func NewStatus() *Status {
-	return &Status{}
+func NewServiceStatus() *ServiceStatus {
+	return &ServiceStatus{}
 }
 
-func (s *Status) WithID(v uint64) *Status    { s.ID = v; return s }
-func (s *Status) WithIFace(v string) *Status { s.IFace = v; return s }
+func (s *ServiceStatus) WithID(v uint64) *ServiceStatus    { s.ID = v; return s }
+func (s *ServiceStatus) WithIFace(v string) *ServiceStatus { s.IFace = v; return s }
 
-func (s *Status) LoadFromPath(path string) error {
+func (s *ServiceStatus) LoadFromPath(path string) error {
 	if _, err := os.Stat(path); err != nil {
 		return nil
 	}
 
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -46,11 +45,11 @@ func (s *Status) LoadFromPath(path string) error {
 	return json.Unmarshal(data, s)
 }
 
-func (s *Status) SaveToPath(path string) error {
+func (s *ServiceStatus) SaveToPath(path string) error {
 	bytes, err := json.Marshal(s)
 	if err != nil {
 		return err
 	}
 
-	return ioutil.WriteFile(path, bytes, 0600)
+	return os.WriteFile(path, bytes, 0600)
 }

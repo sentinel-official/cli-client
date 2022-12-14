@@ -357,10 +357,10 @@ func (c *ClientContext) GenerateSignature(password, name string, data []byte) (*
 	return &result, nil
 }
 
-func (c *ClientContext) GetStatus() (*clitypes.Status, error) {
+func (c *ClientContext) GetStatus() (*clitypes.ServiceStatus, error) {
 	var (
 		resp     resttypes.Response
-		result   clitypes.Status
+		result   clitypes.ServiceStatus
 		endpoint = c.ServiceURL + restroutes.GetStatus
 	)
 

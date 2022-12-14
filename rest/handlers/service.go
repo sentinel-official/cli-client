@@ -22,7 +22,7 @@ import (
 func Connect(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var (
-			status         = clitypes.NewStatus()
+			status         = clitypes.NewServiceStatus()
 			statusFilePath = filepath.Join(ctx.Home(), clitypes.StatusFilename)
 		)
 
@@ -121,7 +121,7 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 				WithHome(ctx.Home())
 		)
 
-		status = clitypes.NewStatus().
+		status = clitypes.NewServiceStatus().
 			WithID(req.ID).
 			WithIFace(wireGuardConfig.Name)
 
@@ -162,7 +162,7 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 func Disconnect(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var (
-			status         = clitypes.NewStatus()
+			status         = clitypes.NewServiceStatus()
 			statusFilePath = filepath.Join(ctx.Home(), clitypes.StatusFilename)
 		)
 
@@ -225,7 +225,7 @@ func Disconnect(ctx *context.ServerContext) http.HandlerFunc {
 func GetStatus(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var (
-			status         = clitypes.NewStatus()
+			status         = clitypes.NewServiceStatus()
 			statusFilePath = filepath.Join(ctx.Home(), clitypes.StatusFilename)
 		)
 
