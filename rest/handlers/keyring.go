@@ -14,7 +14,6 @@ import (
 	restrequests "github.com/sentinel-official/cli-client/rest/requests"
 	restresponses "github.com/sentinel-official/cli-client/rest/responses"
 	keyringtypes "github.com/sentinel-official/cli-client/types"
-	resttypes "github.com/sentinel-official/cli-client/types/rest"
 	restutils "github.com/sentinel-official/cli-client/utils/rest"
 )
 
@@ -24,14 +23,14 @@ func GetKey(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1001, err.Error()),
+				keyringtypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1002, err.Error()),
+				keyringtypes.NewRestError(1002, err.Error()),
 			)
 			return
 		}
@@ -45,7 +44,7 @@ func GetKey(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1003, err.Error()),
+				keyringtypes.NewRestError(1003, err.Error()),
 			)
 			return
 		}
@@ -54,7 +53,7 @@ func GetKey(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1004, err.Error()),
+				keyringtypes.NewRestError(1004, err.Error()),
 			)
 			return
 		}
@@ -70,14 +69,14 @@ func GetKeys(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1001, err.Error()),
+				keyringtypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1002, err.Error()),
+				keyringtypes.NewRestError(1002, err.Error()),
 			)
 			return
 		}
@@ -91,7 +90,7 @@ func GetKeys(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1003, err.Error()),
+				keyringtypes.NewRestError(1003, err.Error()),
 			)
 			return
 		}
@@ -100,7 +99,7 @@ func GetKeys(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1004, err.Error()),
+				keyringtypes.NewRestError(1004, err.Error()),
 			)
 			return
 		}
@@ -116,14 +115,14 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1001, err.Error()),
+				keyringtypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1002, err.Error()),
+				keyringtypes.NewRestError(1002, err.Error()),
 			)
 			return
 		}
@@ -137,7 +136,7 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1003, err.Error()),
+				keyringtypes.NewRestError(1003, err.Error()),
 			)
 			return
 		}
@@ -146,7 +145,7 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 		if key != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusConflict,
-				resttypes.NewError(1004, fmt.Sprintf("key with name %s already exists", req.Name)),
+				keyringtypes.NewRestError(1004, fmt.Sprintf("key with name %s already exists", req.Name)),
 			)
 			return
 		}
@@ -160,7 +159,7 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1005, err.Error()),
+				keyringtypes.NewRestError(1005, err.Error()),
 			)
 			return
 		}
@@ -169,7 +168,7 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1006, err.Error()),
+				keyringtypes.NewRestError(1006, err.Error()),
 			)
 			return
 		}
@@ -185,14 +184,14 @@ func GenerateSignature(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1001, err.Error()),
+				keyringtypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1002, err.Error()),
+				keyringtypes.NewRestError(1002, err.Error()),
 			)
 			return
 		}
@@ -206,7 +205,7 @@ func GenerateSignature(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1003, err.Error()),
+				keyringtypes.NewRestError(1003, err.Error()),
 			)
 			return
 		}
@@ -215,7 +214,7 @@ func GenerateSignature(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1004, err.Error()),
+				keyringtypes.NewRestError(1004, err.Error()),
 			)
 			return
 		}
@@ -235,14 +234,14 @@ func DeleteKey(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1001, err.Error()),
+				keyringtypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1002, err.Error()),
+				keyringtypes.NewRestError(1002, err.Error()),
 			)
 			return
 		}
@@ -256,7 +255,7 @@ func DeleteKey(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1003, err.Error()),
+				keyringtypes.NewRestError(1003, err.Error()),
 			)
 			return
 		}
@@ -264,7 +263,7 @@ func DeleteKey(ctx *context.ServerContext) http.HandlerFunc {
 		if err := kr.Delete(req.Name); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1004, err.Error()),
+				keyringtypes.NewRestError(1004, err.Error()),
 			)
 			return
 		}

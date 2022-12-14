@@ -19,7 +19,6 @@ import (
 	"github.com/sentinel-official/cli-client/context"
 	wireguardtypes "github.com/sentinel-official/cli-client/services/wireguard/types"
 	clitypes "github.com/sentinel-official/cli-client/types"
-	resttypes "github.com/sentinel-official/cli-client/types/rest"
 )
 
 func parseResolversFromCmd(cmd *cobra.Command) ([]net.IP, error) {
@@ -158,7 +157,7 @@ func ConnectCmd() *cobra.Command {
 			}
 
 			var (
-				resp     resttypes.Response
+				resp     clitypes.RestResponse
 				endpoint = fmt.Sprintf(
 					"%s/accounts/%s/sessions/%d",
 					strings.Trim(node.RemoteURL, "/"), from, session.Id,

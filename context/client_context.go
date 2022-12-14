@@ -22,7 +22,6 @@ import (
 	restresponses "github.com/sentinel-official/cli-client/rest/responses"
 	restroutes "github.com/sentinel-official/cli-client/rest/routes"
 	clitypes "github.com/sentinel-official/cli-client/types"
-	resttypes "github.com/sentinel-official/cli-client/types/rest"
 	fileutils "github.com/sentinel-official/cli-client/utils/file"
 	keyringutils "github.com/sentinel-official/cli-client/utils/keyring"
 )
@@ -157,7 +156,7 @@ func (c *ClientContext) GetAddress(password, name string) (sdk.AccAddress, error
 
 func (c *ClientContext) GetKeys(password string) (clitypes.Keys, error) {
 	var (
-		resp     resttypes.Response
+		resp     clitypes.RestResponse
 		result   clitypes.Keys
 		endpoint = c.KeyringURL + restroutes.GetKeys
 	)
@@ -197,7 +196,7 @@ func (c *ClientContext) GetKeys(password string) (clitypes.Keys, error) {
 
 func (c *ClientContext) GetKey(password, name string) (*clitypes.Key, error) {
 	var (
-		resp     resttypes.Response
+		resp     clitypes.RestResponse
 		result   clitypes.Key
 		endpoint = c.KeyringURL + restroutes.GetKey
 	)
@@ -238,7 +237,7 @@ func (c *ClientContext) GetKey(password, name string) (*clitypes.Key, error) {
 
 func (c *ClientContext) AddKey(password, name, mnemonic, bip39Password string, coinType, account, index uint32) (*clitypes.Key, error) {
 	var (
-		resp     resttypes.Response
+		resp     clitypes.RestResponse
 		result   clitypes.Key
 		endpoint = c.KeyringURL + restroutes.AddKey
 	)
@@ -284,7 +283,7 @@ func (c *ClientContext) AddKey(password, name, mnemonic, bip39Password string, c
 
 func (c *ClientContext) DeleteKey(password, name string) error {
 	var (
-		resp     resttypes.Response
+		resp     clitypes.RestResponse
 		endpoint = c.KeyringURL + restroutes.Delete
 	)
 
@@ -316,7 +315,7 @@ func (c *ClientContext) DeleteKey(password, name string) error {
 
 func (c *ClientContext) GenerateSignature(password, name string, data []byte) (*restresponses.GenerateSignature, error) {
 	var (
-		resp     resttypes.Response
+		resp     clitypes.RestResponse
 		result   restresponses.GenerateSignature
 		endpoint = c.KeyringURL + restroutes.GenerateSignature
 	)
@@ -358,7 +357,7 @@ func (c *ClientContext) GenerateSignature(password, name string, data []byte) (*
 
 func (c *ClientContext) GetStatus() (*clitypes.ServiceStatus, error) {
 	var (
-		resp     resttypes.Response
+		resp     clitypes.RestResponse
 		result   clitypes.ServiceStatus
 		endpoint = c.ServiceURL + restroutes.GetStatus
 	)
@@ -388,7 +387,7 @@ func (c *ClientContext) GetStatus() (*clitypes.ServiceStatus, error) {
 
 func (c *ClientContext) Connect(password, from, to string, id uint64, info []byte, keys [][]byte, resolvers []net.IP) error {
 	var (
-		resp     resttypes.Response
+		resp     clitypes.RestResponse
 		endpoint = c.ServiceURL + restroutes.Connect
 	)
 
@@ -425,7 +424,7 @@ func (c *ClientContext) Connect(password, from, to string, id uint64, info []byt
 
 func (c *ClientContext) Disconnect() error {
 	var (
-		resp     resttypes.Response
+		resp     clitypes.RestResponse
 		endpoint = c.ServiceURL + restroutes.Disconnect
 	)
 

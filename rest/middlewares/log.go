@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"time"
 
-	resttypes "github.com/sentinel-official/cli-client/types/rest"
+	clitypes "github.com/sentinel-official/cli-client/types"
 )
 
 func Log(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			var (
-				rw    = resttypes.NewResponseWriter(w)
+				rw    = clitypes.NewRestResponseWriter(w)
 				start = time.Now()
 			)
 

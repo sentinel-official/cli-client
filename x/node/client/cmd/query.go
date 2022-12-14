@@ -18,7 +18,6 @@ import (
 
 	"github.com/sentinel-official/cli-client/context"
 	clitypes "github.com/sentinel-official/cli-client/types"
-	resttypes "github.com/sentinel-official/cli-client/types/rest"
 	"github.com/sentinel-official/cli-client/x/node/types"
 )
 
@@ -40,7 +39,7 @@ var (
 
 func fetchNodeInfo(remote string, timeout time.Duration) (info types.Info, err error) {
 	var (
-		body       resttypes.Response
+		body       clitypes.RestResponse
 		endpoint   = strings.Trim(remote, "/") + "/status"
 		httpclient = &http.Client{
 			Transport: &http.Transport{

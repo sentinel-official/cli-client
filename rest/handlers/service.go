@@ -14,7 +14,6 @@ import (
 	"github.com/sentinel-official/cli-client/services/wireguard"
 	wireguardtypes "github.com/sentinel-official/cli-client/services/wireguard/types"
 	clitypes "github.com/sentinel-official/cli-client/types"
-	resttypes "github.com/sentinel-official/cli-client/types/rest"
 	netutils "github.com/sentinel-official/cli-client/utils/net"
 	restutils "github.com/sentinel-official/cli-client/utils/rest"
 )
@@ -30,14 +29,14 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1001, err.Error()),
+				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				resttypes.NewError(1002, err.Error()),
+				clitypes.NewRestError(1002, err.Error()),
 			)
 			return
 		}
@@ -45,7 +44,7 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 		if err := status.LoadFromPath(statusFilePath); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1003, err.Error()),
+				clitypes.NewRestError(1003, err.Error()),
 			)
 			return
 		}
@@ -64,7 +63,7 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 			if service.IsUp() {
 				restutils.WriteErrorToResponse(
 					w, http.StatusBadRequest,
-					resttypes.NewError(1004, fmt.Sprintf("service is already running on interface %s", status.IFace)),
+					clitypes.NewRestError(1004, fmt.Sprintf("service is already running on interface %s", status.IFace)),
 				)
 				return
 			}
@@ -74,7 +73,7 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 		if err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1007, err.Error()),
+				clitypes.NewRestError(1007, err.Error()),
 			)
 			return
 		}
@@ -128,7 +127,7 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 		if err := status.SaveToPath(statusFilePath); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1008, err.Error()),
+				clitypes.NewRestError(1008, err.Error()),
 			)
 			return
 		}
@@ -136,21 +135,21 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 		if err := service.PreUp(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1009, err.Error()),
+				clitypes.NewRestError(1009, err.Error()),
 			)
 			return
 		}
 		if err := service.Up(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1010, err.Error()),
+				clitypes.NewRestError(1010, err.Error()),
 			)
 			return
 		}
 		if err := service.PostUp(); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1011, err.Error()),
+				clitypes.NewRestError(1011, err.Error()),
 			)
 			return
 		}
@@ -169,7 +168,7 @@ func Disconnect(ctx *context.ServerContext) http.HandlerFunc {
 		if err := status.LoadFromPath(statusFilePath); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1001, err.Error()),
+				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
@@ -189,21 +188,21 @@ func Disconnect(ctx *context.ServerContext) http.HandlerFunc {
 				if err := service.PreDown(); err != nil {
 					restutils.WriteErrorToResponse(
 						w, http.StatusInternalServerError,
-						resttypes.NewError(1002, err.Error()),
+						clitypes.NewRestError(1002, err.Error()),
 					)
 					return
 				}
 				if err := service.Down(); err != nil {
 					restutils.WriteErrorToResponse(
 						w, http.StatusInternalServerError,
-						resttypes.NewError(1003, err.Error()),
+						clitypes.NewRestError(1003, err.Error()),
 					)
 					return
 				}
 				if err := service.PostDown(); err != nil {
 					restutils.WriteErrorToResponse(
 						w, http.StatusInternalServerError,
-						resttypes.NewError(1004, err.Error()),
+						clitypes.NewRestError(1004, err.Error()),
 					)
 					return
 				}
@@ -213,7 +212,7 @@ func Disconnect(ctx *context.ServerContext) http.HandlerFunc {
 		if err := os.Remove(statusFilePath); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1005, err.Error()),
+				clitypes.NewRestError(1005, err.Error()),
 			)
 			return
 		}
@@ -232,7 +231,7 @@ func GetStatus(ctx *context.ServerContext) http.HandlerFunc {
 		if err := status.LoadFromPath(statusFilePath); err != nil {
 			restutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				resttypes.NewError(1001, err.Error()),
+				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
@@ -253,7 +252,7 @@ func GetStatus(ctx *context.ServerContext) http.HandlerFunc {
 				if err != nil {
 					restutils.WriteErrorToResponse(
 						w, http.StatusInternalServerError,
-						resttypes.NewError(1002, err.Error()),
+						clitypes.NewRestError(1002, err.Error()),
 					)
 					return
 				}

@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"net/http"
 
-	resttypes "github.com/sentinel-official/cli-client/types/rest"
+	clitypes "github.com/sentinel-official/cli-client/types"
 )
 
-func write(w http.ResponseWriter, status int, resp *resttypes.Response) error {
+func write(w http.ResponseWriter, status int, resp *clitypes.RestResponse) error {
 	w.WriteHeader(status)
 	return json.NewEncoder(w).Encode(resp)
 }
 
-func WriteErrorToResponse(w http.ResponseWriter, status int, result *resttypes.Error) {
+func WriteErrorToResponse(w http.ResponseWriter, status int, result *clitypes.RestError) {
 	_ = write(
 		w,
 		status,
-		resttypes.NewResponse(
+		clitypes.NewRestResponse(
 			result,
 			nil,
 		),
@@ -27,7 +27,7 @@ func WriteResultToResponse(w http.ResponseWriter, status int, result interface{}
 	_ = write(
 		w,
 		status,
-		resttypes.NewResponse(
+		clitypes.NewRestResponse(
 			nil,
 			result,
 		),
