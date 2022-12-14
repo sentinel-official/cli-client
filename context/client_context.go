@@ -22,7 +22,6 @@ import (
 	restresponses "github.com/sentinel-official/cli-client/rest/responses"
 	restroutes "github.com/sentinel-official/cli-client/rest/routes"
 	clitypes "github.com/sentinel-official/cli-client/types"
-	keyringtypes "github.com/sentinel-official/cli-client/types/keyring"
 	resttypes "github.com/sentinel-official/cli-client/types/rest"
 	fileutils "github.com/sentinel-official/cli-client/utils/file"
 	keyringutils "github.com/sentinel-official/cli-client/utils/keyring"
@@ -156,10 +155,10 @@ func (c *ClientContext) GetAddress(password, name string) (sdk.AccAddress, error
 	return address, nil
 }
 
-func (c *ClientContext) GetKeys(password string) (keyringtypes.Keys, error) {
+func (c *ClientContext) GetKeys(password string) (clitypes.Keys, error) {
 	var (
 		resp     resttypes.Response
-		result   keyringtypes.Keys
+		result   clitypes.Keys
 		endpoint = c.KeyringURL + restroutes.GetKeys
 	)
 
@@ -196,10 +195,10 @@ func (c *ClientContext) GetKeys(password string) (keyringtypes.Keys, error) {
 	return result, nil
 }
 
-func (c *ClientContext) GetKey(password, name string) (*keyringtypes.Key, error) {
+func (c *ClientContext) GetKey(password, name string) (*clitypes.Key, error) {
 	var (
 		resp     resttypes.Response
-		result   keyringtypes.Key
+		result   clitypes.Key
 		endpoint = c.KeyringURL + restroutes.GetKey
 	)
 
@@ -237,10 +236,10 @@ func (c *ClientContext) GetKey(password, name string) (*keyringtypes.Key, error)
 	return &result, nil
 }
 
-func (c *ClientContext) AddKey(password, name, mnemonic, bip39Password string, coinType, account, index uint32) (*keyringtypes.Key, error) {
+func (c *ClientContext) AddKey(password, name, mnemonic, bip39Password string, coinType, account, index uint32) (*clitypes.Key, error) {
 	var (
 		resp     resttypes.Response
-		result   keyringtypes.Key
+		result   clitypes.Key
 		endpoint = c.KeyringURL + restroutes.AddKey
 	)
 

@@ -13,7 +13,7 @@ import (
 	"github.com/sentinel-official/cli-client/context"
 	restrequests "github.com/sentinel-official/cli-client/rest/requests"
 	restresponses "github.com/sentinel-official/cli-client/rest/responses"
-	keyringtypes "github.com/sentinel-official/cli-client/types/keyring"
+	keyringtypes "github.com/sentinel-official/cli-client/types"
 	resttypes "github.com/sentinel-official/cli-client/types/rest"
 	restutils "github.com/sentinel-official/cli-client/utils/rest"
 )

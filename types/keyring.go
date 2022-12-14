@@ -1,4 +1,4 @@
-package keyring
+package types
 
 import (
 	"encoding/base64"
