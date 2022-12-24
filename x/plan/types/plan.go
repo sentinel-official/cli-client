@@ -5,24 +5,24 @@ import (
 
 	plantypes "github.com/sentinel-official/hub/x/plan/types"
 
-	clienttypes "github.com/sentinel-official/cli-client/types"
+	clitypes "github.com/sentinel-official/cli-client/types"
 )
 
 type Plan struct {
-	ID       uint64            `json:"id"`
-	Provider string            `json:"provider"`
-	Price    clienttypes.Coins `json:"price"`
-	Validity time.Duration     `json:"validity"`
-	Bytes    int64             `json:"bytes"`
-	Status   string            `json:"status"`
-	StatusAt time.Time         `json:"status_at"`
+	ID       uint64         `json:"id"`
+	Provider string         `json:"provider"`
+	Price    clitypes.Coins `json:"price"`
+	Validity time.Duration  `json:"validity"`
+	Bytes    int64          `json:"bytes"`
+	Status   string         `json:"status"`
+	StatusAt time.Time      `json:"status_at"`
 }
 
 func NewPlanFromRaw(v *plantypes.Plan) Plan {
 	return Plan{
 		ID:       v.Id,
 		Provider: v.Provider,
-		Price:    clienttypes.NewCoinsFromRaw(v.Price),
+		Price:    clitypes.NewCoinsFromRaw(v.Price),
 		Validity: v.Validity,
 		Bytes:    v.Bytes.Int64(),
 		Status:   v.Status.String(),

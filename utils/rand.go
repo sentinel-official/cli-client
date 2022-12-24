@@ -1,11 +1,11 @@
-package rand
+package utils
 
 import (
 	"crypto/rand"
 	"encoding/base64"
 )
 
-func RandomStringHex(l int) string {
+func RandomHexString(l int) string {
 	v := make([]byte, l)
 	_, _ = rand.Read(v)
 

@@ -22,8 +22,7 @@ import (
 	restresponses "github.com/sentinel-official/cli-client/rest/responses"
 	restroutes "github.com/sentinel-official/cli-client/rest/routes"
 	clitypes "github.com/sentinel-official/cli-client/types"
-	fileutils "github.com/sentinel-official/cli-client/utils/file"
-	keyringutils "github.com/sentinel-official/cli-client/utils/keyring"
+	cliutils "github.com/sentinel-official/cli-client/utils"
 )
 
 func PrepareHTTPClientFromCmd(cmd *cobra.Command) (c http.Client, err error) {
@@ -73,7 +72,7 @@ func NewClientContextFromCmd(cmd *cobra.Command) (ctx ClientContext, err error) 
 		return ctx, err
 	}
 
-	ctx.KeyringURL, err = fileutils.ReadLine(filepath.Join(ctx.KeyringHome, "url.txt"))
+	ctx.KeyringURL, err = cliutils.ReadLineFromFile(filepath.Join(ctx.KeyringHome, "url.txt"))
 	if err != nil {
 		return ctx, err
 	}
@@ -83,7 +82,7 @@ func NewClientContextFromCmd(cmd *cobra.Command) (ctx ClientContext, err error) 
 		return ctx, err
 	}
 
-	ctx.ServiceURL, err = fileutils.ReadLine(filepath.Join(ctx.ServiceHome, "url.txt"))
+	ctx.ServiceURL, err = cliutils.ReadLineFromFile(filepath.Join(ctx.ServiceHome, "url.txt"))
 	if err != nil {
 		return ctx, err
 	}
@@ -127,7 +126,7 @@ func (c ClientContext) WithServiceURL(v string) ClientContext {
 }
 
 func (c *ClientContext) ReadPasswordAndGetAddress(r *bufio.Reader, name string) (string, sdk.AccAddress, error) {
-	password, err := keyringutils.ReadPassword(c.KeyringBackend, r)
+	password, err := cliutils.ReadPassword(c.KeyringBackend, r)
 	if err != nil {
 		return "", nil, err
 	}
@@ -313,19 +312,19 @@ func (c *ClientContext) DeleteKey(password, name string) error {
 	return nil
 }
 
-func (c *ClientContext) GenerateSignature(password, name string, data []byte) (*restresponses.GenerateSignature, error) {
+func (c *ClientContext) SignMessage(password, name string, msg []byte) (*restresponses.SignMessage, error) {
 	var (
 		resp     clitypes.RestResponse
-		result   restresponses.GenerateSignature
-		endpoint = c.KeyringURL + restroutes.GenerateSignature
+		result   restresponses.SignMessage
+		endpoint = c.KeyringURL + restroutes.SignMessage
 	)
 
 	buf, err := json.Marshal(
-		&restrequests.GenerateSignature{
+		&restrequests.SignMessage{
 			Backend:  c.KeyringBackend,
 			Password: password,
 			Name:     name,
-			Bytes:    data,
+			Message:  msg,
 		},
 	)
 	if err != nil {
@@ -516,7 +515,7 @@ func (c *ClientContext) SignAndBroadcastTx(password string, messages ...sdk.Msg)
 		return nil, err
 	}
 
-	result, err := c.GenerateSignature(password, c.From, buf)
+	result, err := c.SignMessage(password, c.From, buf)
 	if err != nil {
 		return nil, err
 	}

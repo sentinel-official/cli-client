@@ -12,7 +12,6 @@ import (
 
 	"github.com/sentinel-official/cli-client/context"
 	clitypes "github.com/sentinel-official/cli-client/types"
-	netutils "github.com/sentinel-official/cli-client/utils/net"
 	"github.com/sentinel-official/cli-client/x/plan/types"
 )
 
@@ -59,7 +58,7 @@ func QueryPlan() *cobra.Command {
 					fmt.Sprintf("%d", item.ID),
 					item.Provider,
 					item.Price.Raw().String(),
-					netutils.ToReadable(item.Bytes, 2),
+					clitypes.ToReadableBytes(item.Bytes, 2),
 					item.Validity.String(),
 					item.Status,
 				},
@@ -143,7 +142,7 @@ func QueryPlans() *cobra.Command {
 						fmt.Sprintf("%d", items[i].ID),
 						items[i].Provider,
 						items[i].Price.Raw().String(),
-						netutils.ToReadable(items[i].Bytes, 2),
+						clitypes.ToReadableBytes(items[i].Bytes, 2),
 						items[i].Validity.String(),
 						items[i].Status,
 					},

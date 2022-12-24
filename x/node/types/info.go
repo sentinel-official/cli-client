@@ -3,7 +3,7 @@ package types
 import (
 	"time"
 
-	clienttypes "github.com/sentinel-official/cli-client/types"
+	clitypes "github.com/sentinel-official/cli-client/types"
 )
 
 type (
@@ -21,20 +21,20 @@ type (
 
 type (
 	Info struct {
-		Address                string                `json:"address"`
-		Bandwidth              clienttypes.Bandwidth `json:"bandwidth"`
-		Handshake              Handshake             `json:"handshake"`
-		IntervalSetSessions    time.Duration         `json:"interval_set_sessions"`
-		IntervalUpdateSessions time.Duration         `json:"interval_update_sessions"`
-		IntervalUpdateStatus   time.Duration         `json:"interval_update_status"`
-		Latency                time.Duration         `json:"latency"`
-		Location               Location              `json:"location"`
-		Moniker                string                `json:"moniker"`
-		Operator               string                `json:"operator"`
-		Peers                  int                   `json:"peers"`
-		Price                  string                `json:"price"`
-		Provider               string                `json:"provider"`
-		Type                   uint64                `json:"type"`
-		Version                string                `json:"version"`
+		Address                string             `json:"address"`
+		Bandwidth              clitypes.Bandwidth `json:"bandwidth"`
+		Handshake              Handshake          `json:"handshake"`
+		IntervalSetSessions    time.Duration      `json:"interval_set_sessions"`
+		IntervalUpdateSessions time.Duration      `json:"interval_update_sessions"`
+		IntervalUpdateStatus   time.Duration      `json:"interval_update_status"`
+		Latency                time.Duration      `json:"latency"`
+		Location               Location           `json:"location"`
+		Moniker                string             `json:"moniker"`
+		Operator               string             `json:"operator"`
+		Peers                  int                `json:"peers"`
+		Price                  string             `json:"price"`
+		Provider               string             `json:"provider"`
+		Type                   uint64             `json:"type"`
+		Version                string             `json:"version"`
 	}
 )

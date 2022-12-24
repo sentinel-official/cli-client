@@ -1,8 +1,7 @@
-package process
+package utils
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -11,7 +10,7 @@ import (
 )
 
 func ReadPID(path string) (int, error) {
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return 0, err
 	}

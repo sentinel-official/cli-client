@@ -1,4 +1,4 @@
-package keyring
+package utils
 
 import (
 	"bufio"

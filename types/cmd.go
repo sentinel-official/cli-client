@@ -3,6 +3,7 @@ package types
 import (
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/spf13/cobra"
 )
@@ -39,10 +40,10 @@ const (
 )
 
 func AddFlagsToCmd(cmd *cobra.Command) {
-	cmd.Flags().String(FlagBroadcastMode, "block", "transaction broadcasting mode (sync|async|block)")
+	cmd.Flags().String(FlagBroadcastMode, flags.BroadcastBlock, "transaction broadcasting mode (sync|async|block)")
 	cmd.Flags().String(FlagChainID, "", "chain identity of the network")
 	cmd.Flags().String(FlagFrom, "", "name or address of private key with which to sign")
-	cmd.Flags().Uint64(FlagGas, 200000, "gas limit to set per-transaction")
+	cmd.Flags().Uint64(FlagGas, flags.DefaultGasLimit, "gas limit to set per-transaction")
 	cmd.Flags().String(FlagGasPrices, "", "gas prices in decimal format to determine the transaction fee")
 	cmd.Flags().String(FlagKeyringBackend, keyring.BackendOS, "the keyring backend backend (os|file|test)")
 	cmd.Flags().String(FlagKeyringHome, Home, "home directory of the keys")

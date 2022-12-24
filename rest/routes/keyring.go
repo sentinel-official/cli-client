@@ -1,9 +1,9 @@
 package routes
 
 const (
-	AddKey            = "/Keys.AddKey"
-	Delete            = "/Keys.DeleteKey"
-	GenerateSignature = "/Keys.GenerateSignature"
-	GetKey            = "/Keys.GetKey"
-	GetKeys           = "/Keys.GetKeys"
+	AddKey      = "/Keys.AddKey"
+	Delete      = "/Keys.DeleteKey"
+	GetKey      = "/Keys.GetKey"
+	GetKeys     = "/Keys.GetKeys"
+	SignMessage = "/Keys.SignMessage"
 )

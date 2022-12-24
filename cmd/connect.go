@@ -142,7 +142,7 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
-			signBytesRes, err := cc.GenerateSignature(
+			signMsgRes, err := cc.SignMessage(
 				password,
 				cc.From,
 				sdk.Uint64ToBigEndian(session.Id),
@@ -151,7 +151,7 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
-			signature, err := base64.StdEncoding.DecodeString(signBytesRes.Signature)
+			signature, err := base64.StdEncoding.DecodeString(signMsgRes.Signature)
 			if err != nil {
 				return err
 			}

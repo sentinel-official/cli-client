@@ -20,9 +20,7 @@ func NewKeyFromRaw(v keyring.Info) Key {
 	}
 }
 
-type (
-	Keys []Key
-)
+type Keys []Key
 
 func NewKeysFromRaw(v []keyring.Info) Keys {
 	items := make(Keys, 0, len(v))

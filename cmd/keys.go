@@ -11,7 +11,7 @@ import (
 
 	"github.com/sentinel-official/cli-client/context"
 	clitypes "github.com/sentinel-official/cli-client/types"
-	keyringutils "github.com/sentinel-official/cli-client/utils/keyring"
+	cliutils "github.com/sentinel-official/cli-client/utils"
 )
 
 func KeysCmd() *cobra.Command {
@@ -69,7 +69,7 @@ func addCmd() *cobra.Command {
 				reader = bufio.NewReader(cmd.InOrStdin())
 			)
 
-			password, err := keyringutils.ReadPassword(cc.KeyringBackend, reader)
+			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
 			if err != nil {
 				return err
 			}
@@ -127,7 +127,7 @@ func deleteCmd() *cobra.Command {
 				reader = bufio.NewReader(cmd.InOrStdin())
 			)
 
-			password, err := keyringutils.ReadPassword(cc.KeyringBackend, reader)
+			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
 			if err != nil {
 				return err
 			}
@@ -154,7 +154,7 @@ func listCmd() *cobra.Command {
 				reader = bufio.NewReader(cmd.InOrStdin())
 			)
 
-			password, err := keyringutils.ReadPassword(cc.KeyringBackend, reader)
+			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
 			if err != nil {
 				return err
 			}
@@ -188,7 +188,7 @@ func showCmd() *cobra.Command {
 				reader = bufio.NewReader(cmd.InOrStdin())
 			)
 
-			password, err := keyringutils.ReadPassword(cc.KeyringBackend, reader)
+			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
 			if err != nil {
 				return err
 			}

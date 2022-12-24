@@ -3,18 +3,18 @@ package types
 import (
 	deposittypes "github.com/sentinel-official/hub/x/deposit/types"
 
-	clienttypes "github.com/sentinel-official/cli-client/types"
+	clitypes "github.com/sentinel-official/cli-client/types"
 )
 
 type Deposit struct {
-	Address string            `json:"address"`
-	Amount  clienttypes.Coins `json:"amount"`
+	Address string         `json:"address"`
+	Amount  clitypes.Coins `json:"amount"`
 }
 
 func NewDepositFromRaw(v *deposittypes.Deposit) Deposit {
 	return Deposit{
 		Address: v.Address,
-		Amount:  clienttypes.NewCoinsFromRaw(v.Coins),
+		Amount:  clitypes.NewCoinsFromRaw(v.Coins),
 	}
 }
 

@@ -81,16 +81,16 @@ func (r *GeyKeys) Validate() error {
 	return nil
 }
 
-type GenerateSignature struct {
+type SignMessage struct {
 	Backend  string `json:"backend"`
 	Password string `json:"password"`
 
-	Name  string `json:"name"`
-	Bytes []byte `json:"bytes"`
+	Name    string `json:"name"`
+	Message []byte `json:"message"`
 }
 
-func NewGenerateSignature(r *http.Request) (*GenerateSignature, error) {
-	var v GenerateSignature
+func NewSignMessage(r *http.Request) (*SignMessage, error) {
+	var v SignMessage
 	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func NewGenerateSignature(r *http.Request) (*GenerateSignature, error) {
 	return &v, nil
 }
 
-func (r *GenerateSignature) Validate() error {
+func (r *SignMessage) Validate() error {
 	if r.Backend == "" {
 		return errors.New("backend cannot be empty")
 	}

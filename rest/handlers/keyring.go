@@ -11,26 +11,26 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/sentinel-official/cli-client/context"
-	restrequests "github.com/sentinel-official/cli-client/rest/requests"
-	restresponses "github.com/sentinel-official/cli-client/rest/responses"
-	keyringtypes "github.com/sentinel-official/cli-client/types"
-	restutils "github.com/sentinel-official/cli-client/utils/rest"
+	"github.com/sentinel-official/cli-client/rest/requests"
+	"github.com/sentinel-official/cli-client/rest/responses"
+	clitypes "github.com/sentinel-official/cli-client/types"
+	cliutils "github.com/sentinel-official/cli-client/utils"
 )
 
 func GetKey(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		req, err := restrequests.NewGeyKey(r)
+		req, err := requests.NewGeyKey(r)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				keyringtypes.NewRestError(1001, err.Error()),
+				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				keyringtypes.NewRestError(1002, err.Error()),
+				clitypes.NewRestError(1002, err.Error()),
 			)
 			return
 		}
@@ -42,41 +42,41 @@ func GetKey(ctx *context.ServerContext) http.HandlerFunc {
 			strings.NewReader(strings.Repeat(req.Password+"\n", 4)),
 		)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				keyringtypes.NewRestError(1003, err.Error()),
+				clitypes.NewRestError(1003, err.Error()),
 			)
 			return
 		}
 
 		key, err := kr.Key(req.Name)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				keyringtypes.NewRestError(1004, err.Error()),
+				clitypes.NewRestError(1004, err.Error()),
 			)
 			return
 		}
 
-		item := keyringtypes.NewKeyFromRaw(key)
-		restutils.WriteResultToResponse(w, http.StatusOK, item)
+		item := clitypes.NewKeyFromRaw(key)
+		cliutils.WriteResultToResponse(w, http.StatusOK, item)
 	}
 }
 
 func GetKeys(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		req, err := restrequests.NewGeyKeys(r)
+		req, err := requests.NewGeyKeys(r)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				keyringtypes.NewRestError(1001, err.Error()),
+				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				keyringtypes.NewRestError(1002, err.Error()),
+				clitypes.NewRestError(1002, err.Error()),
 			)
 			return
 		}
@@ -88,41 +88,41 @@ func GetKeys(ctx *context.ServerContext) http.HandlerFunc {
 			strings.NewReader(strings.Repeat(req.Password+"\n", 4)),
 		)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				keyringtypes.NewRestError(1003, err.Error()),
+				clitypes.NewRestError(1003, err.Error()),
 			)
 			return
 		}
 
 		list, err := kr.List()
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				keyringtypes.NewRestError(1004, err.Error()),
+				clitypes.NewRestError(1004, err.Error()),
 			)
 			return
 		}
 
-		items := keyringtypes.NewKeysFromRaw(list)
-		restutils.WriteResultToResponse(w, http.StatusOK, items)
+		items := clitypes.NewKeysFromRaw(list)
+		cliutils.WriteResultToResponse(w, http.StatusOK, items)
 	}
 }
 
 func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		req, err := restrequests.NewAddKey(r)
+		req, err := requests.NewAddKey(r)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				keyringtypes.NewRestError(1001, err.Error()),
+				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				keyringtypes.NewRestError(1002, err.Error()),
+				clitypes.NewRestError(1002, err.Error()),
 			)
 			return
 		}
@@ -134,18 +134,18 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 			strings.NewReader(strings.Repeat(req.Password+"\n", 4)),
 		)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				keyringtypes.NewRestError(1003, err.Error()),
+				clitypes.NewRestError(1003, err.Error()),
 			)
 			return
 		}
 
 		key, _ := kr.Key(req.Name)
 		if key != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusConflict,
-				keyringtypes.NewRestError(1004, fmt.Sprintf("key with name %s already exists", req.Name)),
+				clitypes.NewRestError(1004, fmt.Sprintf("key with name %s already exists", req.Name)),
 			)
 			return
 		}
@@ -157,41 +157,41 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 
 		algorithm, err := keyring.NewSigningAlgoFromString(string(hd.Secp256k1Type), algorithms)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				keyringtypes.NewRestError(1005, err.Error()),
+				clitypes.NewRestError(1005, err.Error()),
 			)
 			return
 		}
 
 		key, err = kr.NewAccount(req.Name, req.Mnemonic, req.BIP39Password, path.String(), algorithm)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				keyringtypes.NewRestError(1006, err.Error()),
+				clitypes.NewRestError(1006, err.Error()),
 			)
 			return
 		}
 
-		item := keyringtypes.NewKeyFromRaw(key)
-		restutils.WriteResultToResponse(w, http.StatusCreated, item)
+		item := clitypes.NewKeyFromRaw(key)
+		cliutils.WriteResultToResponse(w, http.StatusCreated, item)
 	}
 }
 
-func GenerateSignature(ctx *context.ServerContext) http.HandlerFunc {
+func SignMessage(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		req, err := restrequests.NewGenerateSignature(r)
+		req, err := requests.NewSignMessage(r)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				keyringtypes.NewRestError(1001, err.Error()),
+				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				keyringtypes.NewRestError(1002, err.Error()),
+				clitypes.NewRestError(1002, err.Error()),
 			)
 			return
 		}
@@ -203,24 +203,24 @@ func GenerateSignature(ctx *context.ServerContext) http.HandlerFunc {
 			strings.NewReader(strings.Repeat(req.Password+"\n", 4)),
 		)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				keyringtypes.NewRestError(1003, err.Error()),
+				clitypes.NewRestError(1003, err.Error()),
 			)
 			return
 		}
 
-		signature, pubKey, err := kr.Sign(req.Name, req.Bytes)
+		signature, pubKey, err := kr.Sign(req.Name, req.Message)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				keyringtypes.NewRestError(1004, err.Error()),
+				clitypes.NewRestError(1004, err.Error()),
 			)
 			return
 		}
 
-		restutils.WriteResultToResponse(w, http.StatusOK,
-			&restresponses.GenerateSignature{
+		cliutils.WriteResultToResponse(w, http.StatusOK,
+			&responses.SignMessage{
 				PubKey:    base64.StdEncoding.EncodeToString(pubKey.Bytes()),
 				Signature: base64.StdEncoding.EncodeToString(signature),
 			},
@@ -230,18 +230,18 @@ func GenerateSignature(ctx *context.ServerContext) http.HandlerFunc {
 
 func DeleteKey(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		req, err := restrequests.NewDeleteKey(r)
+		req, err := requests.NewDeleteKey(r)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				keyringtypes.NewRestError(1001, err.Error()),
+				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusBadRequest,
-				keyringtypes.NewRestError(1002, err.Error()),
+				clitypes.NewRestError(1002, err.Error()),
 			)
 			return
 		}
@@ -253,21 +253,21 @@ func DeleteKey(ctx *context.ServerContext) http.HandlerFunc {
 			strings.NewReader(strings.Repeat(req.Password+"\n", 4)),
 		)
 		if err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				keyringtypes.NewRestError(1003, err.Error()),
+				clitypes.NewRestError(1003, err.Error()),
 			)
 			return
 		}
 
 		if err := kr.Delete(req.Name); err != nil {
-			restutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponse(
 				w, http.StatusInternalServerError,
-				keyringtypes.NewRestError(1004, err.Error()),
+				clitypes.NewRestError(1004, err.Error()),
 			)
 			return
 		}
 
-		restutils.WriteResultToResponse(w, http.StatusOK, nil)
+		cliutils.WriteResultToResponse(w, http.StatusOK, nil)
 	}
 }

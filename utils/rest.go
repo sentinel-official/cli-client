@@ -1,4 +1,4 @@
-package rest
+package utils
 
 import (
 	"encoding/json"
@@ -12,24 +12,18 @@ func write(w http.ResponseWriter, status int, resp *clitypes.RestResponse) error
 	return json.NewEncoder(w).Encode(resp)
 }
 
-func WriteErrorToResponse(w http.ResponseWriter, status int, result *clitypes.RestError) {
+func WriteErrorToResponse(w http.ResponseWriter, status int, resp *clitypes.RestError) {
 	_ = write(
 		w,
 		status,
-		clitypes.NewRestResponse(
-			result,
-			nil,
-		),
+		clitypes.NewRestResponse(resp, nil),
 	)
 }
 
-func WriteResultToResponse(w http.ResponseWriter, status int, result interface{}) {
+func WriteResultToResponse(w http.ResponseWriter, status int, resp interface{}) {
 	_ = write(
 		w,
 		status,
-		clitypes.NewRestResponse(
-			nil,
-			result,
-		),
+		clitypes.NewRestResponse(nil, resp),
 	)
 }

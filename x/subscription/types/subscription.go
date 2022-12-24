@@ -5,21 +5,21 @@ import (
 
 	subscriptiontypes "github.com/sentinel-official/hub/x/subscription/types"
 
-	clienttypes "github.com/sentinel-official/cli-client/types"
+	clitypes "github.com/sentinel-official/cli-client/types"
 )
 
 type Subscription struct {
-	ID       uint64           `json:"id"`
-	Owner    string           `json:"owner"`
-	Plan     uint64           `json:"plan"`
-	Expiry   time.Time        `json:"expiry"`
-	Denom    string           `json:"denom"`
-	Node     string           `json:"node"`
-	Price    clienttypes.Coin `json:"price"`
-	Deposit  clienttypes.Coin `json:"deposit"`
-	Free     int64            `json:"free"`
-	Status   string           `json:"status"`
-	StatusAt time.Time        `json:"status_at"`
+	ID       uint64        `json:"id"`
+	Owner    string        `json:"owner"`
+	Plan     uint64        `json:"plan"`
+	Expiry   time.Time     `json:"expiry"`
+	Denom    string        `json:"denom"`
+	Node     string        `json:"node"`
+	Price    clitypes.Coin `json:"price"`
+	Deposit  clitypes.Coin `json:"deposit"`
+	Free     int64         `json:"free"`
+	Status   string        `json:"status"`
+	StatusAt time.Time     `json:"status_at"`
 }
 
 func NewSubscriptionFromRaw(v *subscriptiontypes.Subscription) Subscription {
@@ -30,8 +30,8 @@ func NewSubscriptionFromRaw(v *subscriptiontypes.Subscription) Subscription {
 		Expiry:   v.Expiry,
 		Denom:    v.Denom,
 		Node:     v.Node,
-		Price:    clienttypes.NewCoinFromRaw(&v.Price),
-		Deposit:  clienttypes.NewCoinFromRaw(&v.Deposit),
+		Price:    clitypes.NewCoinFromRaw(&v.Price),
+		Deposit:  clitypes.NewCoinFromRaw(&v.Deposit),
 		Free:     v.Free.Int64(),
 		Status:   v.Status.String(),
 		StatusAt: v.StatusAt,
