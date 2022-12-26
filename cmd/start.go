@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -69,8 +68,8 @@ func StartCmd() *cobra.Command {
 					WithHome(home)
 				muxRouter    = mux.NewRouter()
 				prefixRouter = muxRouter.
-					PathPrefix(clitypes.APIPathPrefix).
-					Subrouter()
+						PathPrefix(clitypes.APIPathPrefix).
+						Subrouter()
 			)
 
 			muxRouter.Use(restmiddlewares.Log)
@@ -83,7 +82,7 @@ func StartCmd() *cobra.Command {
 				restmodules.RegisterService(prefixRouter, &ctx)
 			}
 
-			if err := ioutil.WriteFile(
+			if err := os.WriteFile(
 				filepath.Join(home, "url.txt"),
 				[]byte("http"+"://"+listen+clitypes.APIPathPrefix),
 				os.ModePerm,

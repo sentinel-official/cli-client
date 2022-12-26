@@ -2,8 +2,8 @@ package types
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -111,5 +111,5 @@ func (c *Config) ToWgQuick() string {
 
 func (c *Config) WriteToFile(dir string) error {
 	path := filepath.Join(dir, fmt.Sprintf("%s.conf", c.Name))
-	return ioutil.WriteFile(path, []byte(c.ToWgQuick()), 0600)
+	return os.WriteFile(path, []byte(c.ToWgQuick()), 0600)
 }

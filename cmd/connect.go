@@ -203,6 +203,7 @@ func ConnectCmd() *cobra.Command {
 		},
 	}
 
+	clitypes.AddServiceFlagsToCmd(cmd)
 	clitypes.AddTxFlagsToCmd(cmd)
 	cmd.Flags().StringArray(clitypes.FlagResolver, nil, "provide additional DNS servers")
 	cmd.Flags().Uint64(clitypes.FlagRating, 0, "rate the session quality [0, 10]")

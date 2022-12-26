@@ -32,16 +32,7 @@ func DisconnectCmd() *cobra.Command {
 		},
 	}
 
-	clitypes.AddFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagBroadcastMode)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagChainID)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagFrom)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagGas)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagGasPrices)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagKeyringBackend)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagKeyringHome)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagMemo)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagRPCAddress)
+	clitypes.AddServiceFlagsToCmd(cmd)
 
 	return cmd
 }
