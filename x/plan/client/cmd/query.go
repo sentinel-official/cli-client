@@ -4,10 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/olekukonko/tablewriter"
-	hubtypes "github.com/sentinel-official/hub/types"
 	"github.com/spf13/cobra"
 
 	"github.com/sentinel-official/cli-client/context"
@@ -70,7 +67,6 @@ func QueryPlan() *cobra.Command {
 	}
 
 	clitypes.AddQueryFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }
@@ -85,34 +81,25 @@ func QueryPlans() *cobra.Command {
 				return err
 			}
 
-			provider, err := cmd.Flags().GetString(flagProvider)
+			provAddr, err := clitypes.GetProvAddressFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
-			s, err := cmd.Flags().GetString(flagStatus)
+			status, err := clitypes.GetStatusFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
-			pagination, err := client.ReadPageRequest(cmd.Flags())
+			pagination, err := clitypes.GetPageRequestFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
-			var (
-				items  types.Plans
-				status = hubtypes.StatusFromString(s)
-			)
-
-			if provider != "" {
-				address, err := hubtypes.ProvAddressFromBech32(provider)
-				if err != nil {
-					return err
-				}
-
+			var items types.Plans
+			if provAddr != nil {
 				result, err := qc.QueryPlansForProvider(
-					address,
+					provAddr,
 					status,
 					pagination,
 				)
@@ -154,13 +141,11 @@ func QueryPlans() *cobra.Command {
 		},
 	}
 
-	flags.AddPaginationFlagsToCmd(cmd, "plans")
-
 	clitypes.AddQueryFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
+	clitypes.AddPaginationFlagsToCmd(cmd, "plans")
 
-	cmd.Flags().String(flagProvider, "", "filter with provider address")
-	cmd.Flags().String(flagStatus, "Active", "filter with status")
+	cmd.Flags().String(clitypes.FlagProvider, "", "filter with provider address")
+	cmd.Flags().String(clitypes.FlagStatus, "Active", "filter with status (Active|Inactive)")
 
 	return cmd
 }

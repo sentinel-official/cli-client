@@ -26,14 +26,14 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 
 		req, err := requests.NewConnect(r)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1002, err.Error()),
 			)
@@ -41,7 +41,7 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 		}
 
 		if err := status.LoadFromPath(statusFilePath); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1003, err.Error()),
 			)
@@ -60,7 +60,7 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 			)
 
 			if service.IsUp() {
-				cliutils.WriteErrorToResponse(
+				cliutils.WriteErrorToResponseBody(
 					w, http.StatusBadRequest,
 					clitypes.NewRestError(1004, fmt.Sprintf("service is already running on interface %s", status.IFace)),
 				)
@@ -70,7 +70,7 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 
 		listenPort, err := cliutils.GetFreeUDPPort()
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1007, err.Error()),
 			)
@@ -124,7 +124,7 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 			WithIFace(wireGuardConfig.Name)
 
 		if err := status.SaveToPath(statusFilePath); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1008, err.Error()),
 			)
@@ -132,28 +132,28 @@ func Connect(ctx *context.ServerContext) http.HandlerFunc {
 		}
 
 		if err := service.PreUp(); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1009, err.Error()),
 			)
 			return
 		}
 		if err := service.Up(); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1010, err.Error()),
 			)
 			return
 		}
 		if err := service.PostUp(); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1011, err.Error()),
 			)
 			return
 		}
 
-		cliutils.WriteResultToResponse(w, http.StatusOK, nil)
+		cliutils.WriteResultToResponseBody(w, http.StatusOK, nil)
 	}
 }
 
@@ -165,7 +165,7 @@ func Disconnect(ctx *context.ServerContext) http.HandlerFunc {
 		)
 
 		if err := status.LoadFromPath(statusFilePath); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1001, err.Error()),
 			)
@@ -185,21 +185,21 @@ func Disconnect(ctx *context.ServerContext) http.HandlerFunc {
 
 			if service.IsUp() {
 				if err := service.PreDown(); err != nil {
-					cliutils.WriteErrorToResponse(
+					cliutils.WriteErrorToResponseBody(
 						w, http.StatusInternalServerError,
 						clitypes.NewRestError(1002, err.Error()),
 					)
 					return
 				}
 				if err := service.Down(); err != nil {
-					cliutils.WriteErrorToResponse(
+					cliutils.WriteErrorToResponseBody(
 						w, http.StatusInternalServerError,
 						clitypes.NewRestError(1003, err.Error()),
 					)
 					return
 				}
 				if err := service.PostDown(); err != nil {
-					cliutils.WriteErrorToResponse(
+					cliutils.WriteErrorToResponseBody(
 						w, http.StatusInternalServerError,
 						clitypes.NewRestError(1004, err.Error()),
 					)
@@ -209,14 +209,14 @@ func Disconnect(ctx *context.ServerContext) http.HandlerFunc {
 		}
 
 		if err := os.Remove(statusFilePath); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1005, err.Error()),
 			)
 			return
 		}
 
-		cliutils.WriteResultToResponse(w, http.StatusOK, nil)
+		cliutils.WriteResultToResponseBody(w, http.StatusOK, nil)
 	}
 }
 
@@ -228,7 +228,7 @@ func GetStatus(ctx *context.ServerContext) http.HandlerFunc {
 		)
 
 		if err := status.LoadFromPath(statusFilePath); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1001, err.Error()),
 			)
@@ -249,14 +249,14 @@ func GetStatus(ctx *context.ServerContext) http.HandlerFunc {
 			if service.IsUp() {
 				upload, download, err := service.Transfer()
 				if err != nil {
-					cliutils.WriteErrorToResponse(
+					cliutils.WriteErrorToResponseBody(
 						w, http.StatusInternalServerError,
 						clitypes.NewRestError(1002, err.Error()),
 					)
 					return
 				}
 
-				cliutils.WriteResultToResponse(w, http.StatusOK,
+				cliutils.WriteResultToResponseBody(w, http.StatusOK,
 					&responses.GetStatus{
 						ID:       status.ID,
 						IFace:    status.IFace,
@@ -268,6 +268,6 @@ func GetStatus(ctx *context.ServerContext) http.HandlerFunc {
 			}
 		}
 
-		cliutils.WriteResultToResponse(w, http.StatusOK, nil)
+		cliutils.WriteResultToResponseBody(w, http.StatusOK, nil)
 	}
 }

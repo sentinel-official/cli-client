@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
+	"net/url"
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/olekukonko/tablewriter"
 	hubtypes "github.com/sentinel-official/hub/types"
 	nodetypes "github.com/sentinel-official/hub/x/node/types"
@@ -37,11 +35,10 @@ var (
 	}
 )
 
-func fetchNodeInfo(remote string, timeout time.Duration) (info types.Info, err error) {
+func fetchNodeInfo(remote string, timeout time.Duration) (info types.NodeInfo, err error) {
 	var (
-		body       clitypes.RestResponse
-		endpoint   = strings.Trim(remote, "/") + "/status"
-		httpclient = &http.Client{
+		body   clitypes.RestResponseBody
+		client = &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
 					InsecureSkipVerify: true,
@@ -49,27 +46,33 @@ func fetchNodeInfo(remote string, timeout time.Duration) (info types.Info, err e
 			},
 			Timeout: timeout,
 		}
-		startTime = time.Now()
 	)
 
-	resp, err := httpclient.Get(endpoint)
+	path, err := url.JoinPath(remote, "status")
 	if err != nil {
 		return info, err
 	}
 
-	info.Latency = time.Since(startTime)
+	start := time.Now()
+
+	resp, err := client.Get(path)
+	if err != nil {
+		return info, err
+	}
+
+	info.Latency = time.Since(start)
 	defer resp.Body.Close()
 
 	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
 		return info, err
 	}
 
-	bytes, err := json.Marshal(body.Result)
+	result, err := json.Marshal(body.Result)
 	if err != nil {
 		return info, err
 	}
 
-	if err := json.Unmarshal(bytes, &info); err != nil {
+	if err := json.Unmarshal(result, &info); err != nil {
 		return info, err
 	}
 
@@ -87,7 +90,7 @@ func QueryNode() *cobra.Command {
 				return err
 			}
 
-			address, err := hubtypes.NodeAddressFromBech32(args[0])
+			nodeAddr, err := hubtypes.NodeAddressFromBech32(args[0])
 			if err != nil {
 				return err
 			}
@@ -97,7 +100,7 @@ func QueryNode() *cobra.Command {
 				return err
 			}
 
-			result, err := qc.QueryNode(address)
+			result, err := qc.QueryNode(nodeAddr)
 			if err != nil {
 				return err
 			}
@@ -145,12 +148,12 @@ func QueryNodes() *cobra.Command {
 				return err
 			}
 
-			provider, err := cmd.Flags().GetString(flagProvider)
+			provAddr, err := clitypes.GetProvAddressFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
-			s, err := cmd.Flags().GetString(flagStatus)
+			status, err := clitypes.GetStatusFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -160,24 +163,15 @@ func QueryNodes() *cobra.Command {
 				return err
 			}
 
-			pagination, err := client.ReadPageRequest(cmd.Flags())
+			pagination, err := clitypes.GetPageRequestFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
-			var (
-				items  []nodetypes.Node
-				status = hubtypes.StatusFromString(s)
-			)
-
-			if provider != "" {
-				address, err := hubtypes.ProvAddressFromBech32(provider)
-				if err != nil {
-					return err
-				}
-
+			var items []nodetypes.Node
+			if provAddr != nil {
 				result, err := qc.QueryNodesForProvider(
-					address,
+					provAddr,
 					status,
 					pagination,
 				)
@@ -199,16 +193,16 @@ func QueryNodes() *cobra.Command {
 			}
 
 			var (
-				group = sync.WaitGroup{}
+				wg    = sync.WaitGroup{}
 				mutex = sync.Mutex{}
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
 			table.SetHeader(header)
 			for i := 0; i < len(items); i++ {
-				group.Add(1)
+				wg.Add(1)
 				go func(i int) {
-					defer group.Done()
+					defer wg.Done()
 
 					var (
 						info, _ = fetchNodeInfo(items[i].RemoteURL, timeout)
@@ -236,18 +230,18 @@ func QueryNodes() *cobra.Command {
 				}(i)
 			}
 
-			group.Wait()
+			wg.Wait()
 
 			table.Render()
 			return nil
 		},
 	}
 
-	flags.AddPaginationFlagsToCmd(cmd, "nodes")
 	clitypes.AddQueryFlagsToCmd(cmd)
+	clitypes.AddPaginationFlagsToCmd(cmd, "nodes")
 
-	cmd.Flags().String(flagProvider, "", "filter with provider address")
-	cmd.Flags().String(flagStatus, "Active", "filter with status (Active|Inactive)")
+	cmd.Flags().String(clitypes.FlagProvider, "", "filter with provider address")
+	cmd.Flags().String(clitypes.FlagStatus, "Active", "filter with status (Active|Inactive)")
 
 	return cmd
 }

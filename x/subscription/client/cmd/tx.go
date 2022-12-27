@@ -18,8 +18,8 @@ import (
 
 func GetTxCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "subscription",
-		Short: "Subscription related subcommands",
+		Use:                        "subscription",
+		Short:                      "Subscription related subcommands",
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
@@ -47,16 +47,14 @@ func txSubscribeToNode() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
 
-			address, err := hubtypes.NodeAddressFromBech32(args[0])
+			nodeAddr, err := hubtypes.NodeAddressFromBech32(args[0])
 			if err != nil {
 				return err
 			}
@@ -68,7 +66,7 @@ func txSubscribeToNode() *cobra.Command {
 
 			msg := types.NewMsgSubscribeToNodeRequest(
 				from,
-				address,
+				nodeAddr,
 				deposit,
 			)
 			if err := msg.ValidateBasic(); err != nil {
@@ -86,7 +84,6 @@ func txSubscribeToNode() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -102,9 +99,7 @@ func txSubscribeToPlan() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
@@ -136,7 +131,6 @@ func txSubscribeToPlan() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -152,9 +146,7 @@ func txAddQuota() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
@@ -166,7 +158,7 @@ func txAddQuota() *cobra.Command {
 				return err
 			}
 
-			address, err := sdk.AccAddressFromBech32(args[1])
+			accAddr, err := sdk.AccAddressFromBech32(args[1])
 			if err != nil {
 				return err
 			}
@@ -179,7 +171,7 @@ func txAddQuota() *cobra.Command {
 			msg := types.NewMsgAddQuotaRequest(
 				from,
 				id,
-				address,
+				accAddr,
 				sdk.NewInt(bytes),
 			)
 			if err := msg.ValidateBasic(); err != nil {
@@ -197,7 +189,6 @@ func txAddQuota() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -213,9 +204,7 @@ func txUpdateQuota() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
@@ -227,7 +216,7 @@ func txUpdateQuota() *cobra.Command {
 				return err
 			}
 
-			address, err := sdk.AccAddressFromBech32(args[1])
+			accAddr, err := sdk.AccAddressFromBech32(args[1])
 			if err != nil {
 				return err
 			}
@@ -240,7 +229,7 @@ func txUpdateQuota() *cobra.Command {
 			msg := types.NewMsgUpdateQuotaRequest(
 				from,
 				id,
-				address,
+				accAddr,
 				sdk.NewInt(bytes),
 			)
 			if err := msg.ValidateBasic(); err != nil {
@@ -258,7 +247,6 @@ func txUpdateQuota() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -275,9 +263,7 @@ func txCancel() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			_, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
@@ -302,7 +288,6 @@ func txCancel() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }

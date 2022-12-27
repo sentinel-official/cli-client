@@ -9,7 +9,7 @@ import (
 )
 
 type Node struct {
-	Info
+	NodeInfo
 	Address   string         `json:"address"`
 	Provider  string         `json:"provider"`
 	Price     clitypes.Coins `json:"price"`
@@ -18,7 +18,7 @@ type Node struct {
 	StatusAt  time.Time      `json:"status_at"`
 }
 
-func (n Node) WithInfo(v Info) Node { n.Info = v; return n }
+func (n Node) WithInfo(v NodeInfo) Node { n.NodeInfo = v; return n }
 
 func NewNodeFromRaw(v *nodetypes.Node) Node {
 	return Node{

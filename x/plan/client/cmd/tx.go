@@ -19,8 +19,8 @@ import (
 
 func GetTxCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "plan",
-		Short: "plan related subcommands",
+		Use:                        "plan",
+		Short:                      "plan related subcommands",
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
@@ -47,9 +47,7 @@ func txAdd() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
@@ -92,7 +90,6 @@ func txAdd() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -108,9 +105,7 @@ func txSetStatus() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
@@ -142,7 +137,6 @@ func txSetStatus() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -158,9 +152,7 @@ func txAddNode() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
@@ -197,7 +189,6 @@ func txAddNode() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -213,9 +204,7 @@ func txRemoveNode() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
@@ -252,7 +241,6 @@ func txRemoveNode() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }

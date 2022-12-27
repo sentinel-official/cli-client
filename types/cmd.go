@@ -3,40 +3,46 @@ package types
 import (
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/query"
+	hubtypes "github.com/sentinel-official/hub/types"
 	"github.com/spf13/cobra"
 )
 
 const (
-	FlagAccount  = "account"
-	FlagCoinType = "coin-type"
-	FlagIndex    = "index"
-	FlagRating   = "rating"
-	FlagRecover  = "recover"
-	FlagResolver = "resolver"
-)
-
-const (
-	FlagHome        = "home"
-	FlagListen      = "listen"
-	FlagTTY         = "tty"
-	FlagWithKeyring = "with-keyring"
-	FlagWithService = "with-service"
-)
-
-const (
+	FlagAccount        = "account"
 	FlagBroadcastMode  = "broadcast-mode"
 	FlagChainID        = "chain-id"
+	FlagCoinType       = "coin-type"
+	FlagDescription    = "description"
 	FlagFrom           = "from"
 	FlagGas            = "gas"
 	FlagGasPrices      = "gas-prices"
+	FlagHome           = "home"
+	FlagIdentity       = "identity"
+	FlagIndex          = "index"
 	FlagKeyringBackend = "keyring.backend"
 	FlagKeyringHome    = "keyring.home"
+	FlagListen         = "listen"
 	FlagMemo           = "memo"
-	FlagServiceHome    = "service.home"
+	FlagName           = "name"
+	FlagProvider       = "provider"
+	FlagRating         = "rating"
+	FlagRecover        = "recover"
+	FlagResolver       = "resolver"
 	FlagRPCAddress     = "rpc-address"
+	FlagServiceHome    = "service.home"
+	FlagStatus         = "status"
 	FlagTimeout        = "timeout"
+	FlagTTY            = "tty"
+	FlagWebsite        = "website"
+	FlagWithKeyring    = "with-keyring"
+	FlagWithService    = "with-service"
+	FlagAddress        = keys.FlagAddress
 )
 
 func addKeyringFlagsToCmd(cmd *cobra.Command) {
@@ -49,7 +55,11 @@ func addQueryFlagsToCmd(cmd *cobra.Command) {
 	_ = cmd.MarkFlagRequired(FlagRPCAddress)
 }
 
-func addTimeoutFlagToCmd(cmd *cobra.Command) {
+func addServiceFlagsToCmd(cmd *cobra.Command) {
+	cmd.Flags().String(FlagServiceHome, Home, "home directory of the service")
+}
+
+func addTimeoutFlagsToCmd(cmd *cobra.Command) {
 	cmd.Flags().Duration(FlagTimeout, 15*time.Second, "time limit for requests made by the HTTP client")
 }
 
@@ -66,21 +76,65 @@ func addTxFlagsToCmd(cmd *cobra.Command) {
 
 func AddKeyringFlagsToCmd(cmd *cobra.Command) {
 	addKeyringFlagsToCmd(cmd)
-	addTimeoutFlagToCmd(cmd)
+	addTimeoutFlagsToCmd(cmd)
+}
+
+func AddPaginationFlagsToCmd(cmd *cobra.Command, query string) {
+	flags.AddPaginationFlagsToCmd(cmd, query)
 }
 
 func AddQueryFlagsToCmd(cmd *cobra.Command) {
 	addQueryFlagsToCmd(cmd)
-	addTimeoutFlagToCmd(cmd)
 }
 
 func AddServiceFlagsToCmd(cmd *cobra.Command) {
-	cmd.Flags().String(FlagServiceHome, Home, "home directory of the service")
+	addServiceFlagsToCmd(cmd)
+}
+
+func AddTimeoutFlagsToCmd(cmd *cobra.Command) {
+	addTimeoutFlagsToCmd(cmd)
 }
 
 func AddTxFlagsToCmd(cmd *cobra.Command) {
 	addKeyringFlagsToCmd(cmd)
 	addQueryFlagsToCmd(cmd)
-	addTimeoutFlagToCmd(cmd)
+	addTimeoutFlagsToCmd(cmd)
 	addTxFlagsToCmd(cmd)
+}
+
+func GetAccAddressFromCmd(cmd *cobra.Command) (sdk.AccAddress, error) {
+	s, err := cmd.Flags().GetString(FlagAddress)
+	if err != nil {
+		return nil, err
+	}
+	if s == "" {
+		return nil, nil
+	}
+
+	return sdk.AccAddressFromBech32(s)
+}
+
+func GetPageRequestFromCmd(cmd *cobra.Command) (*query.PageRequest, error) {
+	return client.ReadPageRequest(cmd.Flags())
+}
+
+func GetProvAddressFromCmd(cmd *cobra.Command) (hubtypes.ProvAddress, error) {
+	s, err := cmd.Flags().GetString(FlagProvider)
+	if err != nil {
+		return nil, err
+	}
+	if s == "" {
+		return nil, nil
+	}
+
+	return hubtypes.ProvAddressFromBech32(s)
+}
+
+func GetStatusFromCmd(cmd *cobra.Command) (hubtypes.Status, error) {
+	s, err := cmd.Flags().GetString(FlagStatus)
+	if err != nil {
+		return 0, err
+	}
+
+	return hubtypes.StatusFromString(s), nil
 }

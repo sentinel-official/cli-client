@@ -7,23 +7,23 @@ import (
 	clitypes "github.com/sentinel-official/cli-client/types"
 )
 
-func write(w http.ResponseWriter, status int, resp *clitypes.RestResponse) error {
-	w.WriteHeader(status)
-	return json.NewEncoder(w).Encode(resp)
+func write(w http.ResponseWriter, code int, body *clitypes.RestResponseBody) error {
+	w.WriteHeader(code)
+	return json.NewEncoder(w).Encode(body)
 }
 
-func WriteErrorToResponse(w http.ResponseWriter, status int, resp *clitypes.RestError) {
+func WriteErrorToResponseBody(w http.ResponseWriter, code int, err *clitypes.RestError) {
 	_ = write(
 		w,
-		status,
-		clitypes.NewRestResponse(resp, nil),
+		code,
+		clitypes.NewRestResponseBody(err, nil),
 	)
 }
 
-func WriteResultToResponse(w http.ResponseWriter, status int, resp interface{}) {
+func WriteResultToResponseBody(w http.ResponseWriter, code int, res interface{}) {
 	_ = write(
 		w,
-		status,
-		clitypes.NewRestResponse(nil, resp),
+		code,
+		clitypes.NewRestResponseBody(nil, res),
 	)
 }

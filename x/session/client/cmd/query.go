@@ -5,11 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/olekukonko/tablewriter"
-	hubtypes "github.com/sentinel-official/hub/types"
 	"github.com/spf13/cobra"
 
 	"github.com/sentinel-official/cli-client/context"
@@ -74,7 +70,6 @@ func QuerySession() *cobra.Command {
 	}
 
 	clitypes.AddQueryFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }
@@ -89,34 +84,26 @@ func QuerySessions() *cobra.Command {
 				return err
 			}
 
-			bech32Address, err := cmd.Flags().GetString(flagAddress)
+			accAddr, err := clitypes.GetAccAddressFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
-			pagination, err := client.ReadPageRequest(cmd.Flags())
+			status, err := clitypes.GetStatusFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
-			var (
-				items types.Sessions
-			)
+			pagination, err := clitypes.GetPageRequestFromCmd(cmd)
+			if err != nil {
+				return err
+			}
 
-			if bech32Address != "" {
-				address, err := sdk.AccAddressFromBech32(bech32Address)
-				if err != nil {
-					return err
-				}
-
-				status, err := cmd.Flags().GetString(flagStatus)
-				if err != nil {
-					return err
-				}
-
+			var items types.Sessions
+			if accAddr != nil {
 				result, err := qc.QuerySessionsForAddress(
-					address,
-					hubtypes.StatusFromString(status),
+					accAddr,
+					status,
 					pagination,
 				)
 				if err != nil {
@@ -157,13 +144,11 @@ func QuerySessions() *cobra.Command {
 		},
 	}
 
-	flags.AddPaginationFlagsToCmd(cmd, "sessions")
-
 	clitypes.AddQueryFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
+	clitypes.AddPaginationFlagsToCmd(cmd, "sessions")
 
-	cmd.Flags().String(flagAddress, "", "filter with account address")
-	cmd.Flags().String(flagStatus, "Active", "filter with status (Active|Inactive)")
+	cmd.Flags().String(clitypes.FlagAddress, "", "filter with account address")
+	cmd.Flags().String(clitypes.FlagStatus, "Active", "filter with status (Active|Inactive)")
 
 	return cmd
 }

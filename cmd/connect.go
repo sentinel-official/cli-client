@@ -31,7 +31,7 @@ func parseResolversFromCmd(cmd *cobra.Command) ([]net.IP, error) {
 	for _, s := range v {
 		item := net.ParseIP(s)
 		if item == nil {
-			return nil, fmt.Errorf("resolver ip %s is invalid", s)
+			return nil, fmt.Errorf("invalid resolver ip %s", s)
 		}
 
 		items = append(items, item)
@@ -51,7 +51,7 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
-			address, err := hubtypes.NodeAddressFromBech32(args[1])
+			nodeAddr, err := hubtypes.NodeAddressFromBech32(args[1])
 			if err != nil {
 				return err
 			}
@@ -113,7 +113,7 @@ func ConnectCmd() *cobra.Command {
 				sessiontypes.NewMsgStartRequest(
 					from,
 					id,
-					address,
+					nodeAddr,
 				),
 			)
 
@@ -132,7 +132,7 @@ func ConnectCmd() *cobra.Command {
 				return fmt.Errorf("active session does not exist for subscription %d", id)
 			}
 
-			node, err := cc.QueryNode(address)
+			node, err := cc.QueryNode(nodeAddr)
 			if err != nil {
 				return err
 			}
@@ -157,7 +157,7 @@ func ConnectCmd() *cobra.Command {
 			}
 
 			var (
-				resp     clitypes.RestResponse
+				resp     clitypes.RestResponseBody
 				endpoint = fmt.Sprintf(
 					"%s/accounts/%s/sessions/%d",
 					strings.Trim(node.RemoteURL, "/"), from, session.Id,
@@ -194,7 +194,7 @@ func ConnectCmd() *cobra.Command {
 			return cc.Connect(
 				password,
 				from.String(),
-				address.String(),
+				nodeAddr.String(),
 				session.Id,
 				info,
 				[][]byte{wgPrivateKey.Bytes()},
@@ -205,8 +205,9 @@ func ConnectCmd() *cobra.Command {
 
 	clitypes.AddServiceFlagsToCmd(cmd)
 	clitypes.AddTxFlagsToCmd(cmd)
+
 	cmd.Flags().StringArray(clitypes.FlagResolver, nil, "provide additional DNS servers")
-	cmd.Flags().Uint64(clitypes.FlagRating, 0, "rate the session quality [0, 10]")
+	cmd.Flags().Uint64(clitypes.FlagRating, 0, "rate the session quality between 0 and 10")
 
 	return cmd
 }

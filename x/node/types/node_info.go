@@ -17,10 +17,7 @@ type (
 		Latitude  float64 `json:"latitude"`
 		Longitude float64 `json:"longitude"`
 	}
-)
-
-type (
-	Info struct {
+	NodeInfo struct {
 		Address                string             `json:"address"`
 		Bandwidth              clitypes.Bandwidth `json:"bandwidth"`
 		Handshake              Handshake          `json:"handshake"`

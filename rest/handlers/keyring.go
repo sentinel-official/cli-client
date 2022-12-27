@@ -21,14 +21,14 @@ func GetKey(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req, err := requests.NewGeyKey(r)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1002, err.Error()),
 			)
@@ -42,7 +42,7 @@ func GetKey(ctx *context.ServerContext) http.HandlerFunc {
 			strings.NewReader(strings.Repeat(req.Password+"\n", 4)),
 		)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1003, err.Error()),
 			)
@@ -51,7 +51,7 @@ func GetKey(ctx *context.ServerContext) http.HandlerFunc {
 
 		key, err := kr.Key(req.Name)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1004, err.Error()),
 			)
@@ -59,7 +59,7 @@ func GetKey(ctx *context.ServerContext) http.HandlerFunc {
 		}
 
 		item := clitypes.NewKeyFromRaw(key)
-		cliutils.WriteResultToResponse(w, http.StatusOK, item)
+		cliutils.WriteResultToResponseBody(w, http.StatusOK, item)
 	}
 }
 
@@ -67,14 +67,14 @@ func GetKeys(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req, err := requests.NewGeyKeys(r)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1002, err.Error()),
 			)
@@ -88,7 +88,7 @@ func GetKeys(ctx *context.ServerContext) http.HandlerFunc {
 			strings.NewReader(strings.Repeat(req.Password+"\n", 4)),
 		)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1003, err.Error()),
 			)
@@ -97,7 +97,7 @@ func GetKeys(ctx *context.ServerContext) http.HandlerFunc {
 
 		list, err := kr.List()
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1004, err.Error()),
 			)
@@ -105,7 +105,7 @@ func GetKeys(ctx *context.ServerContext) http.HandlerFunc {
 		}
 
 		items := clitypes.NewKeysFromRaw(list)
-		cliutils.WriteResultToResponse(w, http.StatusOK, items)
+		cliutils.WriteResultToResponseBody(w, http.StatusOK, items)
 	}
 }
 
@@ -113,14 +113,14 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req, err := requests.NewAddKey(r)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1002, err.Error()),
 			)
@@ -134,7 +134,7 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 			strings.NewReader(strings.Repeat(req.Password+"\n", 4)),
 		)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1003, err.Error()),
 			)
@@ -143,7 +143,7 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 
 		key, _ := kr.Key(req.Name)
 		if key != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusConflict,
 				clitypes.NewRestError(1004, fmt.Sprintf("key with name %s already exists", req.Name)),
 			)
@@ -157,7 +157,7 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 
 		algorithm, err := keyring.NewSigningAlgoFromString(string(hd.Secp256k1Type), algorithms)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1005, err.Error()),
 			)
@@ -166,7 +166,7 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 
 		key, err = kr.NewAccount(req.Name, req.Mnemonic, req.BIP39Password, path.String(), algorithm)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1006, err.Error()),
 			)
@@ -174,7 +174,7 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 		}
 
 		item := clitypes.NewKeyFromRaw(key)
-		cliutils.WriteResultToResponse(w, http.StatusCreated, item)
+		cliutils.WriteResultToResponseBody(w, http.StatusCreated, item)
 	}
 }
 
@@ -182,14 +182,14 @@ func SignMessage(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req, err := requests.NewSignMessage(r)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1002, err.Error()),
 			)
@@ -203,7 +203,7 @@ func SignMessage(ctx *context.ServerContext) http.HandlerFunc {
 			strings.NewReader(strings.Repeat(req.Password+"\n", 4)),
 		)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1003, err.Error()),
 			)
@@ -212,14 +212,14 @@ func SignMessage(ctx *context.ServerContext) http.HandlerFunc {
 
 		signature, pubKey, err := kr.Sign(req.Name, req.Message)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1004, err.Error()),
 			)
 			return
 		}
 
-		cliutils.WriteResultToResponse(w, http.StatusOK,
+		cliutils.WriteResultToResponseBody(w, http.StatusOK,
 			&responses.SignMessage{
 				PubKey:    base64.StdEncoding.EncodeToString(pubKey.Bytes()),
 				Signature: base64.StdEncoding.EncodeToString(signature),
@@ -232,14 +232,14 @@ func DeleteKey(ctx *context.ServerContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req, err := requests.NewDeleteKey(r)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1001, err.Error()),
 			)
 			return
 		}
 		if err := req.Validate(); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusBadRequest,
 				clitypes.NewRestError(1002, err.Error()),
 			)
@@ -253,7 +253,7 @@ func DeleteKey(ctx *context.ServerContext) http.HandlerFunc {
 			strings.NewReader(strings.Repeat(req.Password+"\n", 4)),
 		)
 		if err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1003, err.Error()),
 			)
@@ -261,13 +261,13 @@ func DeleteKey(ctx *context.ServerContext) http.HandlerFunc {
 		}
 
 		if err := kr.Delete(req.Name); err != nil {
-			cliutils.WriteErrorToResponse(
+			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,
 				clitypes.NewRestError(1004, err.Error()),
 			)
 			return
 		}
 
-		cliutils.WriteResultToResponse(w, http.StatusOK, nil)
+		cliutils.WriteResultToResponseBody(w, http.StatusOK, nil)
 	}
 }

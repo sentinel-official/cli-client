@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -30,12 +28,12 @@ func QueryDeposit() *cobra.Command {
 				return err
 			}
 
-			address, err := sdk.AccAddressFromBech32(args[0])
+			accAddr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
 				return err
 			}
 
-			result, err := qc.QueryDeposit(address)
+			result, err := qc.QueryDeposit(accAddr)
 			if err != nil {
 				return err
 			}
@@ -59,7 +57,6 @@ func QueryDeposit() *cobra.Command {
 	}
 
 	clitypes.AddQueryFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }
@@ -74,7 +71,7 @@ func QueryDeposits() *cobra.Command {
 				return err
 			}
 
-			pagination, err := client.ReadPageRequest(cmd.Flags())
+			pagination, err := clitypes.GetPageRequestFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -104,10 +101,8 @@ func QueryDeposits() *cobra.Command {
 		},
 	}
 
-	flags.AddPaginationFlagsToCmd(cmd, "deposits")
-
 	clitypes.AddQueryFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
+	clitypes.AddPaginationFlagsToCmd(cmd, "deposits")
 
 	return cmd
 }

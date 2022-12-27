@@ -33,6 +33,7 @@ func DisconnectCmd() *cobra.Command {
 	}
 
 	clitypes.AddServiceFlagsToCmd(cmd)
+	clitypes.AddTimeoutFlagsToCmd(cmd)
 
 	return cmd
 }

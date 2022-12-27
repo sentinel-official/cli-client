@@ -155,7 +155,7 @@ func (c *ClientContext) GetAddress(password, name string) (sdk.AccAddress, error
 
 func (c *ClientContext) GetKeys(password string) (clitypes.Keys, error) {
 	var (
-		resp     clitypes.RestResponse
+		resp     clitypes.RestResponseBody
 		result   clitypes.Keys
 		endpoint = c.KeyringURL + restroutes.GetKeys
 	)
@@ -195,7 +195,7 @@ func (c *ClientContext) GetKeys(password string) (clitypes.Keys, error) {
 
 func (c *ClientContext) GetKey(password, name string) (*clitypes.Key, error) {
 	var (
-		resp     clitypes.RestResponse
+		resp     clitypes.RestResponseBody
 		result   clitypes.Key
 		endpoint = c.KeyringURL + restroutes.GetKey
 	)
@@ -236,7 +236,7 @@ func (c *ClientContext) GetKey(password, name string) (*clitypes.Key, error) {
 
 func (c *ClientContext) AddKey(password, name, mnemonic, bip39Password string, coinType, account, index uint32) (*clitypes.Key, error) {
 	var (
-		resp     clitypes.RestResponse
+		resp     clitypes.RestResponseBody
 		result   clitypes.Key
 		endpoint = c.KeyringURL + restroutes.AddKey
 	)
@@ -282,7 +282,7 @@ func (c *ClientContext) AddKey(password, name, mnemonic, bip39Password string, c
 
 func (c *ClientContext) DeleteKey(password, name string) error {
 	var (
-		resp     clitypes.RestResponse
+		resp     clitypes.RestResponseBody
 		endpoint = c.KeyringURL + restroutes.Delete
 	)
 
@@ -314,7 +314,7 @@ func (c *ClientContext) DeleteKey(password, name string) error {
 
 func (c *ClientContext) SignMessage(password, name string, msg []byte) (*restresponses.SignMessage, error) {
 	var (
-		resp     clitypes.RestResponse
+		resp     clitypes.RestResponseBody
 		result   restresponses.SignMessage
 		endpoint = c.KeyringURL + restroutes.SignMessage
 	)
@@ -356,7 +356,7 @@ func (c *ClientContext) SignMessage(password, name string, msg []byte) (*restres
 
 func (c *ClientContext) GetStatus() (*clitypes.ServiceStatus, error) {
 	var (
-		resp     clitypes.RestResponse
+		resp     clitypes.RestResponseBody
 		result   clitypes.ServiceStatus
 		endpoint = c.ServiceURL + restroutes.GetStatus
 	)
@@ -386,7 +386,7 @@ func (c *ClientContext) GetStatus() (*clitypes.ServiceStatus, error) {
 
 func (c *ClientContext) Connect(password, from, to string, id uint64, info []byte, keys [][]byte, resolvers []net.IP) error {
 	var (
-		resp     clitypes.RestResponse
+		resp     clitypes.RestResponseBody
 		endpoint = c.ServiceURL + restroutes.Connect
 	)
 
@@ -423,7 +423,7 @@ func (c *ClientContext) Connect(password, from, to string, id uint64, info []byt
 
 func (c *ClientContext) Disconnect() error {
 	var (
-		resp     clitypes.RestResponse
+		resp     clitypes.RestResponseBody
 		endpoint = c.ServiceURL + restroutes.Disconnect
 	)
 

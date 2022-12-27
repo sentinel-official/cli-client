@@ -16,15 +16,20 @@ func NewRestError(code int, message string) *RestError {
 	}
 }
 
-type RestResponse struct {
+type RestResponseBody struct {
 	Success bool        `json:"success"`
 	Error   *RestError  `json:"error,omitempty"`
 	Result  interface{} `json:"result,omitempty"`
 }
 
-func NewRestResponse(err *RestError, res interface{}) *RestResponse {
-	return &RestResponse{
-		Success: err == nil,
+func NewRestResponseBody(err *RestError, res interface{}) *RestResponseBody {
+	success := true
+	if err != nil {
+		success = false
+	}
+
+	return &RestResponseBody{
+		Success: success,
 		Error:   err,
 		Result:  res,
 	}

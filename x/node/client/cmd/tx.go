@@ -40,9 +40,7 @@ func txSetStatus() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
@@ -68,7 +66,6 @@ func txSetStatus() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }

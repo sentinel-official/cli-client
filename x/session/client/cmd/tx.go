@@ -43,9 +43,7 @@ func txStart() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
@@ -57,7 +55,7 @@ func txStart() *cobra.Command {
 				return err
 			}
 
-			address, err := hubtypes.NodeAddressFromBech32(args[1])
+			nodeAddr, err := hubtypes.NodeAddressFromBech32(args[1])
 			if err != nil {
 				return err
 			}
@@ -65,7 +63,7 @@ func txStart() *cobra.Command {
 			msg := types.NewMsgStartRequest(
 				from,
 				id,
-				address,
+				nodeAddr,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
@@ -82,7 +80,6 @@ func txStart() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
 	return cmd
 }
@@ -98,9 +95,7 @@ func txEnd() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
@@ -112,7 +107,7 @@ func txEnd() *cobra.Command {
 				return err
 			}
 
-			rating, err := cmd.Flags().GetUint64(flagRating)
+			rating, err := cmd.Flags().GetUint64(clitypes.FlagRating)
 			if err != nil {
 				return err
 			}
@@ -137,9 +132,8 @@ func txEnd() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
-	cmd.Flags().Uint64(flagRating, 0, "rate the session quality [0, 10]")
+	cmd.Flags().Uint64(clitypes.FlagRating, 0, "rate the session quality between 0 and 10")
 
 	return cmd
 }

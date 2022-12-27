@@ -65,9 +65,7 @@ func addCmd() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
 			if err != nil {
@@ -123,9 +121,7 @@ func deleteCmd() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
 			if err != nil {
@@ -150,9 +146,7 @@ func listCmd() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
 			if err != nil {
@@ -184,9 +178,7 @@ func showCmd() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
 			if err != nil {

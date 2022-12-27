@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/olekukonko/tablewriter"
 	hubtypes "github.com/sentinel-official/hub/types"
 	"github.com/spf13/cobra"
@@ -32,12 +30,12 @@ func QueryProvider() *cobra.Command {
 				return err
 			}
 
-			address, err := hubtypes.ProvAddressFromBech32(args[0])
+			provAddr, err := hubtypes.ProvAddressFromBech32(args[0])
 			if err != nil {
 				return err
 			}
 
-			result, err := qc.QueryProvider(address)
+			result, err := qc.QueryProvider(provAddr)
 			if err != nil {
 				return err
 			}
@@ -63,7 +61,6 @@ func QueryProvider() *cobra.Command {
 	}
 
 	clitypes.AddQueryFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
 
 	return cmd
 }
@@ -78,7 +75,7 @@ func QueryProviders() *cobra.Command {
 				return err
 			}
 
-			pagination, err := client.ReadPageRequest(cmd.Flags())
+			pagination, err := clitypes.GetPageRequestFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -110,10 +107,8 @@ func QueryProviders() *cobra.Command {
 		},
 	}
 
-	flags.AddPaginationFlagsToCmd(cmd, "providers")
-
 	clitypes.AddQueryFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagTimeout)
+	clitypes.AddPaginationFlagsToCmd(cmd, "providers")
 
 	return cmd
 }

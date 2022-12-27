@@ -42,26 +42,24 @@ func txRegister() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
 
-			identity, err := cmd.Flags().GetString(flagIdentity)
+			identity, err := cmd.Flags().GetString(clitypes.FlagIdentity)
 			if err != nil {
 				return err
 			}
 
-			website, err := cmd.Flags().GetString(flagWebsite)
+			website, err := cmd.Flags().GetString(clitypes.FlagWebsite)
 			if err != nil {
 				return err
 			}
 
-			description, err := cmd.Flags().GetString(flagDescription)
+			description, err := cmd.Flags().GetString(clitypes.FlagDescription)
 			if err != nil {
 				return err
 			}
@@ -88,11 +86,10 @@ func txRegister() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
-	cmd.Flags().String(flagIdentity, "", "identity signature (optional)")
-	cmd.Flags().String(flagWebsite, "", "website (optional)")
-	cmd.Flags().String(flagDescription, "", "description (optional)")
+	cmd.Flags().String(clitypes.FlagIdentity, "", "identity signature (optional)")
+	cmd.Flags().String(clitypes.FlagWebsite, "", "website (optional)")
+	cmd.Flags().String(clitypes.FlagDescription, "", "description (optional)")
 
 	return cmd
 }
@@ -107,31 +104,29 @@ func txUpdate() *cobra.Command {
 				return err
 			}
 
-			var (
-				reader = bufio.NewReader(cmd.InOrStdin())
-			)
+			reader := bufio.NewReader(cmd.InOrStdin())
 
 			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
 			if err != nil {
 				return err
 			}
 
-			name, err := cmd.Flags().GetString(flagName)
+			name, err := cmd.Flags().GetString(clitypes.FlagName)
 			if err != nil {
 				return err
 			}
 
-			identity, err := cmd.Flags().GetString(flagIdentity)
+			identity, err := cmd.Flags().GetString(clitypes.FlagIdentity)
 			if err != nil {
 				return err
 			}
 
-			website, err := cmd.Flags().GetString(flagWebsite)
+			website, err := cmd.Flags().GetString(clitypes.FlagWebsite)
 			if err != nil {
 				return err
 			}
 
-			description, err := cmd.Flags().GetString(flagDescription)
+			description, err := cmd.Flags().GetString(clitypes.FlagDescription)
 			if err != nil {
 				return err
 			}
@@ -158,12 +153,11 @@ func txUpdate() *cobra.Command {
 	}
 
 	clitypes.AddTxFlagsToCmd(cmd)
-	_ = cmd.Flags().MarkHidden(clitypes.FlagServiceHome)
 
-	cmd.Flags().String(flagName, "", "name (optional)")
-	cmd.Flags().String(flagIdentity, "", "identity signature (optional)")
-	cmd.Flags().String(flagWebsite, "", "website (optional)")
-	cmd.Flags().String(flagDescription, "", "description (optional)")
+	cmd.Flags().String(clitypes.FlagName, "", "name (optional)")
+	cmd.Flags().String(clitypes.FlagIdentity, "", "identity signature (optional)")
+	cmd.Flags().String(clitypes.FlagWebsite, "", "website (optional)")
+	cmd.Flags().String(clitypes.FlagDescription, "", "description (optional)")
 
 	return cmd
 }
