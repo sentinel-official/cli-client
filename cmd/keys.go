@@ -40,7 +40,7 @@ func addCmd() *cobra.Command {
 		Use:  "add [name]",
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			kc, err := context.NewKeyringContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
@@ -67,7 +67,7 @@ func addCmd() *cobra.Command {
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
+			password, err := cliutils.GetPassword(kc.Backend, reader)
 			if err != nil {
 				return err
 			}
@@ -89,7 +89,7 @@ func addCmd() *cobra.Command {
 				}
 			}
 
-			result, err := cc.AddKey(password, args[0], mnemonic, "", coinType, account, index)
+			result, err := kc.AddKey(password, args[0], mnemonic, "", coinType, account, index)
 			if err != nil {
 				return err
 			}
@@ -116,19 +116,19 @@ func deleteCmd() *cobra.Command {
 		Use:  "delete [name]",
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			kc, err := context.NewKeyringContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
+			password, err := cliutils.GetPassword(kc.Backend, reader)
 			if err != nil {
 				return err
 			}
 
-			return cc.DeleteKey(password, args[0])
+			return kc.DeleteKey(password, args[0])
 		},
 	}
 
@@ -141,19 +141,19 @@ func listCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "list",
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			kc, err := context.NewKeyringContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
+			password, err := cliutils.GetPassword(kc.Backend, reader)
 			if err != nil {
 				return err
 			}
 
-			result, err := cc.GetKeys(password)
+			result, err := kc.GetKeys(password)
 			if err != nil {
 				return err
 			}
@@ -173,19 +173,19 @@ func showCmd() *cobra.Command {
 		Use:  "show [name]",
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			kc, err := context.NewKeyringContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, err := cliutils.ReadPassword(cc.KeyringBackend, reader)
+			password, err := cliutils.GetPassword(kc.Backend, reader)
 			if err != nil {
 				return err
 			}
 
-			result, err := cc.GetKey(password, args[0])
+			result, err := kc.GetKey(password, args[0])
 			if err != nil {
 				return err
 			}

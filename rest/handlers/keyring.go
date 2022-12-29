@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/crypto/hd"
+	cryptohd "github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -151,11 +151,11 @@ func AddKey(ctx *context.ServerContext) http.HandlerFunc {
 		}
 
 		var (
-			path          = hd.CreateHDPath(req.CoinType, req.Account, req.Index)
+			path          = cryptohd.CreateHDPath(req.CoinType, req.Account, req.Index)
 			algorithms, _ = kr.SupportedAlgorithms()
 		)
 
-		algorithm, err := keyring.NewSigningAlgoFromString(string(hd.Secp256k1Type), algorithms)
+		algorithm, err := keyring.NewSigningAlgoFromString(string(cryptohd.Secp256k1Type), algorithms)
 		if err != nil {
 			cliutils.WriteErrorToResponseBody(
 				w, http.StatusInternalServerError,

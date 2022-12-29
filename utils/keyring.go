@@ -7,13 +7,15 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 )
 
-func ReadPassword(backend string, r *bufio.Reader) (s string, err error) {
+func GetPassword(backend string, r *bufio.Reader) (string, error) {
 	if backend == keyring.BackendFile {
-		s, err = input.GetPassword("Enter keyring passphrase: ", r)
+		password, err := input.GetPassword("Enter keyring passphrase: ", r)
 		if err != nil {
 			return "", err
 		}
+
+		return password, nil
 	}
 
-	return s, nil
+	return "", nil
 }

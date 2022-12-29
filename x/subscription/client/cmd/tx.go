@@ -42,14 +42,14 @@ func txSubscribeToNode() *cobra.Command {
 		Short: "Subscribe to a node",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -65,7 +65,7 @@ func txSubscribeToNode() *cobra.Command {
 			}
 
 			msg := types.NewMsgSubscribeToNodeRequest(
-				from,
+				fromAddr,
 				nodeAddr,
 				deposit,
 			)
@@ -73,7 +73,7 @@ func txSubscribeToNode() *cobra.Command {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}
@@ -94,14 +94,14 @@ func txSubscribeToPlan() *cobra.Command {
 		Short: "Subscribe to a plan",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -112,7 +112,7 @@ func txSubscribeToPlan() *cobra.Command {
 			}
 
 			msg := types.NewMsgSubscribeToPlanRequest(
-				from,
+				fromAddr,
 				id,
 				args[1],
 			)
@@ -120,7 +120,7 @@ func txSubscribeToPlan() *cobra.Command {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}
@@ -141,14 +141,14 @@ func txAddQuota() *cobra.Command {
 		Short: "Add a quota for subscription",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -169,7 +169,7 @@ func txAddQuota() *cobra.Command {
 			}
 
 			msg := types.NewMsgAddQuotaRequest(
-				from,
+				fromAddr,
 				id,
 				accAddr,
 				sdk.NewInt(bytes),
@@ -178,7 +178,7 @@ func txAddQuota() *cobra.Command {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}
@@ -199,14 +199,14 @@ func txUpdateQuota() *cobra.Command {
 		Short: "Update a quota for subscription",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -227,7 +227,7 @@ func txUpdateQuota() *cobra.Command {
 			}
 
 			msg := types.NewMsgUpdateQuotaRequest(
-				from,
+				fromAddr,
 				id,
 				accAddr,
 				sdk.NewInt(bytes),
@@ -236,7 +236,7 @@ func txUpdateQuota() *cobra.Command {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}
@@ -258,14 +258,14 @@ func txCancel() *cobra.Command {
 		Args:   cobra.ExactArgs(1),
 		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			_, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			_, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -276,7 +276,7 @@ func txCancel() *cobra.Command {
 			}
 
 			msg := types.NewMsgCancelRequest(
-				from,
+				fromAddr,
 				id,
 			)
 			if err := msg.ValidateBasic(); err != nil {

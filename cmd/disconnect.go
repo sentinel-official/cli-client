@@ -12,18 +12,18 @@ func DisconnectCmd() *cobra.Command {
 		Use:   "disconnect",
 		Short: "Disconnect from a node",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			sc, err := context.NewServiceContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
-			status, err := cc.GetStatus()
+			status, err := sc.GetStatus()
 			if err != nil {
 				return err
 			}
 
 			if status.IFace != "" {
-				if err := cc.Disconnect(); err != nil {
+				if err := sc.Disconnect(); err != nil {
 					return err
 				}
 			}

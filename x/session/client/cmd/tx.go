@@ -38,14 +38,14 @@ func txStart() *cobra.Command {
 		Short: "Start a session",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -61,7 +61,7 @@ func txStart() *cobra.Command {
 			}
 
 			msg := types.NewMsgStartRequest(
-				from,
+				fromAddr,
 				id,
 				nodeAddr,
 			)
@@ -69,7 +69,7 @@ func txStart() *cobra.Command {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}
@@ -90,14 +90,14 @@ func txEnd() *cobra.Command {
 		Short: "End a session",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -113,7 +113,7 @@ func txEnd() *cobra.Command {
 			}
 
 			msg := types.NewMsgEndRequest(
-				from,
+				fromAddr,
 				id,
 				rating,
 			)
@@ -121,7 +121,7 @@ func txEnd() *cobra.Command {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}

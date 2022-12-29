@@ -42,14 +42,14 @@ func txAdd() *cobra.Command {
 		Short: "Add a plan",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -70,7 +70,7 @@ func txAdd() *cobra.Command {
 			}
 
 			msg := types.NewMsgAddRequest(
-				from.Bytes(),
+				fromAddr.Bytes(),
 				price,
 				validity,
 				sdk.NewInt(bytes),
@@ -79,7 +79,7 @@ func txAdd() *cobra.Command {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}
@@ -100,14 +100,14 @@ func txSetStatus() *cobra.Command {
 		Short: "Set a plan status",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -118,7 +118,7 @@ func txSetStatus() *cobra.Command {
 			}
 
 			msg := types.NewMsgSetStatusRequest(
-				from.Bytes(),
+				fromAddr.Bytes(),
 				id,
 				hubtypes.StatusFromString(args[1]),
 			)
@@ -126,7 +126,7 @@ func txSetStatus() *cobra.Command {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}
@@ -147,14 +147,14 @@ func txAddNode() *cobra.Command {
 		Short: "Add a node for plan",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -164,21 +164,21 @@ func txAddNode() *cobra.Command {
 				return err
 			}
 
-			node, err := hubtypes.NodeAddressFromBech32(args[1])
+			nodeAddr, err := hubtypes.NodeAddressFromBech32(args[1])
 			if err != nil {
 				return err
 			}
 
 			msg := types.NewMsgAddNodeRequest(
-				from.Bytes(),
+				fromAddr.Bytes(),
 				id,
-				node,
+				nodeAddr,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}
@@ -199,14 +199,14 @@ func txRemoveNode() *cobra.Command {
 		Short: "Remove a node for plan",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -216,21 +216,21 @@ func txRemoveNode() *cobra.Command {
 				return err
 			}
 
-			node, err := hubtypes.NodeAddressFromBech32(args[1])
+			nodeAddr, err := hubtypes.NodeAddressFromBech32(args[1])
 			if err != nil {
 				return err
 			}
 
 			msg := types.NewMsgRemoveNodeRequest(
-				from,
+				fromAddr,
 				id,
-				node,
+				nodeAddr,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}

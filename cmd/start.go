@@ -64,7 +64,7 @@ func StartCmd() *cobra.Command {
 			}
 
 			var (
-				ctx = context.NewServiceContext().
+				ctx = context.NewServerContext().
 					WithHome(home)
 				muxRouter    = mux.NewRouter()
 				prefixRouter = muxRouter.

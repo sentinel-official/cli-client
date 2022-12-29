@@ -30,14 +30,3 @@ func NewNodeFromRaw(v *nodetypes.Node) Node {
 		StatusAt:  v.StatusAt,
 	}
 }
-
-type Nodes []Node
-
-func NewNodesFromRaw(v nodetypes.Nodes) Nodes {
-	items := make(Nodes, 0, len(v))
-	for i := 0; i < len(v); i++ {
-		items = append(items, NewNodeFromRaw(&v[i]))
-	}
-
-	return items
-}

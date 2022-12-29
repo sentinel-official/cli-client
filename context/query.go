@@ -45,14 +45,14 @@ func (c QueryContext) WithContext(v client.Context) QueryContext {
 	return c
 }
 
-func (c *QueryContext) QueryAccount(address sdk.AccAddress) (authtypes.AccountI, error) {
+func (c *QueryContext) QueryAccount(accAddr sdk.AccAddress) (authtypes.AccountI, error) {
 	var (
-		account     authtypes.AccountI
-		qc          = authtypes.NewQueryClient(c)
-		result, err = qc.Account(
+		account   authtypes.AccountI
+		qc        = authtypes.NewQueryClient(c)
+		resp, err = qc.Account(
 			context.Background(),
 			&authtypes.QueryAccountRequest{
-				Address: address.String(),
+				Address: accAddr.String(),
 			},
 		)
 	)
@@ -60,20 +60,20 @@ func (c *QueryContext) QueryAccount(address sdk.AccAddress) (authtypes.AccountI,
 	if err != nil {
 		return nil, err
 	}
-	if err := c.InterfaceRegistry.UnpackAny(result.Account, &account); err != nil {
+	if err := c.InterfaceRegistry.UnpackAny(resp.Account, &account); err != nil {
 		return nil, err
 	}
 
 	return account, nil
 }
 
-func (c *QueryContext) QueryDeposit(address sdk.AccAddress) (*deposittypes.Deposit, error) {
+func (c *QueryContext) QueryDeposit(accAddr sdk.AccAddress) (*deposittypes.Deposit, error) {
 	var (
-		qsc         = deposittypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryDeposit(
+		qsc       = deposittypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryDeposit(
 			context.Background(),
 			deposittypes.NewQueryDepositRequest(
-				address,
+				accAddr,
 			),
 		)
 	)
@@ -82,13 +82,13 @@ func (c *QueryContext) QueryDeposit(address sdk.AccAddress) (*deposittypes.Depos
 		return nil, err
 	}
 
-	return &result.Deposit, nil
+	return &resp.Deposit, nil
 }
 
 func (c *QueryContext) QueryDeposits(pagination *query.PageRequest) (deposittypes.Deposits, error) {
 	var (
-		qsc         = deposittypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryDeposits(
+		qsc       = deposittypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryDeposits(
 			context.Background(),
 			deposittypes.NewQueryDepositsRequest(
 				pagination,
@@ -100,16 +100,16 @@ func (c *QueryContext) QueryDeposits(pagination *query.PageRequest) (deposittype
 		return nil, err
 	}
 
-	return result.Deposits, nil
+	return resp.Deposits, nil
 }
 
-func (c *QueryContext) QueryNode(address hubtypes.NodeAddress) (*nodetypes.Node, error) {
+func (c *QueryContext) QueryNode(nodeAddr hubtypes.NodeAddress) (*nodetypes.Node, error) {
 	var (
-		qsc         = nodetypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryNode(
+		qsc       = nodetypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryNode(
 			context.Background(),
 			nodetypes.NewQueryNodeRequest(
-				address,
+				nodeAddr,
 			),
 		)
 	)
@@ -118,13 +118,13 @@ func (c *QueryContext) QueryNode(address hubtypes.NodeAddress) (*nodetypes.Node,
 		return nil, err
 	}
 
-	return &result.Node, nil
+	return &resp.Node, nil
 }
 
 func (c *QueryContext) QueryNodes(status hubtypes.Status, pagination *query.PageRequest) (nodetypes.Nodes, error) {
 	var (
-		qsc         = nodetypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryNodes(
+		qsc       = nodetypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryNodes(
 			context.Background(),
 			nodetypes.NewQueryNodesRequest(
 				status,
@@ -137,16 +137,16 @@ func (c *QueryContext) QueryNodes(status hubtypes.Status, pagination *query.Page
 		return nil, err
 	}
 
-	return result.Nodes, nil
+	return resp.Nodes, nil
 }
 
-func (c *QueryContext) QueryNodesForProvider(address hubtypes.ProvAddress, status hubtypes.Status, pagination *query.PageRequest) (nodetypes.Nodes, error) {
+func (c *QueryContext) QueryNodesForProvider(provAddr hubtypes.ProvAddress, status hubtypes.Status, pagination *query.PageRequest) (nodetypes.Nodes, error) {
 	var (
-		qsc         = nodetypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryNodesForProvider(
+		qsc       = nodetypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryNodesForProvider(
 			context.Background(),
 			nodetypes.NewQueryNodesForProviderRequest(
-				address,
+				provAddr,
 				status,
 				pagination,
 			),
@@ -157,13 +157,13 @@ func (c *QueryContext) QueryNodesForProvider(address hubtypes.ProvAddress, statu
 		return nil, err
 	}
 
-	return result.Nodes, nil
+	return resp.Nodes, nil
 }
 
 func (c *QueryContext) QueryPlan(id uint64) (*plantypes.Plan, error) {
 	var (
-		qsc         = plantypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryPlan(
+		qsc       = plantypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryPlan(
 			context.Background(),
 			plantypes.NewQueryPlanRequest(
 				id,
@@ -174,13 +174,13 @@ func (c *QueryContext) QueryPlan(id uint64) (*plantypes.Plan, error) {
 		return nil, err
 	}
 
-	return &result.Plan, nil
+	return &resp.Plan, nil
 }
 
 func (c *QueryContext) QueryPlans(status hubtypes.Status, pagination *query.PageRequest) (plantypes.Plans, error) {
 	var (
-		qsc         = plantypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryPlans(
+		qsc       = plantypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryPlans(
 			context.Background(),
 			plantypes.NewQueryPlansRequest(
 				status,
@@ -193,16 +193,16 @@ func (c *QueryContext) QueryPlans(status hubtypes.Status, pagination *query.Page
 		return nil, err
 	}
 
-	return result.Plans, nil
+	return resp.Plans, nil
 }
 
-func (c *QueryContext) QueryPlansForProvider(address hubtypes.ProvAddress, status hubtypes.Status, pagination *query.PageRequest) (plantypes.Plans, error) {
+func (c *QueryContext) QueryPlansForProvider(provAddr hubtypes.ProvAddress, status hubtypes.Status, pagination *query.PageRequest) (plantypes.Plans, error) {
 	var (
-		qsc         = plantypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryPlansForProvider(
+		qsc       = plantypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryPlansForProvider(
 			context.Background(),
 			plantypes.NewQueryPlansForProviderRequest(
-				address,
+				provAddr,
 				status,
 				pagination,
 			),
@@ -213,16 +213,16 @@ func (c *QueryContext) QueryPlansForProvider(address hubtypes.ProvAddress, statu
 		return nil, err
 	}
 
-	return result.Plans, nil
+	return resp.Plans, nil
 }
 
-func (c *QueryContext) QueryProvider(address hubtypes.ProvAddress) (*providertypes.Provider, error) {
+func (c *QueryContext) QueryProvider(provAddr hubtypes.ProvAddress) (*providertypes.Provider, error) {
 	var (
-		qsc         = providertypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryProvider(
+		qsc       = providertypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryProvider(
 			context.Background(),
 			providertypes.NewQueryProviderRequest(
-				address,
+				provAddr,
 			),
 		)
 	)
@@ -231,13 +231,13 @@ func (c *QueryContext) QueryProvider(address hubtypes.ProvAddress) (*providertyp
 		return nil, err
 	}
 
-	return &result.Provider, nil
+	return &resp.Provider, nil
 }
 
 func (c *QueryContext) QueryProviders(pagination *query.PageRequest) (providertypes.Providers, error) {
 	var (
-		qsc         = providertypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryProviders(
+		qsc       = providertypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryProviders(
 			context.Background(),
 			providertypes.NewQueryProvidersRequest(
 				pagination,
@@ -249,13 +249,13 @@ func (c *QueryContext) QueryProviders(pagination *query.PageRequest) (providerty
 		return nil, err
 	}
 
-	return result.Providers, nil
+	return resp.Providers, nil
 }
 
 func (c *QueryContext) QuerySession(id uint64) (*sessiontypes.Session, error) {
 	var (
-		qsc         = sessiontypes.NewQueryServiceClient(c)
-		result, err = qsc.QuerySession(
+		qsc       = sessiontypes.NewQueryServiceClient(c)
+		resp, err = qsc.QuerySession(
 			context.Background(),
 			sessiontypes.NewQuerySessionRequest(
 				id,
@@ -267,13 +267,13 @@ func (c *QueryContext) QuerySession(id uint64) (*sessiontypes.Session, error) {
 		return nil, err
 	}
 
-	return &result.Session, nil
+	return &resp.Session, nil
 }
 
 func (c *QueryContext) QuerySessions(pagination *query.PageRequest) (sessiontypes.Sessions, error) {
 	var (
-		qsc         = sessiontypes.NewQueryServiceClient(c)
-		result, err = qsc.QuerySessions(
+		qsc       = sessiontypes.NewQueryServiceClient(c)
+		resp, err = qsc.QuerySessions(
 			context.Background(),
 			sessiontypes.NewQuerySessionsRequest(
 				pagination,
@@ -285,16 +285,16 @@ func (c *QueryContext) QuerySessions(pagination *query.PageRequest) (sessiontype
 		return nil, err
 	}
 
-	return result.Sessions, nil
+	return resp.Sessions, nil
 }
 
-func (c *QueryContext) QuerySessionsForAddress(address sdk.AccAddress, status hubtypes.Status, pagination *query.PageRequest) (sessiontypes.Sessions, error) {
+func (c *QueryContext) QuerySessionsForAddress(accAddr sdk.AccAddress, status hubtypes.Status, pagination *query.PageRequest) (sessiontypes.Sessions, error) {
 	var (
-		qsc         = sessiontypes.NewQueryServiceClient(c)
-		result, err = qsc.QuerySessionsForAddress(
+		qsc       = sessiontypes.NewQueryServiceClient(c)
+		resp, err = qsc.QuerySessionsForAddress(
 			context.Background(),
 			sessiontypes.NewQuerySessionsForAddressRequest(
-				address,
+				accAddr,
 				status,
 				pagination,
 			),
@@ -305,13 +305,13 @@ func (c *QueryContext) QuerySessionsForAddress(address sdk.AccAddress, status hu
 		return nil, err
 	}
 
-	return result.Sessions, nil
+	return resp.Sessions, nil
 }
 
 func (c *QueryContext) QuerySubscription(id uint64) (*subscriptiontypes.Subscription, error) {
 	var (
-		qsc         = subscriptiontypes.NewQueryServiceClient(c)
-		result, err = qsc.QuerySubscription(
+		qsc       = subscriptiontypes.NewQueryServiceClient(c)
+		resp, err = qsc.QuerySubscription(
 			context.Background(),
 			subscriptiontypes.NewQuerySubscriptionRequest(
 				id,
@@ -323,13 +323,13 @@ func (c *QueryContext) QuerySubscription(id uint64) (*subscriptiontypes.Subscrip
 		return nil, err
 	}
 
-	return &result.Subscription, nil
+	return &resp.Subscription, nil
 }
 
 func (c *QueryContext) QuerySubscriptions(pagination *query.PageRequest) (subscriptiontypes.Subscriptions, error) {
 	var (
-		qsc         = subscriptiontypes.NewQueryServiceClient(c)
-		result, err = qsc.QuerySubscriptions(
+		qsc       = subscriptiontypes.NewQueryServiceClient(c)
+		resp, err = qsc.QuerySubscriptions(
 			context.Background(),
 			subscriptiontypes.NewQuerySubscriptionsRequest(
 				pagination,
@@ -341,16 +341,16 @@ func (c *QueryContext) QuerySubscriptions(pagination *query.PageRequest) (subscr
 		return nil, err
 	}
 
-	return result.Subscriptions, nil
+	return resp.Subscriptions, nil
 }
 
-func (c *QueryContext) QuerySubscriptionsForAddress(address sdk.AccAddress, status hubtypes.Status, pagination *query.PageRequest) (subscriptiontypes.Subscriptions, error) {
+func (c *QueryContext) QuerySubscriptionsForAddress(accAddr sdk.AccAddress, status hubtypes.Status, pagination *query.PageRequest) (subscriptiontypes.Subscriptions, error) {
 	var (
-		qsc         = subscriptiontypes.NewQueryServiceClient(c)
-		result, err = qsc.QuerySubscriptionsForAddress(
+		qsc       = subscriptiontypes.NewQueryServiceClient(c)
+		resp, err = qsc.QuerySubscriptionsForAddress(
 			context.Background(),
 			subscriptiontypes.NewQuerySubscriptionsForAddressRequest(
-				address,
+				accAddr,
 				status,
 				pagination,
 			),
@@ -361,17 +361,17 @@ func (c *QueryContext) QuerySubscriptionsForAddress(address sdk.AccAddress, stat
 		return nil, err
 	}
 
-	return result.Subscriptions, nil
+	return resp.Subscriptions, nil
 }
 
-func (c *QueryContext) QueryQuota(id uint64, address sdk.AccAddress) (*subscriptiontypes.Quota, error) {
+func (c *QueryContext) QueryQuota(id uint64, accAddr sdk.AccAddress) (*subscriptiontypes.Quota, error) {
 	var (
-		qsc         = subscriptiontypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryQuota(
+		qsc       = subscriptiontypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryQuota(
 			context.Background(),
 			subscriptiontypes.NewQueryQuotaRequest(
 				id,
-				address,
+				accAddr,
 			),
 		)
 	)
@@ -380,13 +380,13 @@ func (c *QueryContext) QueryQuota(id uint64, address sdk.AccAddress) (*subscript
 		return nil, err
 	}
 
-	return &result.Quota, nil
+	return &resp.Quota, nil
 }
 
 func (c *QueryContext) QueryQuotas(id uint64, pagination *query.PageRequest) (subscriptiontypes.Quotas, error) {
 	var (
-		qsc         = subscriptiontypes.NewQueryServiceClient(c)
-		result, err = qsc.QueryQuotas(
+		qsc       = subscriptiontypes.NewQueryServiceClient(c)
+		resp, err = qsc.QueryQuotas(
 			context.Background(),
 			subscriptiontypes.NewQueryQuotasRequest(
 				id,
@@ -399,16 +399,16 @@ func (c *QueryContext) QueryQuotas(id uint64, pagination *query.PageRequest) (su
 		return nil, err
 	}
 
-	return result.Quotas, nil
+	return resp.Quotas, nil
 }
 
-func (c *QueryContext) QueryActiveSession(address sdk.AccAddress) (*sessiontypes.Session, error) {
+func (c *QueryContext) QueryActiveSession(accAddr sdk.AccAddress) (*sessiontypes.Session, error) {
 	var (
-		qsc         = sessiontypes.NewQueryServiceClient(c)
-		result, err = qsc.QuerySessionsForAddress(
+		qsc       = sessiontypes.NewQueryServiceClient(c)
+		resp, err = qsc.QuerySessionsForAddress(
 			context.Background(),
 			sessiontypes.NewQuerySessionsForAddressRequest(
-				address,
+				accAddr,
 				hubtypes.StatusActive,
 				&query.PageRequest{
 					Limit: 1,
@@ -420,9 +420,9 @@ func (c *QueryContext) QueryActiveSession(address sdk.AccAddress) (*sessiontypes
 	if err != nil {
 		return nil, err
 	}
-	if len(result.Sessions) == 0 {
+	if len(resp.Sessions) == 0 {
 		return nil, nil
 	}
 
-	return &result.Sessions[0], nil
+	return &resp.Sessions[0], nil
 }

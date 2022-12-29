@@ -1,11 +1,12 @@
 package types
 
 import (
+	"crypto/tls"
+	"net/http"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
@@ -15,6 +16,7 @@ import (
 
 const (
 	FlagAccount        = "account"
+	FlagAddress        = "address"
 	FlagBroadcastMode  = "broadcast-mode"
 	FlagChainID        = "chain-id"
 	FlagCoinType       = "coin-type"
@@ -25,8 +27,8 @@ const (
 	FlagHome           = "home"
 	FlagIdentity       = "identity"
 	FlagIndex          = "index"
-	FlagKeyringBackend = "keyring.backend"
-	FlagKeyringHome    = "keyring.home"
+	FlagKeyringBackend = "keyring-backend"
+	FlagKeyringHome    = "keyring-home"
 	FlagListen         = "listen"
 	FlagMemo           = "memo"
 	FlagName           = "name"
@@ -42,7 +44,6 @@ const (
 	FlagWebsite        = "website"
 	FlagWithKeyring    = "with-keyring"
 	FlagWithService    = "with-service"
-	FlagAddress        = keys.FlagAddress
 )
 
 func addKeyringFlagsToCmd(cmd *cobra.Command) {
@@ -137,4 +138,20 @@ func GetStatusFromCmd(cmd *cobra.Command) (hubtypes.Status, error) {
 	}
 
 	return hubtypes.StatusFromString(s), nil
+}
+
+func GetHTTPClientFromCmd(cmd *cobra.Command) (c http.Client, err error) {
+	timeout, err := cmd.Flags().GetDuration(FlagTimeout)
+	if err != nil {
+		return c, err
+	}
+
+	return http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+		Timeout: timeout,
+	}, nil
 }

@@ -66,18 +66,23 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
-			status, err := cc.GetStatus()
+			sc, err := context.NewServiceContextFromCmd(cmd)
+			if err != nil {
+				return err
+			}
+
+			status, err := sc.GetStatus()
 			if err != nil {
 				return err
 			}
 
 			if status.IFace != "" {
-				if err := cc.Disconnect(); err != nil {
+				if err := sc.Disconnect(); err != nil {
 					return err
 				}
 			}
@@ -87,12 +92,12 @@ func ConnectCmd() *cobra.Command {
 				reader   = bufio.NewReader(cmd.InOrStdin())
 			)
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, from, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
 
-			session, err := cc.QueryActiveSession(from)
+			session, err := tc.QueryActiveSession(from)
 			if err != nil {
 				return err
 			}
@@ -117,14 +122,14 @@ func ConnectCmd() *cobra.Command {
 				),
 			)
 
-			txRes, err := cc.SignAndBroadcastTx(password, messages...)
+			txRes, err := tc.SignMessagesAndBroadcastTx(password, messages...)
 			if err != nil {
 				return err
 			}
 
 			fmt.Println(txRes)
 
-			session, err = cc.QueryActiveSession(from)
+			session, err = tc.QueryActiveSession(from)
 			if err != nil {
 				return err
 			}
@@ -132,7 +137,7 @@ func ConnectCmd() *cobra.Command {
 				return fmt.Errorf("active session does not exist for subscription %d", id)
 			}
 
-			node, err := cc.QueryNode(nodeAddr)
+			node, err := tc.QueryNode(nodeAddr)
 			if err != nil {
 				return err
 			}
@@ -142,9 +147,9 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
-			signMsgRes, err := cc.SignMessage(
+			signMsgRes, err := tc.SignMessage(
 				password,
-				cc.From,
+				tc.From,
 				sdk.Uint64ToBigEndian(session.Id),
 			)
 			if err != nil {
@@ -174,7 +179,7 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
-			r, err := cc.Post(endpoint, jsonrpc.ContentType, bytes.NewBuffer(buf))
+			r, err := tc.Post(endpoint, jsonrpc.ContentType, bytes.NewBuffer(buf))
 			if err != nil {
 				return err
 			}
@@ -191,7 +196,8 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
-			return cc.Connect(
+			return sc.Connect(
+				tc.Backend,
 				password,
 				from.String(),
 				nodeAddr.String(),

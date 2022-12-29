@@ -35,27 +35,27 @@ func txSetStatus() *cobra.Command {
 		Short: "Set a node status",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
 
 			msg := nodetypes.NewMsgSetStatusRequest(
-				from.Bytes(),
+				fromAddr.Bytes(),
 				hubtypes.StatusFromString(args[0]),
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}

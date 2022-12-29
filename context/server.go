@@ -4,7 +4,7 @@ type ServerContext struct {
 	home string
 }
 
-func NewServiceContext() ServerContext {
+func NewServerContext() ServerContext {
 	return ServerContext{}
 }
 

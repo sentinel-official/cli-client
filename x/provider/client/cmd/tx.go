@@ -37,14 +37,14 @@ func txRegister() *cobra.Command {
 		Args:   cobra.ExactArgs(1),
 		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -65,7 +65,7 @@ func txRegister() *cobra.Command {
 			}
 
 			msg := types.NewMsgRegisterRequest(
-				from,
+				fromAddr,
 				args[0],
 				identity,
 				website,
@@ -75,7 +75,7 @@ func txRegister() *cobra.Command {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}
@@ -99,14 +99,14 @@ func txUpdate() *cobra.Command {
 		Use:   "update",
 		Short: "Update a provider",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc, err := context.NewClientContextFromCmd(cmd)
+			tc, err := context.NewTxContextFromCmd(cmd)
 			if err != nil {
 				return err
 			}
 
 			reader := bufio.NewReader(cmd.InOrStdin())
 
-			password, from, err := cc.ReadPasswordAndGetAddress(reader, cc.From)
+			password, fromAddr, err := tc.GetPasswordAndAddress(reader, tc.From)
 			if err != nil {
 				return err
 			}
@@ -132,7 +132,7 @@ func txUpdate() *cobra.Command {
 			}
 
 			msg := types.NewMsgUpdateRequest(
-				from.Bytes(),
+				fromAddr.Bytes(),
 				name,
 				identity,
 				website,
@@ -142,7 +142,7 @@ func txUpdate() *cobra.Command {
 				return err
 			}
 
-			result, err := cc.SignAndBroadcastTx(password, msg)
+			result, err := tc.SignMessagesAndBroadcastTx(password, msg)
 			if err != nil {
 				return err
 			}
