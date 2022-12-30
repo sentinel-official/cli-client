@@ -46,8 +46,11 @@ func (w *WireGuard) IsUp() bool {
 	if err != nil {
 		return false
 	}
+	if strings.Contains(string(output), "No such device") {
+		return false
+	}
 
-	return strings.Contains(string(output), "No such device")
+	return true
 }
 
 func (w *WireGuard) PreUp() error {
