@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/alessio/shellescape"
@@ -16,9 +18,7 @@ func (w *WireGuard) RealInterface() (string, error) {
 		return "", err
 	}
 
-	var (
-		scanner = bufio.NewReader(nameFile)
-	)
+	scanner := bufio.NewReader(nameFile)
 
 	line, err := scanner.ReadString('\n')
 	if err != nil {
@@ -26,4 +26,32 @@ func (w *WireGuard) RealInterface() (string, error) {
 	}
 
 	return strings.Trim(line, "\n"), nil
+}
+
+func (w *WireGuard) ExecFile(name string) string {
+	return name
+}
+
+func (w *WireGuard) Up() error {
+	var (
+		cfgFilePath = filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
+		cmd         = exec.Command(w.ExecFile("wg-quick"), strings.Split(
+			fmt.Sprintf("up %s", shellescape.Quote(cfgFilePath)), " ")...)
+	)
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func (w *WireGuard) Down() error {
+	var (
+		cfgFilePath = filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
+		cmd         = exec.Command(w.ExecFile("wg-quick"), strings.Split(
+			fmt.Sprintf("down %s", shellescape.Quote(cfgFilePath)), " ")...)
+	)
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
