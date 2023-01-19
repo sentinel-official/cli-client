@@ -40,7 +40,7 @@ func (w *WireGuard) IsUp() bool {
 		return false
 	}
 
-	output, err := exec.Command("wg", strings.Split(
+	output, err := exec.Command(w.ExecFile("wg"), strings.Split(
 		fmt.Sprintf("show %s", shellescape.Quote(iFace)), " ")...).CombinedOutput()
 	if err != nil {
 		return false
@@ -56,40 +56,16 @@ func (w *WireGuard) PreUp() error {
 	return w.cfg.WriteToFile(w.home)
 }
 
-func (w *WireGuard) Up() error {
-	var (
-		path = filepath.Join(w.home, fmt.Sprintf("%s.conf", w.cfg.Name))
-		cmd  = exec.Command("wg-quick", strings.Split(
-			fmt.Sprintf("up %s", shellescape.Quote(path)), " ")...)
-	)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
 func (w *WireGuard) PostUp() error  { return nil }
 func (w *WireGuard) PreDown() error { return nil }
 
-func (w *WireGuard) Down() error {
-	var (
-		path = filepath.Join(w.home, fmt.Sprintf("%s.conf", w.cfg.Name))
-		cmd  = exec.Command("wg-quick", strings.Split(
-			fmt.Sprintf("down %s", shellescape.Quote(path)), " ")...)
-	)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
 func (w *WireGuard) PostDown() error {
-	path := filepath.Join(w.home, fmt.Sprintf("%s.conf", w.cfg.Name))
-	if _, err := os.Stat(path); err == nil {
-		return os.Remove(path)
+	cfgFilePath := filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
+	if _, err := os.Stat(cfgFilePath); err != nil {
+		return nil
 	}
 
-	return nil
+	return os.Remove(cfgFilePath)
 }
 
 func (w *WireGuard) Transfer() (u int64, d int64, err error) {
@@ -98,7 +74,7 @@ func (w *WireGuard) Transfer() (u int64, d int64, err error) {
 		return 0, 0, err
 	}
 
-	output, err := exec.Command("wg", strings.Split(
+	output, err := exec.Command(w.ExecFile("wg"), strings.Split(
 		fmt.Sprintf("show %s transfer", shellescape.Quote(iFace)), " ")...).Output()
 	if err != nil {
 		return 0, 0, err

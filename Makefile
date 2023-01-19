@@ -24,6 +24,8 @@ build:
 		-o ./build/sentinelcli-${VERSION}-darwin-amd64 main.go
 	GOOS=linux GOARCH=amd64 go build -mod=readonly -tags="${BUILD_TAGS}" -ldflags="${LD_FLAGS}" \
 		-o ./build/sentinelcli-${VERSION}-linux-amd64 main.go
+	GOOS=windows GOARCH=amd64 go build -mod=readonly -tags="${BUILD_TAGS}" -ldflags="${LD_FLAGS}" \
+		-o ./build/sentinelcli-${VERSION}-windows-amd64.exe main.go
 
 .PHONY: install
 install:
