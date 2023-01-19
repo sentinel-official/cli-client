@@ -60,7 +60,7 @@ func (w *WireGuard) PostUp() error  { return nil }
 func (w *WireGuard) PreDown() error { return nil }
 
 func (w *WireGuard) PostDown() error {
-	cfgFilePath := filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
+	cfgFilePath := filepath.Join(w.home, fmt.Sprintf("%s.conf", w.cfg.Name))
 	if _, err := os.Stat(cfgFilePath); err != nil {
 		return nil
 	}

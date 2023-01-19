@@ -17,7 +17,7 @@ func (w *WireGuard) ExecFile(name string) string {
 
 func (w *WireGuard) Up() error {
 	var (
-		cfgFilePath = filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
+		cfgFilePath = filepath.Join(w.home, fmt.Sprintf("%s.conf", w.cfg.Name))
 		cmd         = exec.Command(
 			w.ExecFile("wireguard.exe"),
 			"/installtunnelservice", cfgFilePath,
