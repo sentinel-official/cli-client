@@ -34,14 +34,14 @@ func main() {
 			var (
 				config    = hub.MakeEncodingConfig()
 				clientCtx = client.Context{}.
-					WithJSONMarshaler(config.Marshaler).
-					WithInterfaceRegistry(config.InterfaceRegistry).
-					WithTxConfig(config.TxConfig).
-					WithLegacyAmino(config.Amino).
-					WithInput(os.Stdin).
-					WithAccountRetriever(authtypes.AccountRetriever{}).
-					WithBroadcastMode(flags.BroadcastBlock).
-					WithHomeDir(types.DefaultHomeDirectory)
+						WithCodec(config.Marshaler).
+						WithInterfaceRegistry(config.InterfaceRegistry).
+						WithTxConfig(config.TxConfig).
+						WithLegacyAmino(config.Amino).
+						WithInput(os.Stdin).
+						WithAccountRetriever(authtypes.AccountRetriever{}).
+						WithBroadcastMode(flags.BroadcastBlock).
+						WithHomeDir(types.DefaultHomeDirectory)
 			)
 
 			if err := client.SetCmdClientContextHandler(clientCtx, cmd); err != nil {

@@ -111,11 +111,6 @@ func QuerySubscriptions() *cobra.Command {
 				return err
 			}
 
-			plan, err := cmd.Flags().GetUint64(flagPlan)
-			if err != nil {
-				return err
-			}
-
 			status, err := cmd.Flags().GetString(flagStatus)
 			if err != nil {
 				return err
@@ -142,19 +137,6 @@ func QuerySubscriptions() *cobra.Command {
 					subscriptiontypes.NewQuerySubscriptionsForAddressRequest(
 						address,
 						hubtypes.StatusFromString(status),
-						pagination,
-					),
-				)
-				if err != nil {
-					return err
-				}
-
-				items = append(items, types.NewSubscriptionsFromRaw(result.Subscriptions)...)
-			} else if plan != 0 {
-				result, err := qsc.QuerySubscriptionsForPlan(
-					context.Background(),
-					subscriptiontypes.NewQuerySubscriptionsForPlanRequest(
-						plan,
 						pagination,
 					),
 				)
@@ -204,7 +186,6 @@ func QuerySubscriptions() *cobra.Command {
 	flags.AddPaginationFlagsToCmd(cmd, "subscriptions")
 
 	cmd.Flags().String(flagAddress, "", "filter with account address")
-	cmd.Flags().Uint64(flagPlan, 0, "filter with plan identity")
 	cmd.Flags().String(flagStatus, "Active", "filter with status (Active|Inactive)")
 
 	return cmd
