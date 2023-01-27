@@ -9,7 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/version"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/sentinel-official/hub"
 	hubtypes "github.com/sentinel-official/hub/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,7 +31,7 @@ func main() {
 			}
 
 			var (
-				config    = hub.MakeEncodingConfig()
+				config    = types.MakeEncodingConfig()
 				clientCtx = client.Context{}.
 						WithCodec(config.Marshaler).
 						WithInterfaceRegistry(config.InterfaceRegistry).
