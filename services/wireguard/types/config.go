@@ -8,29 +8,30 @@ import (
 )
 
 type Config struct {
-	Interface Interface
-	Peers     []Peer
+	Name      string    `json:"name"`
+	Interface Interface `json:"-"`
+	Peers     []Peer    `json:"-"`
 }
 
 type Interface struct {
-	PrivateKey Key
-	Addresses  []IPNet
-	ListenPort uint16
-	MTU        uint16
-	DNS        []net.IP
-	DNSSearch  []string
-	PreUp      string
-	PostUp     string
-	PreDown    string
-	PostDown   string
+	PrivateKey Key      `json:"-"`
+	Addresses  []IPNet  `json:"-"`
+	ListenPort uint16   `json:"-"`
+	MTU        uint16   `json:"-"`
+	DNS        []net.IP `json:"-"`
+	DNSSearch  []string `json:"-"`
+	PreUp      string   `json:"-"`
+	PostUp     string   `json:"-"`
+	PreDown    string   `json:"-"`
+	PostDown   string   `json:"-"`
 }
 
 type Peer struct {
-	PublicKey           Key
-	PresharedKey        Key
-	AllowedIPs          []IPNet
-	Endpoint            Endpoint
-	PersistentKeepalive uint16
+	PublicKey           Key      `json:"-"`
+	PresharedKey        Key      `json:"-"`
+	AllowedIPs          []IPNet  `json:"-"`
+	Endpoint            Endpoint `json:"-"`
+	PersistentKeepalive uint16   `json:"-"`
 }
 
 func (c *Config) ToWgQuick() string {

@@ -1,6 +1,7 @@
 package wireguard
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -20,24 +21,29 @@ var (
 )
 
 type WireGuard struct {
-	cfg  *types.Config
-	info []byte
+	cfg *types.Config
 }
 
-func NewWireGuard(cfg *types.Config, info []byte) *WireGuard {
+func NewWireGuard(cfg *types.Config) *WireGuard {
 	return &WireGuard{
-		cfg:  cfg,
-		info: info,
+		cfg: cfg,
 	}
 }
 
 func (s *WireGuard) home() string { return viper.GetString(flags.FlagHome) }
 
 func (s *WireGuard) configFilePath() string {
-	return filepath.Join(s.home(), types.DefaultConfigFileName)
+	return filepath.Join(s.home(), fmt.Sprintf("%s.conf", s.cfg.Name))
 }
 
-func (s *WireGuard) Info() []byte { return s.info }
+func (s *WireGuard) Info() []byte {
+	buf, err := json.Marshal(s.cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	return buf
+}
 
 func (s *WireGuard) IsUp() bool {
 	iFace, err := s.realInterface()

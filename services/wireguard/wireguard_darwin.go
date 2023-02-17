@@ -6,12 +6,10 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/sentinel-official/cli-client/services/wireguard/types"
 )
 
 func (s *WireGuard) realInterface() (string, error) {
-	nameFile, err := os.Open(fmt.Sprintf("/var/run/wireguard/%s.name", types.DefaultInterface))
+	nameFile, err := os.Open(fmt.Sprintf("/var/run/wireguard/%s.name", s.cfg.Name))
 	if err != nil {
 		return "", err
 	}

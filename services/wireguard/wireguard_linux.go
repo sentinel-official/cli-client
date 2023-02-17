@@ -5,12 +5,10 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/sentinel-official/cli-client/services/wireguard/types"
 )
 
 func (s *WireGuard) realInterface() (string, error) {
-	return types.DefaultInterface, nil
+	return s.cfg.Name, nil
 }
 
 func (s *WireGuard) execFile(name string) string {
