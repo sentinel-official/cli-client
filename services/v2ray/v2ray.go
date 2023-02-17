@@ -1,0 +1,98 @@
+package v2ray
+
+import (
+	"encoding/binary"
+	"os"
+	"path/filepath"
+
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/shirou/gopsutil/v3/process"
+	"github.com/spf13/viper"
+
+	"github.com/sentinel-official/cli-client/services/v2ray/types"
+	clienttypes "github.com/sentinel-official/cli-client/types"
+)
+
+var (
+	_ clienttypes.Service = (*V2Ray)(nil)
+)
+
+type V2Ray struct {
+	cfg  *types.Config
+	info []byte
+}
+
+func NewV2Ray(cfg *types.Config, info []byte) *V2Ray {
+	return &V2Ray{
+		cfg:  cfg,
+		info: info,
+	}
+}
+
+func (s *V2Ray) home() string           { return viper.GetString(flags.FlagHome) }
+func (s *V2Ray) configFilePath() string { return filepath.Join(s.home(), types.ConfigFileName) }
+func (s *V2Ray) pid() int32             { return int32(binary.BigEndian.Uint32(s.info[0:4])) }
+
+func (s *V2Ray) Info() []byte { return s.info }
+
+func (s *V2Ray) PreUp() error {
+	return s.cfg.WriteToFile(s.home())
+}
+
+func (s *V2Ray) IsUp() bool {
+	ok, err := process.PidExists(s.pid())
+	if err != nil {
+		return false
+	}
+	if !ok {
+		return false
+	}
+
+	proc, err := process.NewProcess(s.pid())
+	if err != nil {
+		return false
+	}
+
+	ok, err = proc.IsRunning()
+	if err != nil {
+		return false
+	}
+	if !ok {
+		return false
+	}
+
+	name, err := proc.Name()
+	if err != nil {
+		return false
+	}
+	if name != v2ray {
+		return false
+	}
+
+	return true
+}
+
+func (s *V2Ray) PostUp() error  { return nil }
+func (s *V2Ray) PreDown() error { return nil }
+
+func (s *V2Ray) Down() error {
+	proc, err := process.NewProcess(s.pid())
+	if err != nil {
+		return err
+	}
+
+	return proc.Kill()
+}
+
+func (s *V2Ray) PostDown() error {
+	cfgFilePath := s.configFilePath()
+	if _, err := os.Stat(cfgFilePath); err != nil {
+		return nil
+	}
+
+	return os.Remove(cfgFilePath)
+}
+
+func (s *V2Ray) Transfer() (int64, int64, error) {
+	return 0, 0, nil
+}
