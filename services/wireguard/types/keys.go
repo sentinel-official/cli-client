@@ -1,5 +1,6 @@
 package types
 
 const (
-	DefaultInterface = "wg99"
+	DefaultConfigFileName = "wg99.conf"
+	DefaultInterface      = "wg99"
 )

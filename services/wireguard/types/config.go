@@ -2,14 +2,12 @@ package types
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
-	"path/filepath"
+	"os"
 	"strings"
 )
 
 type Config struct {
-	Name      string
 	Interface Interface
 	Peers     []Peer
 }
@@ -109,7 +107,6 @@ func (c *Config) ToWgQuick() string {
 	return output.String()
 }
 
-func (c *Config) WriteToFile(dir string) error {
-	path := filepath.Join(dir, fmt.Sprintf("%s.conf", c.Name))
-	return ioutil.WriteFile(path, []byte(c.ToWgQuick()), 0600)
+func (c *Config) WriteToFile(path string) error {
+	return os.WriteFile(path, []byte(c.ToWgQuick()), 0600)
 }

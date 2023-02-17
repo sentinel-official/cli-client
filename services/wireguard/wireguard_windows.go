@@ -1,26 +1,26 @@
 package wireguard
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/sentinel-official/cli-client/services/wireguard/types"
 )
 
-func (w *WireGuard) RealInterface() (string, error) {
-	return w.cfg.Name, nil
+func (s *WireGuard) realInterface() (string, error) {
+	return types.DefaultInterface, nil
 }
 
-func (w *WireGuard) ExecFile(name string) string {
-	return ".\\" + filepath.Join("WireGuard", name)
+func (s *WireGuard) execFile(name string) string {
+	return ".\\" + filepath.Join("WireGuard", name+".exe")
 }
 
-func (w *WireGuard) Up() error {
+func (s *WireGuard) Up() error {
 	var (
-		cfgFilePath = filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
-		cmd         = exec.Command(
-			w.ExecFile("wireguard.exe"),
-			"/installtunnelservice", cfgFilePath,
+		cmd = exec.Command(
+			s.execFile("wireguard"),
+			"/installtunnelservice", s.configFilePath(),
 		)
 	)
 
@@ -29,14 +29,14 @@ func (w *WireGuard) Up() error {
 	return cmd.Run()
 }
 
-func (w *WireGuard) Down() error {
-	iFace, err := w.RealInterface()
+func (s *WireGuard) Down() error {
+	iFace, err := s.realInterface()
 	if err != nil {
 		return err
 	}
 
 	cmd := exec.Command(
-		w.ExecFile("wireguard.exe"),
+		s.execFile("wireguard"),
 		"/uninstalltunnelservice", iFace,
 	)
 
