@@ -6,17 +6,13 @@ import (
 	"path/filepath"
 )
 
-const (
-	v2ray = "v2ray.exe"
-)
-
 func (s *V2Ray) execFile(name string) string {
-	return ".\\" + filepath.Join("V2Ray", name)
+	return ".\\" + filepath.Join("V2Ray", name+".exe")
 }
 
 func (s *V2Ray) Up() error {
 	cmd := exec.Command(
-		s.execFile(v2ray),
+		s.execFile("v2ray"),
 		"run", "--config", s.configFilePath(),
 	)
 	cmd.Stdout = os.Stdout

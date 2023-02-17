@@ -7,17 +7,13 @@ import (
 	"strings"
 )
 
-const (
-	v2ray = "v2ray"
-)
-
 func (s *V2Ray) execFile(name string) string {
 	return name
 }
 
 func (s *V2Ray) Up() error {
 	cmd := exec.Command(
-		s.execFile(v2ray),
+		s.execFile("v2ray"),
 		strings.Split(
 			fmt.Sprintf("run --config %s", s.configFilePath()),
 			" ",

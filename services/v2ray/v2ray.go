@@ -30,13 +30,14 @@ func NewV2Ray(cfg *types.Config, info []byte) *V2Ray {
 }
 
 func (s *V2Ray) home() string           { return viper.GetString(flags.FlagHome) }
-func (s *V2Ray) configFilePath() string { return filepath.Join(s.home(), types.ConfigFileName) }
+func (s *V2Ray) configFilePath() string { return filepath.Join(s.home(), types.DefaultConfigFileName) }
 func (s *V2Ray) pid() int32             { return int32(binary.BigEndian.Uint32(s.info[0:4])) }
 
 func (s *V2Ray) Info() []byte { return s.info }
 
 func (s *V2Ray) PreUp() error {
-	return s.cfg.WriteToFile(s.home())
+	cfgFilePath := s.configFilePath()
+	return s.cfg.WriteToFile(cfgFilePath)
 }
 
 func (s *V2Ray) IsUp() bool {

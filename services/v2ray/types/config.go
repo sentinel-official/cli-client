@@ -3,7 +3,6 @@ package types
 import (
 	"bytes"
 	"os"
-	"path/filepath"
 	"strings"
 	"text/template"
 )
@@ -111,22 +110,28 @@ var (
 	`)
 )
 
-type Config struct {
-	API struct {
-		Port uint16 `json:"port"`
-	} `json:"api"`
-	Proxy struct {
-		Port uint16 `json:"port"`
-	} `json:"proxy"`
-	VMess struct {
-		Address   string `json:"address"`
-		ID        string `json:"id"`
-		Port      uint16 `json:"port"`
-		Transport string `json:"transport"`
-	} `json:"vmess"`
+type APIConfig struct {
+	Port uint16 `json:"port"`
 }
 
-func (c *Config) WriteToFile(dir string) error {
+type ProxyConfig struct {
+	Port uint16 `json:"port"`
+}
+
+type VMessConfig struct {
+	Address   string `json:"address"`
+	ID        string `json:"id"`
+	Port      uint16 `json:"port"`
+	Transport string `json:"transport"`
+}
+
+type Config struct {
+	API   *APIConfig   `json:"api"`
+	Proxy *ProxyConfig `json:"proxy"`
+	VMess *VMessConfig `json:"vmess"`
+}
+
+func (c *Config) WriteToFile(path string) error {
 	t, err := template.New("config_v2ray_json").Parse(configTemplate)
 	if err != nil {
 		return err
@@ -137,6 +142,5 @@ func (c *Config) WriteToFile(dir string) error {
 		return err
 	}
 
-	cfgFilePath := filepath.Join(dir, ConfigFileName)
-	return os.WriteFile(cfgFilePath, buf.Bytes(), 0600)
+	return os.WriteFile(path, buf.Bytes(), 0600)
 }
