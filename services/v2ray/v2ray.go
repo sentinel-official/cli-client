@@ -1,7 +1,7 @@
 package v2ray
 
 import (
-	"encoding/binary"
+	"encoding/json"
 	"os"
 	"path/filepath"
 
@@ -18,22 +18,27 @@ var (
 )
 
 type V2Ray struct {
-	cfg  *types.Config
-	info []byte
+	cfg *types.Config
 }
 
-func NewV2Ray(cfg *types.Config, info []byte) *V2Ray {
+func NewV2Ray(cfg *types.Config) *V2Ray {
 	return &V2Ray{
-		cfg:  cfg,
-		info: info,
+		cfg: cfg,
 	}
 }
 
 func (s *V2Ray) home() string           { return viper.GetString(flags.FlagHome) }
 func (s *V2Ray) configFilePath() string { return filepath.Join(s.home(), types.DefaultConfigFileName) }
-func (s *V2Ray) pid() int32             { return int32(binary.BigEndian.Uint32(s.info[0:4])) }
+func (s *V2Ray) pid() int32             { return s.cfg.PID }
 
-func (s *V2Ray) Info() []byte { return s.info }
+func (s *V2Ray) Info() []byte {
+	buf, err := json.Marshal(s.cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	return buf
+}
 
 func (s *V2Ray) PreUp() error {
 	cfgFilePath := s.configFilePath()

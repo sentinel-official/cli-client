@@ -115,20 +115,21 @@ type APIConfig struct {
 }
 
 type ProxyConfig struct {
-	Port uint16 `json:"port"`
+	Port uint16 `json:"-"`
 }
 
 type VMessConfig struct {
-	Address   string `json:"address"`
-	ID        string `json:"id"`
-	Port      uint16 `json:"port"`
-	Transport string `json:"transport"`
+	Address   string `json:"-"`
+	ID        string `json:"-"`
+	Port      uint16 `json:"-"`
+	Transport string `json:"-"`
 }
 
 type Config struct {
+	PID   int32        `json:"pid"`
 	API   *APIConfig   `json:"api"`
-	Proxy *ProxyConfig `json:"proxy"`
-	VMess *VMessConfig `json:"vmess"`
+	Proxy *ProxyConfig `json:"-"`
+	VMess *VMessConfig `json:"-"`
 }
 
 func (c *Config) WriteToFile(path string) error {
