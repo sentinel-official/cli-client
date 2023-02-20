@@ -3,10 +3,10 @@ module github.com/sentinel-official/cli-client
 go 1.19
 
 require (
-	github.com/alessio/shellescape v1.4.1
 	github.com/cosmos/cosmos-sdk v0.45.11
 	github.com/cosmos/ibc-go/v3 v3.4.0
 	github.com/go-kit/kit v0.12.0
+	github.com/hashicorp/go-uuid v1.0.1
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
 	github.com/sentinel-official/hub v0.10.1
@@ -59,7 +59,6 @@ require (
 	github.com/gtank/merlin v0.1.1 // indirect
 	github.com/gtank/ristretto255 v0.1.2 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
-	github.com/hashicorp/go-uuid v1.0.1 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hdevalence/ed25519consensus v0.0.0-20210204194344-59a8610d2b87 // indirect
