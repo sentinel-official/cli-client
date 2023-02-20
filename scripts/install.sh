@@ -8,7 +8,7 @@ Linux)
   OS=linux
   ;;
 *)
-  echo "Unsupported"
+  echo "Unsupported operating system!"
   exit 1
   ;;
 esac
@@ -25,9 +25,9 @@ VERSION=$(
 
 FILE_NAME="sentinelcli-${VERSION}-${OS}-amd64"
 FILE_PATH="$(mktemp -d)/${FILE_NAME}"
-ASSET_URL="https://github.com/sentinel-official/cli-client/releases/download/v${VERSION}/${FILE_NAME}"
+ASSET_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/v${VERSION}/${FILE_NAME}"
 
 curl --location --output "${FILE_PATH}" "${ASSET_URL}"
-chmod +x "${FILE_PATH}" &&
-  sudo chown root "${FILE_PATH}" &&
-  sudo mv "${FILE_PATH}" /usr/local/bin/sentinelcli
+chmod +x "${FILE_PATH}" && \
+sudo chown root "${FILE_PATH}" && \
+sudo mv "${FILE_PATH}" /usr/local/bin/sentinelcli
