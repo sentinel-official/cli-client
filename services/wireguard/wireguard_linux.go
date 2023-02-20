@@ -30,15 +30,10 @@ func (s *WireGuard) Up() error {
 }
 
 func (s *WireGuard) Down() error {
-	iFace, err := s.realInterface()
-	if err != nil {
-		return err
-	}
-
 	cmd := exec.Command(
 		s.execFile("wg-quick"),
 		strings.Split(
-			fmt.Sprintf("down %s", iFace),
+			fmt.Sprintf("down %s", s.configFilePath()),
 			" ",
 		)...,
 	)
