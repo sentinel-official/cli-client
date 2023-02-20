@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -21,17 +21,50 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/go-kit/kit/transport/http/jsonrpc"
+	"github.com/hashicorp/go-uuid"
 	"github.com/pkg/errors"
 	hubtypes "github.com/sentinel-official/hub/types"
 	nodetypes "github.com/sentinel-official/hub/x/node/types"
 	sessiontypes "github.com/sentinel-official/hub/x/session/types"
 	"github.com/spf13/cobra"
 
+	"github.com/sentinel-official/cli-client/services/v2ray"
+	v2raytypes "github.com/sentinel-official/cli-client/services/v2ray/types"
 	"github.com/sentinel-official/cli-client/services/wireguard"
 	wireguardtypes "github.com/sentinel-official/cli-client/services/wireguard/types"
 	clienttypes "github.com/sentinel-official/cli-client/types"
 	netutil "github.com/sentinel-official/cli-client/utils/net"
 )
+
+func fetchNodeInfo(remoteURL string, timeout time.Duration) (map[string]interface{}, error) {
+	endpoint, err := url.JoinPath(remoteURL, "status")
+	if err != nil {
+		return nil, err
+	}
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+		Timeout: timeout,
+	}
+
+	resp, err := httpClient.Get(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	var body clienttypes.Response
+	if err = json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, err
+	}
+
+	return body.Result.(map[string]interface{}), nil
+}
 
 func queryNode(qsc nodetypes.QueryServiceClient, address hubtypes.NodeAddress) (*nodetypes.Node, error) {
 	var (
@@ -103,51 +136,74 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
-			var (
-				resolvers      []net.IP
-				status         = clienttypes.NewStatus()
-				statusFilePath = filepath.Join(ctx.HomeDir, "status.json")
-			)
-
+			var resolvers []net.IP
 			for _, s := range ss {
 				ip := net.ParseIP(s)
 				if ip == nil {
-					return fmt.Errorf("provided resolver ip %s is invalid", s)
+					return fmt.Errorf("invalid resolver ip %s", s)
 				}
 
 				resolvers = append(resolvers, ip)
 			}
 
-			if err := status.LoadFromPath(statusFilePath); err != nil {
+			v2RayProxyPort, err := cmd.Flags().GetUint16(clienttypes.FlagV2RayProxyPort)
+			if err != nil {
 				return err
 			}
 
-			if status.IFace != "" {
-				var (
-					service = wireguard.NewWireGuard().
-						WithConfig(
-							&wireguardtypes.Config{
-								Name: status.IFace,
-							},
-						)
-				)
+			var (
+				status         = clienttypes.NewStatus()
+				statusFilePath = filepath.Join(ctx.HomeDir, "status.json")
+			)
 
-				if service.IsUp() {
-					if err := service.PreDown(); err != nil {
-						return err
-					}
-					if err := service.Down(); err != nil {
-						return err
-					}
-					if err := service.PostDown(); err != nil {
-						return err
-					}
+			if err = status.LoadFromPath(statusFilePath); err != nil {
+				return err
+			}
+
+			var service clienttypes.Service
+			if status.Type == 1 {
+				var cfg wireguardtypes.Config
+				if err = json.Unmarshal(status.Info, &cfg); err != nil {
+					return err
+				}
+
+				service = wireguard.NewWireGuard(&cfg)
+			} else if status.Type == 2 {
+				var cfg v2raytypes.Config
+				if err = json.Unmarshal(status.Info, &cfg); err != nil {
+					return err
+				}
+
+				service = v2ray.NewV2Ray(&cfg)
+			}
+
+			if service != nil && service.IsUp() {
+				if err = service.PreDown(); err != nil {
+					return err
+				}
+				if err = service.Down(); err != nil {
+					return err
+				}
+				if err = service.PostDown(); err != nil {
+					return err
 				}
 			}
 
+			nodeQueryClient := nodetypes.NewQueryServiceClient(ctx)
+
+			node, err := queryNode(nodeQueryClient, address)
+			if err != nil {
+				return err
+			}
+
+			nodeInfo, err := fetchNodeInfo(node.RemoteURL, timeout)
+			if err != nil {
+				return err
+			}
+
 			var (
+				nodeType           = uint64(nodeInfo["type"].(float64))
 				messages           []sdk.Msg
-				nodeQueryClient    = nodetypes.NewQueryServiceClient(ctx)
 				sessionQueryClient = sessiontypes.NewQueryServiceClient(ctx)
 			)
 
@@ -176,12 +232,7 @@ func ConnectCmd() *cobra.Command {
 				),
 			)
 
-			if err := tx.GenerateOrBroadcastTxCLI(ctx, cmd.Flags(), messages...); err != nil {
-				return err
-			}
-
-			node, err := queryNode(nodeQueryClient, address)
-			if err != nil {
+			if err = tx.GenerateOrBroadcastTxCLI(ctx, cmd.Flags(), messages...); err != nil {
 				return err
 			}
 
@@ -193,9 +244,28 @@ func ConnectCmd() *cobra.Command {
 				return errors.New("no active session found")
 			}
 
-			wgPrivateKey, err := wireguardtypes.NewPrivateKey()
-			if err != nil {
-				return err
+			var (
+				key          string
+				wgPrivateKey *wireguardtypes.Key
+				uid          []byte
+			)
+
+			if nodeType == 1 {
+				wgPrivateKey, err = wireguardtypes.NewPrivateKey()
+				if err != nil {
+					return err
+				}
+
+				key = wgPrivateKey.Public().String()
+			} else if nodeType == 2 {
+				uid, err = uuid.GenerateRandomBytes(16)
+				if err != nil {
+					return err
+				}
+
+				key = base64.StdEncoding.EncodeToString(append([]byte{0x01}, uid...))
+			} else {
+				return fmt.Errorf("invalid node type %d", nodeType)
 			}
 
 			signature, _, err := ctx.Keyring.Sign(ctx.From, sdk.Uint64ToBigEndian(session.Id))
@@ -205,7 +275,7 @@ func ConnectCmd() *cobra.Command {
 
 			req, err := json.Marshal(
 				map[string]interface{}{
-					"key":       wgPrivateKey.Public().String(),
+					"key":       key,
 					"signature": signature,
 				},
 			)
@@ -213,12 +283,13 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
+			endpoint, err := url.JoinPath(node.RemoteURL, fmt.Sprintf("/accounts/%s/sessions/%d", ctx.FromAddress, session.Id))
+			if err != nil {
+				return err
+			}
+
 			var (
-				body     clienttypes.Response
-				endpoint = fmt.Sprintf(
-					"%s/accounts/%s/sessions/%d",
-					strings.Trim(node.RemoteURL, "/"), ctx.FromAddress, session.Id,
-				)
+				body       clienttypes.Response
 				httpClient = http.Client{
 					Transport: &http.Transport{
 						TLSClientConfig: &tls.Config{
@@ -236,7 +307,7 @@ func ConnectCmd() *cobra.Command {
 
 			defer resp.Body.Close()
 
-			if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+			if err = json.NewDecoder(resp.Body).Decode(&body); err != nil {
 				return err
 			}
 			if body.Error != nil {
@@ -247,25 +318,26 @@ func ConnectCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if len(result) != 58 {
-				return fmt.Errorf("incorrect result size %d", len(result))
-			}
 
-			var (
-				ipv4Address         = net.IP(result[0:4])
-				ipv6Address         = net.IP(result[4:20])
-				endpointHost        = net.IP(result[20:24])
-				endpointPort        = binary.BigEndian.Uint16(result[24:26])
-				endpointWGPublicKey = wireguardtypes.NewKey(result[26:58])
-			)
+			if nodeType == 1 {
+				if len(result) != 58 {
+					return fmt.Errorf("incorrect result size %d", len(result))
+				}
 
-			listenPort, err := netutil.GetFreeUDPPort()
-			if err != nil {
-				return err
-			}
+				var (
+					ipv4Address         = net.IP(result[0:4])
+					ipv6Address         = net.IP(result[4:20])
+					endpointHost        = net.IP(result[20:24])
+					endpointPort        = binary.BigEndian.Uint16(result[24:26])
+					endpointWGPublicKey = wireguardtypes.NewKey(result[26:58])
+				)
 
-			var (
-				cfg = &wireguardtypes.Config{
+				listenPort, err := netutil.GetFreeUDPPort()
+				if err != nil {
+					return err
+				}
+
+				cfg := &wireguardtypes.Config{
 					Name: wireguardtypes.DefaultInterface,
 					Interface: wireguardtypes.Interface{
 						Addresses: []wireguardtypes.IPNet{
@@ -295,26 +367,87 @@ func ConnectCmd() *cobra.Command {
 					},
 				}
 
-				service = wireguard.NewWireGuard().
-					WithConfig(cfg)
-			)
+				service = wireguard.NewWireGuard(cfg)
+			} else if nodeType == 2 {
+				if len(result) != 7 {
+					return fmt.Errorf("incorrect result size %d", len(result))
+				}
+
+				var (
+					vMessAddress   = net.IP(result[0:4])
+					vMessPort      = binary.BigEndian.Uint16(result[4:6])
+					vMessTransport = func() string {
+						switch result[6] {
+						case 0x01:
+							return "tcp"
+						case 0x02:
+							return "mkcp"
+						case 0x03:
+							return "websocket"
+						case 0x04:
+							return "http"
+						case 0x05:
+							return "domainsocket"
+						case 0x06:
+							return "quic"
+						case 0x07:
+							return "gun"
+						case 0x08:
+							return "grpc"
+						default:
+							return ""
+						}
+					}()
+				)
+
+				uidStr, err := uuid.FormatUUID(uid)
+				if err != nil {
+					return err
+				}
+
+				apiPort, err := netutil.GetFreeTCPPort()
+				if err != nil {
+					return err
+				}
+
+				cfg := &v2raytypes.Config{
+					API: &v2raytypes.APIConfig{
+						Port: apiPort,
+					},
+					Proxy: &v2raytypes.ProxyConfig{
+						Port: v2RayProxyPort,
+					},
+					VMess: &v2raytypes.VMessConfig{
+						Address:   vMessAddress.String(),
+						ID:        uidStr,
+						Port:      vMessPort,
+						Transport: vMessTransport,
+					},
+				}
+
+				service = v2ray.NewV2Ray(cfg)
+			} else {
+				return fmt.Errorf("invalid node type %d", nodeType)
+			}
+
+			if err = service.PreUp(); err != nil {
+				return err
+			}
+			if err = service.Up(); err != nil {
+				return err
+			}
+			if err = service.PostUp(); err != nil {
+				return err
+			}
 
 			status = clienttypes.NewStatus().
-				WithFrom(ctx.FromAddress.String()).
+				WithFrom(ctx.GetFromName()).
 				WithID(id).
-				WithIFace(cfg.Name).
-				WithTo(address.String())
-			if err := status.SaveToPath(statusFilePath); err != nil {
-				return err
-			}
+				WithInfo(service.Info()).
+				WithTo(address.String()).
+				WithType(nodeType)
 
-			if err := service.PreUp(); err != nil {
-				return err
-			}
-			if err := service.Up(); err != nil {
-				return err
-			}
-			if err := service.PostUp(); err != nil {
+			if err = status.SaveToPath(statusFilePath); err != nil {
 				return err
 			}
 
@@ -324,9 +457,10 @@ func ConnectCmd() *cobra.Command {
 
 	flags.AddTxFlagsToCmd(cmd)
 
-	cmd.Flags().String(flags.FlagChainID, "", "the network chain identity")
-	cmd.Flags().StringArray(clienttypes.FlagResolver, nil, "provide additional DNS servers")
+	cmd.Flags().String(flags.FlagChainID, "sentinelhub-2", "the network chain identity")
+	cmd.Flags().StringArray(clienttypes.FlagResolver, []string{"1.0.0.1", "1.1.1.1"}, "provide additional DNS servers")
 	cmd.Flags().Duration(clienttypes.FlagTimeout, 15*time.Second, "time limit for requests made by the HTTP client")
+	cmd.Flags().Uint16(clienttypes.FlagV2RayProxyPort, 1080, "port number fot the V2Ray SOCKS proxy")
 
 	return cmd
 }
