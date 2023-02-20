@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 )
 
@@ -19,27 +18,29 @@ type Service interface {
 }
 
 type Status struct {
-	From  string `json:"from"`
-	ID    uint64 `json:"id"`
-	IFace string `json:"iface"`
-	To    string `json:"to"`
+	From string `json:"from"`
+	ID   uint64 `json:"id"`
+	To   string `json:"to"`
+	Type uint64 `json:"type"`
+	Info []byte `json:"info"`
 }
 
 func NewStatus() *Status {
 	return &Status{}
 }
 
-func (s *Status) WithFrom(v string) *Status  { s.From = v; return s }
-func (s *Status) WithID(v uint64) *Status    { s.ID = v; return s }
-func (s *Status) WithIFace(v string) *Status { s.IFace = v; return s }
-func (s *Status) WithTo(v string) *Status    { s.To = v; return s }
+func (s *Status) WithFrom(v string) *Status { s.From = v; return s }
+func (s *Status) WithID(v uint64) *Status   { s.ID = v; return s }
+func (s *Status) WithInfo(v []byte) *Status { s.Info = v; return s }
+func (s *Status) WithTo(v string) *Status   { s.To = v; return s }
+func (s *Status) WithType(v uint64) *Status { s.Type = v; return s }
 
 func (s *Status) LoadFromPath(path string) error {
 	if _, err := os.Stat(path); err != nil {
 		return nil
 	}
 
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -56,5 +57,5 @@ func (s *Status) SaveToPath(path string) error {
 		return err
 	}
 
-	return ioutil.WriteFile(path, bytes, 0600)
+	return os.WriteFile(path, bytes, 0600)
 }
