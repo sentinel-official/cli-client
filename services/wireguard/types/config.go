@@ -2,37 +2,36 @@ package types
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
-	"path/filepath"
+	"os"
 	"strings"
 )
 
 type Config struct {
-	Name      string
-	Interface Interface
-	Peers     []Peer
+	Name      string    `json:"name"`
+	Interface Interface `json:"-"`
+	Peers     []Peer    `json:"-"`
 }
 
 type Interface struct {
-	PrivateKey Key
-	Addresses  []IPNet
-	ListenPort uint16
-	MTU        uint16
-	DNS        []net.IP
-	DNSSearch  []string
-	PreUp      string
-	PostUp     string
-	PreDown    string
-	PostDown   string
+	PrivateKey Key      `json:"-"`
+	Addresses  []IPNet  `json:"-"`
+	ListenPort uint16   `json:"-"`
+	MTU        uint16   `json:"-"`
+	DNS        []net.IP `json:"-"`
+	DNSSearch  []string `json:"-"`
+	PreUp      string   `json:"-"`
+	PostUp     string   `json:"-"`
+	PreDown    string   `json:"-"`
+	PostDown   string   `json:"-"`
 }
 
 type Peer struct {
-	PublicKey           Key
-	PresharedKey        Key
-	AllowedIPs          []IPNet
-	Endpoint            Endpoint
-	PersistentKeepalive uint16
+	PublicKey           Key      `json:"-"`
+	PresharedKey        Key      `json:"-"`
+	AllowedIPs          []IPNet  `json:"-"`
+	Endpoint            Endpoint `json:"-"`
+	PersistentKeepalive uint16   `json:"-"`
 }
 
 func (c *Config) ToWgQuick() string {
@@ -109,7 +108,6 @@ func (c *Config) ToWgQuick() string {
 	return output.String()
 }
 
-func (c *Config) WriteToFile(dir string) error {
-	path := filepath.Join(dir, fmt.Sprintf("%s.conf", c.Name))
-	return ioutil.WriteFile(path, []byte(c.ToWgQuick()), 0600)
+func (c *Config) WriteToFile(path string) error {
+	return os.WriteFile(path, []byte(c.ToWgQuick()), 0600)
 }

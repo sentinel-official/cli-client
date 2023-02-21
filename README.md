@@ -11,25 +11,28 @@
 
 ```sh
 sudo apt-get update && \
-sudo apt-get install openresolv wireguard-tools
+sudo apt-get install curl openresolv wireguard-tools
+
+sudo su; # run as root
+bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh) --version v5.2.1
 ```
 
 ### Mac
 
 ```sh
-brew install wireguard-tools
+brew install v2ray wireguard-tools
 ```
 
 or
 
 ```sh
-port install wireguard-tools
+port install v2ray wireguard-tools
 ```
 
 ## Install Sentinel CLI client
 
 ```sh
-curl --silent https://raw.githubusercontent.com/sentinel-official/cli-client/development/scripts/install.sh | sh
+curl --silent https://raw.githubusercontent.com/sentinel-official/cli-client/master/scripts/install.sh | sh
 ```
 
 ## Connect to a dVPN node

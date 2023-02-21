@@ -5,22 +5,18 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
-
-	"github.com/alessio/shellescape"
 )
 
-func (w *WireGuard) RealInterface() (string, error) {
-	nameFile, err := os.Open(
-		fmt.Sprintf("/var/run/wireguard/%s.name", shellescape.Quote(w.cfg.Name)))
+func (s *WireGuard) realInterface() (string, error) {
+	nameFile, err := os.Open(fmt.Sprintf("/var/run/wireguard/%s.name", s.cfg.Name))
 	if err != nil {
 		return "", err
 	}
 
-	scanner := bufio.NewReader(nameFile)
+	reader := bufio.NewReader(nameFile)
 
-	line, err := scanner.ReadString('\n')
+	line, err := reader.ReadString('\n')
 	if err != nil {
 		return "", err
 	}
@@ -28,15 +24,17 @@ func (w *WireGuard) RealInterface() (string, error) {
 	return strings.Trim(line, "\n"), nil
 }
 
-func (w *WireGuard) ExecFile(name string) string {
+func (s *WireGuard) execFile(name string) string {
 	return name
 }
 
-func (w *WireGuard) Up() error {
-	var (
-		cfgFilePath = filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
-		cmd         = exec.Command(w.ExecFile("wg-quick"), strings.Split(
-			fmt.Sprintf("up %s", shellescape.Quote(cfgFilePath)), " ")...)
+func (s *WireGuard) Up() error {
+	cmd := exec.Command(
+		s.execFile("wg-quick"),
+		strings.Split(
+			fmt.Sprintf("up %s", s.configFilePath()),
+			" ",
+		)...,
 	)
 
 	cmd.Stdout = os.Stdout
@@ -44,11 +42,13 @@ func (w *WireGuard) Up() error {
 	return cmd.Run()
 }
 
-func (w *WireGuard) Down() error {
-	var (
-		cfgFilePath = filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
-		cmd         = exec.Command(w.ExecFile("wg-quick"), strings.Split(
-			fmt.Sprintf("down %s", shellescape.Quote(cfgFilePath)), " ")...)
+func (s *WireGuard) Down() error {
+	cmd := exec.Command(
+		s.execFile("wg-quick"),
+		strings.Split(
+			fmt.Sprintf("down %s", s.configFilePath()),
+			" ",
+		)...,
 	)
 
 	cmd.Stdout = os.Stdout

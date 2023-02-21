@@ -1,6 +1,7 @@
 package wireguard
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -8,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/alessio/shellescape"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/viper"
 
@@ -21,28 +21,45 @@ var (
 )
 
 type WireGuard struct {
-	cfg  *types.Config
-	info []byte
+	cfg *types.Config
 }
 
-func NewWireGuard() *WireGuard {
-	return &WireGuard{}
+func NewWireGuard(cfg *types.Config) *WireGuard {
+	return &WireGuard{
+		cfg: cfg,
+	}
 }
 
-func (w *WireGuard) WithConfig(v *types.Config) *WireGuard { w.cfg = v; return w }
-func (w *WireGuard) WithInfo(v []byte) *WireGuard          { w.info = v; return w }
+func (s *WireGuard) home() string { return viper.GetString(flags.FlagHome) }
 
-func (w *WireGuard) Home() string { return viper.GetString(flags.FlagHome) }
-func (w *WireGuard) Info() []byte { return w.info }
+func (s *WireGuard) configFilePath() string {
+	return filepath.Join(s.home(), fmt.Sprintf("%s.conf", s.cfg.Name))
+}
 
-func (w *WireGuard) IsUp() bool {
-	iFace, err := w.RealInterface()
+func (s *WireGuard) Info() []byte {
+	buf, err := json.Marshal(s.cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	return buf
+}
+
+func (s *WireGuard) IsUp() bool {
+	iFace, err := s.realInterface()
 	if err != nil {
 		return false
 	}
 
-	output, err := exec.Command(w.ExecFile("wg"), strings.Split(
-		fmt.Sprintf("show %s", shellescape.Quote(iFace)), " ")...).CombinedOutput()
+	cmd := exec.Command(
+		s.execFile("wg"),
+		strings.Split(
+			fmt.Sprintf("show %s", iFace),
+			" ",
+		)...,
+	)
+
+	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return false
 	}
@@ -53,15 +70,16 @@ func (w *WireGuard) IsUp() bool {
 	return true
 }
 
-func (w *WireGuard) PreUp() error {
-	return w.cfg.WriteToFile(w.Home())
+func (s *WireGuard) PreUp() error {
+	cfgFilePath := s.configFilePath()
+	return s.cfg.WriteToFile(cfgFilePath)
 }
 
-func (w *WireGuard) PostUp() error  { return nil }
-func (w *WireGuard) PreDown() error { return nil }
+func (s *WireGuard) PostUp() error  { return nil }
+func (s *WireGuard) PreDown() error { return nil }
 
-func (w *WireGuard) PostDown() error {
-	cfgFilePath := filepath.Join(w.Home(), fmt.Sprintf("%s.conf", w.cfg.Name))
+func (s *WireGuard) PostDown() error {
+	cfgFilePath := s.configFilePath()
 	if _, err := os.Stat(cfgFilePath); err != nil {
 		return nil
 	}
@@ -69,14 +87,21 @@ func (w *WireGuard) PostDown() error {
 	return os.Remove(cfgFilePath)
 }
 
-func (w *WireGuard) Transfer() (u int64, d int64, err error) {
-	iFace, err := w.RealInterface()
+func (s *WireGuard) Transfer() (u int64, d int64, err error) {
+	iFace, err := s.realInterface()
 	if err != nil {
 		return 0, 0, err
 	}
 
-	output, err := exec.Command(w.ExecFile("wg"), strings.Split(
-		fmt.Sprintf("show %s transfer", shellescape.Quote(iFace)), " ")...).Output()
+	cmd := exec.Command(
+		s.execFile("wg"),
+		strings.Split(
+			fmt.Sprintf("show %s transfer", iFace),
+			" ",
+		)...,
+	)
+
+	output, err := cmd.Output()
 	if err != nil {
 		return 0, 0, err
 	}
@@ -88,12 +113,12 @@ func (w *WireGuard) Transfer() (u int64, d int64, err error) {
 			continue
 		}
 
-		d, err := strconv.ParseInt(columns[1], 10, 64)
+		d, err = strconv.ParseInt(columns[1], 10, 64)
 		if err != nil {
 			return 0, 0, err
 		}
 
-		u, err := strconv.ParseInt(columns[2], 10, 64)
+		u, err = strconv.ParseInt(columns[2], 10, 64)
 		if err != nil {
 			return 0, 0, err
 		}

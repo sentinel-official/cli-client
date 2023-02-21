@@ -32,8 +32,13 @@ var (
 		"Latency",
 		"Peers",
 		"Handshake",
+		"Type",
 		"Version",
 		"Status",
+	}
+	nodeTypes = map[uint64]string{
+		1: "WireGuard",
+		2: "V2Ray",
 	}
 )
 
@@ -127,6 +132,7 @@ func QueryNode() *cobra.Command {
 					item.Latency.Truncate(1 * time.Millisecond).String(),
 					fmt.Sprintf("%d", item.Peers),
 					fmt.Sprintf("%t", item.Handshake.Enable),
+					nodeTypes[item.Type],
 					item.Version,
 					item.Status,
 				},
@@ -245,6 +251,7 @@ func QueryNodes() *cobra.Command {
 							item.Latency.Truncate(1 * time.Millisecond).String(),
 							fmt.Sprintf("%d", item.Peers),
 							fmt.Sprintf("%t", item.Handshake.Enable),
+							nodeTypes[item.Type],
 							item.Version,
 							item.Status,
 						},
