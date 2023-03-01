@@ -1,9 +1,10 @@
 # Sentinel CLI Client
 
+[![Go](https://img.shields.io/github/go-mod/go-version/sentinel-official/cli-client)]()
+[![GoReport](https://goreportcard.com/badge/github.com/sentinel-official/cli-client)](https://goreportcard.com/report/github.com/sentinel-official/cli-client)
+[![Licence](https://img.shields.io/github/license/sentinel-official/cli-client.svg)](https://github.com/sentinel-official/cli-client/blob/master/LICENSE)
 [![Tag](https://img.shields.io/github/tag/sentinel-official/cli-client.svg)](https://github.com/sentinel-official/cli-client/releases/latest)
-[![GoReportCard](https://goreportcard.com/badge/github.com/sentinel-official/cli-client)](https://goreportcard.com/report/github.com/sentinel-official/cli-client)
-[![Licence](https://img.shields.io/github/license/sentinel-official/cli-client.svg)](https://github.com/sentinel-official/cli-client/blob/development/LICENSE)
-[![LoC](https://tokei.rs/b1/github/sentinel-official/cli-client)](https://github.com/sentinel-official/cli-client)
+[![TotalLines](https://img.shields.io/tokei/lines/github/sentinel-official/cli-client)]()
 
 ## Install dependencies
 
@@ -11,10 +12,8 @@
 
 ```sh
 sudo apt-get update && \
-sudo apt-get install curl openresolv wireguard-tools
-
-sudo su; # run as root
-bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh) --version v5.2.1
+sudo apt-get install curl openresolv wireguard-tools && \
+sudo sh -c "curl -fsLS https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | bash -s -- --version v5.2.1"
 ```
 
 ### Mac
@@ -107,4 +106,4 @@ curl --silent https://raw.githubusercontent.com/sentinel-official/cli-client/mas
         --home "${HOME}/.sentinelcli"
     ```
 
-Click [here](https://github.com/sentinel-official/docs/tree/master/guides/clients/cli "here") to know more!
+Click [here](https://docs.sentinel.co/clients/CLI/installation "here") to know more!
