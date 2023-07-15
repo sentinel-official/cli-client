@@ -83,13 +83,13 @@ func queryNode(qsc nodetypes.QueryServiceClient, address hubtypes.NodeAddress) (
 
 func queryActiveSession(qsc sessiontypes.QueryServiceClient, address sdk.AccAddress) (*sessiontypes.Session, error) {
 	var (
-		result, err = qsc.QuerySessionsForAddress(
+		result, err = qsc.QuerySessionsForAccount(
 			context.Background(),
-			sessiontypes.NewQuerySessionsForAddressRequest(
+			sessiontypes.NewQuerySessionsForAccountRequest(
 				address,
-				hubtypes.StatusActive,
 				&query.PageRequest{
-					Limit: 1,
+					Limit:   1,
+					Reverse: true,
 				},
 			),
 		)
@@ -217,7 +217,7 @@ func ConnectCmd() *cobra.Command {
 					messages,
 					sessiontypes.NewMsgEndRequest(
 						ctx.FromAddress,
-						session.Id,
+						session.ID,
 						0,
 					),
 				)
@@ -268,7 +268,7 @@ func ConnectCmd() *cobra.Command {
 				return fmt.Errorf("invalid node type %d", nodeType)
 			}
 
-			signature, _, err := ctx.Keyring.Sign(ctx.From, sdk.Uint64ToBigEndian(session.Id))
+			signature, _, err := ctx.Keyring.Sign(ctx.From, sdk.Uint64ToBigEndian(session.ID))
 			if err != nil {
 				return err
 			}
@@ -283,7 +283,7 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
-			endpoint, err := url.JoinPath(node.RemoteURL, fmt.Sprintf("/accounts/%s/sessions/%d", ctx.FromAddress, session.Id))
+			endpoint, err := url.JoinPath(node.RemoteURL, fmt.Sprintf("/accounts/%s/sessions/%d", ctx.FromAddress, session.ID))
 			if err != nil {
 				return err
 			}

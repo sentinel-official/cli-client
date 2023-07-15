@@ -32,8 +32,8 @@ func QueryCommand() *cobra.Command {
 	cmd.AddCommand(plancmd.QueryPlans())
 	cmd.AddCommand(subscriptioncmd.QuerySubscription())
 	cmd.AddCommand(subscriptioncmd.QuerySubscriptions())
-	cmd.AddCommand(subscriptioncmd.QueryQuota())
-	cmd.AddCommand(subscriptioncmd.QueryQuotas())
+	cmd.AddCommand(subscriptioncmd.QueryAllocation())
+	cmd.AddCommand(subscriptioncmd.QueryAllocations())
 	cmd.AddCommand(sessioncmd.QuerySession())
 	cmd.AddCommand(sessioncmd.QuerySessions())
 
