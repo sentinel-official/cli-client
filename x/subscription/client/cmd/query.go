@@ -9,7 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/olekukonko/tablewriter"
-	hubtypes "github.com/sentinel-official/hub/types"
 	subscriptiontypes "github.com/sentinel-official/hub/x/subscription/types"
 	"github.com/spf13/cobra"
 
@@ -20,20 +19,20 @@ import (
 var (
 	subscriptionHeader = []string{
 		"ID",
-		"Owner",
-		"Plan",
-		"Expiry",
-		"Denom",
-		"Node",
-		"Price",
-		"Deposit",
-		"Free",
-		"Status",
-	}
-	quotaHeader = []string{
 		"Address",
-		"Allocated",
-		"Consumed",
+		"Expiry at",
+		"Status",
+		"Node",
+		"Gigabytes",
+		"Hours",
+		"Deposit",
+		"Plan",
+		"Denom",
+	}
+	allocationHeader = []string{
+		"Address",
+		"Granted bytes",
+		"Utilised bytes",
 	}
 )
 
@@ -65,8 +64,13 @@ func QuerySubscription() *cobra.Command {
 				return err
 			}
 
+			var subscription subscriptiontypes.Subscription
+			if err = ctx.InterfaceRegistry.UnpackAny(result.Subscription, &subscription); err != nil {
+				return err
+			}
+
 			var (
-				item  = types.NewSubscriptionFromRaw(&result.Subscription)
+				item  = types.NewSubscriptionFromRaw(subscription)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
@@ -74,15 +78,15 @@ func QuerySubscription() *cobra.Command {
 			table.Append(
 				[]string{
 					fmt.Sprintf("%d", item.ID),
-					item.Owner,
-					fmt.Sprintf("%d", item.Plan),
-					item.Expiry.String(),
-					item.Denom,
-					item.Node,
-					item.Price.Raw().String(),
-					item.Deposit.Raw().String(),
-					netutil.ToReadable(item.Free, 2),
+					item.Address,
+					item.ExpiryAt.String(),
 					item.Status,
+					item.NodeAddress,
+					fmt.Sprintf("%d", item.Gigabytes),
+					fmt.Sprintf("%d", item.Hours),
+					item.Deposit,
+					fmt.Sprintf("%d", item.PlanID),
+					item.Denom,
 				},
 			)
 
@@ -111,11 +115,6 @@ func QuerySubscriptions() *cobra.Command {
 				return err
 			}
 
-			status, err := cmd.Flags().GetString(flagStatus)
-			if err != nil {
-				return err
-			}
-
 			pagination, err := client.ReadPageRequest(cmd.Flags())
 			if err != nil {
 				return err
@@ -132,11 +131,10 @@ func QuerySubscriptions() *cobra.Command {
 					return err
 				}
 
-				result, err := qsc.QuerySubscriptionsForAddress(
+				result, err := qsc.QuerySubscriptionsForAccount(
 					context.Background(),
-					subscriptiontypes.NewQuerySubscriptionsForAddressRequest(
+					subscriptiontypes.NewQuerySubscriptionsForAccountRequest(
 						address,
-						hubtypes.StatusFromString(status),
 						pagination,
 					),
 				)
@@ -144,7 +142,17 @@ func QuerySubscriptions() *cobra.Command {
 					return err
 				}
 
-				items = append(items, types.NewSubscriptionsFromRaw(result.Subscriptions)...)
+				var subscriptions []subscriptiontypes.Subscription
+				for _, item := range result.Subscriptions {
+					var subscription subscriptiontypes.Subscription
+					if err = ctx.InterfaceRegistry.UnpackAny(item, &subscription); err != nil {
+						return err
+					}
+
+					subscriptions = append(subscriptions, subscription)
+				}
+
+				items = append(items, types.NewSubscriptionsFromRaw(subscriptions)...)
 			} else {
 				result, err := qsc.QuerySubscriptions(
 					context.Background(),
@@ -154,7 +162,17 @@ func QuerySubscriptions() *cobra.Command {
 					return err
 				}
 
-				items = append(items, types.NewSubscriptionsFromRaw(result.Subscriptions)...)
+				var subscriptions []subscriptiontypes.Subscription
+				for _, item := range result.Subscriptions {
+					var subscription subscriptiontypes.Subscription
+					if err = ctx.InterfaceRegistry.UnpackAny(item, &subscription); err != nil {
+						return err
+					}
+
+					subscriptions = append(subscriptions, subscription)
+				}
+
+				items = append(items, types.NewSubscriptionsFromRaw(subscriptions)...)
 			}
 
 			table := tablewriter.NewWriter(cmd.OutOrStdout())
@@ -164,15 +182,15 @@ func QuerySubscriptions() *cobra.Command {
 				table.Append(
 					[]string{
 						fmt.Sprintf("%d", items[i].ID),
-						items[i].Owner,
-						fmt.Sprintf("%d", items[i].Plan),
-						items[i].Expiry.String(),
-						items[i].Denom,
-						items[i].Node,
-						items[i].Price.Raw().String(),
-						items[i].Deposit.Raw().String(),
-						netutil.ToReadable(items[i].Free, 2),
+						items[i].Address,
+						items[i].ExpiryAt.String(),
 						items[i].Status,
+						items[i].NodeAddress,
+						fmt.Sprintf("%d", items[i].Gigabytes),
+						fmt.Sprintf("%d", items[i].Hours),
+						items[i].Deposit,
+						fmt.Sprintf("%d", items[i].PlanID),
+						items[i].Denom,
 					},
 				)
 			}
@@ -186,15 +204,14 @@ func QuerySubscriptions() *cobra.Command {
 	flags.AddPaginationFlagsToCmd(cmd, "subscriptions")
 
 	cmd.Flags().String(flagAddress, "", "filter with account address")
-	cmd.Flags().String(flagStatus, "Active", "filter with status (Active|Inactive)")
 
 	return cmd
 }
 
-func QueryQuota() *cobra.Command {
+func QueryAllocation() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "quota [subscription] [address]",
-		Short: "Query a quota",
+		Use:   "allocation [subscription] [address]",
+		Short: "Query a allocation",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, err := client.GetClientQueryContext(cmd)
@@ -216,9 +233,9 @@ func QueryQuota() *cobra.Command {
 				qsc = subscriptiontypes.NewQueryServiceClient(ctx)
 			)
 
-			result, err := qsc.QueryQuota(
+			result, err := qsc.QueryAllocation(
 				context.Background(),
-				subscriptiontypes.NewQueryQuotaRequest(
+				subscriptiontypes.NewQueryAllocationRequest(
 					id,
 					address,
 				),
@@ -228,16 +245,16 @@ func QueryQuota() *cobra.Command {
 			}
 
 			var (
-				item  = types.NewQuotaFromRaw(&result.Quota)
+				item  = types.NewAllocationFromRaw(&result.Allocation)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
-			table.SetHeader(quotaHeader)
+			table.SetHeader(allocationHeader)
 			table.Append(
 				[]string{
 					item.Address,
-					netutil.ToReadable(item.Allocated, 2),
-					netutil.ToReadable(item.Consumed, 2),
+					netutil.ToReadable(item.GrantedBytes, 2),
+					netutil.ToReadable(item.UtilisedBytes, 2),
 				},
 			)
 
@@ -251,10 +268,10 @@ func QueryQuota() *cobra.Command {
 	return cmd
 }
 
-func QueryQuotas() *cobra.Command {
+func QueryAllocations() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "quotas [subscription]",
-		Short: "Query quotas of a subscription",
+		Use:   "allocations [subscription]",
+		Short: "Query allocations of a subscription",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			ctx, err := client.GetClientQueryContext(cmd)
@@ -276,9 +293,9 @@ func QueryQuotas() *cobra.Command {
 				qsc = subscriptiontypes.NewQueryServiceClient(ctx)
 			)
 
-			result, err := qsc.QueryQuotas(
+			result, err := qsc.QueryAllocations(
 				context.Background(),
-				subscriptiontypes.NewQueryQuotasRequest(
+				subscriptiontypes.NewQueryAllocationsRequest(
 					id,
 					pagination,
 				),
@@ -288,17 +305,17 @@ func QueryQuotas() *cobra.Command {
 			}
 
 			var (
-				items = types.NewQuotasFromRaw(result.Quotas)
+				items = types.NewAllocationsFromRaw(result.Allocations)
 				table = tablewriter.NewWriter(cmd.OutOrStdout())
 			)
 
-			table.SetHeader(quotaHeader)
+			table.SetHeader(allocationHeader)
 			for i := 0; i < len(items); i++ {
 				table.Append(
 					[]string{
 						items[i].Address,
-						netutil.ToReadable(items[i].Allocated, 2),
-						netutil.ToReadable(items[i].Consumed, 2),
+						netutil.ToReadable(items[i].GrantedBytes, 2),
+						netutil.ToReadable(items[i].UtilisedBytes, 2),
 					},
 				)
 			}
@@ -309,7 +326,7 @@ func QueryQuotas() *cobra.Command {
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-	flags.AddPaginationFlagsToCmd(cmd, "quotas")
+	flags.AddPaginationFlagsToCmd(cmd, "allocations")
 
 	return cmd
 }
