@@ -10,24 +10,24 @@ import (
 
 type Node struct {
 	Info
-	Address   string            `json:"address"`
-	Provider  string            `json:"provider"`
-	Price     clienttypes.Coins `json:"price"`
-	RemoteURL string            `json:"remote_url"`
-	Status    string            `json:"status"`
-	StatusAt  time.Time         `json:"status_at"`
+	Address        string            `json:"address"`
+	GigabytePrices clienttypes.Coins `json:"gigabyte_prices"`
+	HourlyPrices   clienttypes.Coins `json:"hourly_prices"`
+	RemoteURL      string            `json:"remote_url"`
+	Status         string            `json:"status"`
+	StatusAt       time.Time         `json:"status_at"`
 }
 
 func (n Node) WithInfo(v Info) Node { n.Info = v; return n }
 
 func NewNodeFromRaw(v *nodetypes.Node) Node {
 	return Node{
-		Address:   v.Address,
-		Provider:  v.Provider,
-		Price:     clienttypes.NewCoinsFromRaw(v.Price),
-		RemoteURL: v.RemoteURL,
-		Status:    v.Status.String(),
-		StatusAt:  v.StatusAt,
+		Address:        v.Address,
+		GigabytePrices: clienttypes.NewCoinsFromRaw(v.GigabytePrices),
+		HourlyPrices:   clienttypes.NewCoinsFromRaw(v.HourlyPrices),
+		RemoteURL:      v.RemoteURL,
+		Status:         v.Status.String(),
+		StatusAt:       v.StatusAt,
 	}
 }
 

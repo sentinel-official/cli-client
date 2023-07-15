@@ -1,6 +1,6 @@
 package cmd
 
 const (
-	flagProvider = "provider"
-	flagStatus   = "status"
+	flagPlanID = "plan-id"
+	flagStatus = "status"
 )

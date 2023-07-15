@@ -25,8 +25,8 @@ var (
 	header = []string{
 		"Moniker",
 		"Address",
-		"Provider",
-		"Price",
+		"Gigabyte prices",
+		"Hourly prices",
 		"Country",
 		"Speed test",
 		"Latency",
@@ -125,8 +125,8 @@ func QueryNode() *cobra.Command {
 				[]string{
 					item.Moniker,
 					item.Address,
-					item.Provider,
-					item.Price.Raw().String(),
+					item.GigabytePrices.Raw().String(),
+					item.HourlyPrices.Raw().String(),
 					item.Location.Country,
 					item.Bandwidth.String(),
 					item.Latency.Truncate(1 * time.Millisecond).String(),
@@ -160,7 +160,7 @@ func QueryNodes() *cobra.Command {
 				return err
 			}
 
-			provider, err := cmd.Flags().GetString(flagProvider)
+			planID, err := cmd.Flags().GetUint64(flagPlanID)
 			if err != nil {
 				return err
 			}
@@ -186,16 +186,11 @@ func QueryNodes() *cobra.Command {
 				status = hubtypes.StatusFromString(s)
 			)
 
-			if provider != "" {
-				address, err := hubtypes.ProvAddressFromBech32(provider)
-				if err != nil {
-					return err
-				}
-
-				result, err := qsc.QueryNodesForProvider(
+			if planID != 0 {
+				result, err := qsc.QueryNodesForPlan(
 					context.Background(),
-					nodetypes.NewQueryNodesForProviderRequest(
-						address,
+					nodetypes.NewQueryNodesForPlanRequest(
+						planID,
 						status,
 						pagination,
 					),
@@ -244,8 +239,8 @@ func QueryNodes() *cobra.Command {
 						[]string{
 							item.Moniker,
 							item.Address,
-							item.Provider,
-							item.Price.Raw().String(),
+							item.GigabytePrices.Raw().String(),
+							item.HourlyPrices.Raw().String(),
 							item.Location.Country,
 							item.Bandwidth.String(),
 							item.Latency.Truncate(1 * time.Millisecond).String(),
@@ -269,7 +264,7 @@ func QueryNodes() *cobra.Command {
 	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "nodes")
 
-	cmd.Flags().String(flagProvider, "", "filter with provider address")
+	cmd.Flags().String(flagPlanID, "", "filter with plan id")
 	cmd.Flags().String(flagStatus, "Active", "filter with status (Active|Inactive)")
 	cmd.Flags().Duration(clienttypes.FlagTimeout, 15*time.Second, "time limit for requests made by the HTTP client")
 
