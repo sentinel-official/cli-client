@@ -1,9 +1,13 @@
 package types
 
 import (
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdkstd "github.com/cosmos/cosmos-sdk/std"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting"
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -22,15 +26,17 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
-	ibcica "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts"
-	ibctransfer "github.com/cosmos/ibc-go/v3/modules/apps/transfer"
-	ibc "github.com/cosmos/ibc-go/v3/modules/core"
-	ibcclientclient "github.com/cosmos/ibc-go/v3/modules/core/02-client/client"
-	hubparams "github.com/sentinel-official/hub/params"
 	custommint "github.com/sentinel-official/hub/x/mint"
 	"github.com/sentinel-official/hub/x/swap"
 	"github.com/sentinel-official/hub/x/vpn"
 )
+
+type EncodingConfig struct {
+	Amino             *codec.LegacyAmino
+	Codec             codec.Codec
+	InterfaceRegistry codectypes.InterfaceRegistry
+	TxConfig          client.TxConfig
+}
 
 var (
 	ModuleBasics = module.NewBasicManager(
@@ -46,15 +52,10 @@ var (
 		genutil.AppModuleBasic{},
 		gov.NewAppModuleBasic(
 			distributionclient.ProposalHandler,
-			ibcclientclient.UpdateClientProposalHandler,
-			ibcclientclient.UpgradeProposalHandler,
 			paramsclient.ProposalHandler,
 			upgradeclient.ProposalHandler,
 			upgradeclient.CancelProposalHandler,
 		),
-		ibc.AppModuleBasic{},
-		ibcica.AppModuleBasic{},
-		ibctransfer.AppModuleBasic{},
 		mint.AppModuleBasic{},
 		params.AppModuleBasic{},
 		slashing.AppModuleBasic{},
@@ -66,11 +67,29 @@ var (
 	)
 )
 
-func MakeEncodingConfig() hubparams.EncodingConfig {
-	config := hubparams.MakeEncodingConfig()
+func NewEncodingConfig() EncodingConfig {
+	var (
+		amino             = codec.NewLegacyAmino()
+		interfaceRegistry = codectypes.NewInterfaceRegistry()
+		cdc               = codec.NewProtoCodec(interfaceRegistry)
+		txConfig          = authtx.NewTxConfig(cdc, authtx.DefaultSignModes)
+	)
+
+	return EncodingConfig{
+		Amino:             amino,
+		Codec:             cdc,
+		InterfaceRegistry: interfaceRegistry,
+		TxConfig:          txConfig,
+	}
+}
+
+func DefaultEncodingConfig() EncodingConfig {
+	config := NewEncodingConfig()
+
 	sdkstd.RegisterLegacyAminoCodec(config.Amino)
 	sdkstd.RegisterInterfaces(config.InterfaceRegistry)
 	ModuleBasics.RegisterLegacyAminoCodec(config.Amino)
 	ModuleBasics.RegisterInterfaces(config.InterfaceRegistry)
+
 	return config
 }
