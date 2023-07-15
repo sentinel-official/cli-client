@@ -4,6 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	hubtypes "github.com/sentinel-official/hub/types"
 	"github.com/spf13/cobra"
 
 	"github.com/sentinel-official/hub/x/provider/types"
@@ -104,12 +105,18 @@ func txUpdate() *cobra.Command {
 				return err
 			}
 
+			s, err := cmd.Flags().GetString(flagStatus)
+			if err != nil {
+				return err
+			}
+
 			msg := types.NewMsgUpdateRequest(
 				ctx.FromAddress.Bytes(),
 				name,
 				identity,
 				website,
 				description,
+				hubtypes.StatusFromString(s),
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
@@ -125,6 +132,7 @@ func txUpdate() *cobra.Command {
 	cmd.Flags().String(flagIdentity, "", "identity signature (optional)")
 	cmd.Flags().String(flagWebsite, "", "website (optional)")
 	cmd.Flags().String(flagDescription, "", "description (optional)")
+	cmd.Flags().String(flagStatus, "", "status (optional)")
 
 	return cmd
 }

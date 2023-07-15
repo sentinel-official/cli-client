@@ -5,4 +5,5 @@ const (
 	flagIdentity    = "identity"
 	flagWebsite     = "website"
 	flagDescription = "description"
+	flagStatus      = "status"
 )

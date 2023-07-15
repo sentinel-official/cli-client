@@ -24,7 +24,7 @@ var (
 
 func QueryProvider() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "provider [address]",
+		Use:   "provider [prov-addr]",
 		Short: "Query a provider",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -85,6 +85,11 @@ func QueryProviders() *cobra.Command {
 				return err
 			}
 
+			s, err := cmd.Flags().GetString(flagStatus)
+			if err != nil {
+				return err
+			}
+
 			pagination, err := client.ReadPageRequest(cmd.Flags())
 			if err != nil {
 				return err
@@ -96,7 +101,10 @@ func QueryProviders() *cobra.Command {
 
 			result, err := qsc.QueryProviders(
 				context.Background(),
-				providertypes.NewQueryProvidersRequest(pagination),
+				providertypes.NewQueryProvidersRequest(
+					hubtypes.StatusFromString(s),
+					pagination,
+				),
 			)
 			if err != nil {
 				return err
@@ -126,6 +134,7 @@ func QueryProviders() *cobra.Command {
 
 	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "providers")
+	cmd.Flags().String(flagStatus, "active", "filter with status (active|inactive)")
 
 	return cmd
 }
