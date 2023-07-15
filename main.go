@@ -31,9 +31,9 @@ func main() {
 			}
 
 			var (
-				config    = types.MakeEncodingConfig()
+				config    = types.DefaultEncodingConfig()
 				clientCtx = client.Context{}.
-						WithCodec(config.Marshaler).
+						WithCodec(config.Codec).
 						WithInterfaceRegistry(config.InterfaceRegistry).
 						WithTxConfig(config.TxConfig).
 						WithLegacyAmino(config.Amino).
