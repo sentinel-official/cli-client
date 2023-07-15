@@ -10,7 +10,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/olekukonko/tablewriter"
-	hubtypes "github.com/sentinel-official/hub/types"
 	sessiontypes "github.com/sentinel-official/hub/x/session/types"
 	"github.com/spf13/cobra"
 
@@ -66,8 +65,8 @@ func QuerySession() *cobra.Command {
 			table.Append(
 				[]string{
 					fmt.Sprintf("%d", item.ID),
-					fmt.Sprintf("%d", item.Subscription),
-					item.Node,
+					fmt.Sprintf("%d", item.SubscriptionID),
+					item.NodeAddress,
 					item.Address,
 					item.Duration.Truncate(1 * time.Second).String(),
 					item.Bandwidth.String(),
@@ -116,16 +115,10 @@ func QuerySessions() *cobra.Command {
 					return err
 				}
 
-				status, err := cmd.Flags().GetString(flagStatus)
-				if err != nil {
-					return err
-				}
-
-				result, err := qc.QuerySessionsForAddress(
+				result, err := qc.QuerySessionsForAccount(
 					context.Background(),
-					sessiontypes.NewQuerySessionsForAddressRequest(
+					sessiontypes.NewQuerySessionsForAccountRequest(
 						address,
-						hubtypes.StatusFromString(status),
 						pagination,
 					),
 				)
@@ -153,8 +146,8 @@ func QuerySessions() *cobra.Command {
 				table.Append(
 					[]string{
 						fmt.Sprintf("%d", items[i].ID),
-						fmt.Sprintf("%d", items[i].Subscription),
-						items[i].Node,
+						fmt.Sprintf("%d", items[i].SubscriptionID),
+						items[i].NodeAddress,
 						items[i].Address,
 						items[i].Duration.Truncate(1 * time.Second).String(),
 						items[i].Bandwidth.String(),
