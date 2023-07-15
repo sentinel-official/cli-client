@@ -10,9 +10,9 @@ import (
 
 type Plan struct {
 	ID       uint64            `json:"id"`
-	Provider string            `json:"provider"`
-	Price    clienttypes.Coins `json:"price"`
-	Validity time.Duration     `json:"validity"`
+	Address  string            `json:"address"`
+	Prices   clienttypes.Coins `json:"prices"`
+	Duration time.Duration     `json:"duration"`
 	Bytes    int64             `json:"bytes"`
 	Status   string            `json:"status"`
 	StatusAt time.Time         `json:"status_at"`
@@ -20,10 +20,10 @@ type Plan struct {
 
 func NewPlanFromRaw(v *plantypes.Plan) Plan {
 	return Plan{
-		ID:       v.Id,
-		Provider: v.Provider,
-		Price:    clienttypes.NewCoinsFromRaw(v.Price),
-		Validity: v.Validity,
+		ID:       v.ID,
+		Address:  v.Address,
+		Prices:   clienttypes.NewCoinsFromRaw(v.Prices),
+		Duration: v.Duration,
 		Bytes:    v.Bytes.Int64(),
 		Status:   v.Status.String(),
 		StatusAt: v.StatusAt,

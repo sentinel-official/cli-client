@@ -19,10 +19,10 @@ import (
 var (
 	header = []string{
 		"ID",
-		"Provider",
-		"Price",
+		"Address",
+		"Prices",
 		"Bytes",
-		"Validity",
+		"Duration",
 		"Status",
 	}
 )
@@ -64,10 +64,10 @@ func QueryPlan() *cobra.Command {
 			table.Append(
 				[]string{
 					fmt.Sprintf("%d", item.ID),
-					item.Provider,
-					item.Price.Raw().String(),
+					item.Address,
+					item.Prices.Raw().String(),
 					netutil.ToReadable(item.Bytes, 2),
-					item.Validity.String(),
+					item.Duration.String(),
 					item.Status,
 				},
 			)
@@ -154,10 +154,10 @@ func QueryPlans() *cobra.Command {
 				table.Append(
 					[]string{
 						fmt.Sprintf("%d", items[i].ID),
-						items[i].Provider,
-						items[i].Price.Raw().String(),
+						items[i].Address,
+						items[i].Prices.Raw().String(),
 						netutil.ToReadable(items[i].Bytes, 2),
-						items[i].Validity.String(),
+						items[i].Duration.String(),
 						items[i].Status,
 					},
 				)
