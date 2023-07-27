@@ -20,7 +20,7 @@ var (
 	subscriptionHeader = []string{
 		"ID",
 		"Address",
-		"Expiry at",
+		"Inactive at",
 		"Status",
 		"Node",
 		"Gigabytes",
@@ -79,7 +79,7 @@ func QuerySubscription() *cobra.Command {
 				[]string{
 					fmt.Sprintf("%d", item.ID),
 					item.Address,
-					item.ExpiryAt.String(),
+					item.InactiveAt.String(),
 					item.Status,
 					item.NodeAddress,
 					fmt.Sprintf("%d", item.Gigabytes),
@@ -183,7 +183,7 @@ func QuerySubscriptions() *cobra.Command {
 					[]string{
 						fmt.Sprintf("%d", items[i].ID),
 						items[i].Address,
-						items[i].ExpiryAt.String(),
+						items[i].InactiveAt.String(),
 						items[i].Status,
 						items[i].NodeAddress,
 						fmt.Sprintf("%d", items[i].Gigabytes),

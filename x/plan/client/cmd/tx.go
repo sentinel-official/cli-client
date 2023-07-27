@@ -33,7 +33,7 @@ func GetTxCommand() *cobra.Command {
 
 func txCreate() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create [bytes] [duration] [prices]",
+		Use:   "create [duration] [gigabytes] [prices]",
 		Short: "Create a plan",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -42,12 +42,12 @@ func txCreate() *cobra.Command {
 				return err
 			}
 
-			bytes, err := strconv.ParseInt(args[0], 10, 64)
+			duration, err := time.ParseDuration(args[0])
 			if err != nil {
 				return err
 			}
 
-			duration, err := time.ParseDuration(args[1])
+			gigabytes, err := strconv.ParseInt(args[1], 10, 64)
 			if err != nil {
 				return err
 			}
@@ -59,8 +59,8 @@ func txCreate() *cobra.Command {
 
 			msg := plantypes.NewMsgCreateRequest(
 				ctx.FromAddress.Bytes(),
-				sdk.NewInt(bytes),
 				duration,
+				gigabytes,
 				prices,
 			)
 			if err := msg.ValidateBasic(); err != nil {

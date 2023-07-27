@@ -7,11 +7,11 @@ import (
 )
 
 type Subscription struct {
-	ID       uint64    `json:"id"`
-	Address  string    `json:"address"`
-	ExpiryAt time.Time `json:"expiry_at"`
-	Status   string    `json:"status"`
-	StatusAt time.Time `json:"status_at"`
+	ID         uint64    `json:"id"`
+	Address    string    `json:"address"`
+	InactiveAt time.Time `json:"inactive_at"`
+	Status     string    `json:"status"`
+	StatusAt   time.Time `json:"status_at"`
 
 	NodeAddress string `json:"node_address"`
 	Gigabytes   int64  `json:"gigabytes"`
@@ -24,11 +24,11 @@ type Subscription struct {
 
 func NewSubscriptionFromRaw(v subscriptiontypes.Subscription) Subscription {
 	s := Subscription{
-		ID:       v.GetID(),
-		Address:  v.GetAddress().String(),
-		ExpiryAt: v.GetExpiryAt(),
-		Status:   v.GetStatus().String(),
-		StatusAt: v.GetStatusAt(),
+		ID:         v.GetID(),
+		Address:    v.GetAddress().String(),
+		InactiveAt: v.GetInactiveAt(),
+		Status:     v.GetStatus().String(),
+		StatusAt:   v.GetStatusAt(),
 	}
 
 	if v.Type() == subscriptiontypes.TypeNode {
