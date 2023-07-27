@@ -264,7 +264,7 @@ func QueryNodes() *cobra.Command {
 	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "nodes")
 
-	cmd.Flags().String(flagPlanID, "", "filter with plan id")
+	cmd.Flags().Uint64(flagPlanID, 0, "filter with plan id")
 	cmd.Flags().String(flagStatus, "Active", "filter with status (Active|Inactive)")
 	cmd.Flags().Duration(clienttypes.FlagTimeout, 15*time.Second, "time limit for requests made by the HTTP client")
 
