@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
-	github.com/sentinel-official/hub v0.11.0-rc2
+	github.com/sentinel-official/hub v0.11.0-rc3
 	github.com/shirou/gopsutil/v3 v3.23.6
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
