@@ -21,7 +21,7 @@ type Plan struct {
 func NewPlanFromRaw(v *plantypes.Plan) Plan {
 	return Plan{
 		ID:        v.ID,
-		Address:   v.Address,
+		Address:   v.ProviderAddress,
 		Prices:    clienttypes.NewCoinsFromRaw(v.Prices),
 		Duration:  v.Duration,
 		Gigabytes: v.Gigabytes,
