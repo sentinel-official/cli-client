@@ -127,10 +127,7 @@ func ConnectCmd() *cobra.Command {
 
 			address, err := hubtypes.NodeAddressFromBech32(args[1])
 			if err != nil {
-				message := fmt.Sprintf("%s", err)
-				fmt.Println(message)
 				return err
-
 			}
 
 			timeout, err := cmd.Flags().GetDuration(clienttypes.FlagTimeout)
@@ -214,7 +211,6 @@ func ConnectCmd() *cobra.Command {
 				sessionQueryClient = sessiontypes.NewQueryServiceClient(ctx)
 			)
 
-			// This is where it finds the inactive_pending session, session.ID
 			session, err := queryActiveSession(sessionQueryClient, ctx.FromAddress)
 			if err != nil {
 				return err
