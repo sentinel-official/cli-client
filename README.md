@@ -37,73 +37,73 @@ curl --silent https://raw.githubusercontent.com/sentinel-official/cli-client/mas
 ## Connect to a dVPN node
 
 1. Create or recover a key
-
+   
     Need not perform this step again in case you have already done it once.
-
-    ```sh
-    sentinelcli keys add \
-        --home "${HOME}/.sentinelcli" \
-        --keyring-backend file \
-        <KEY_NAME>
-    ```
-
+   
+   ```sh
+   sentinelcli keys add \
+       --home "${HOME}/.sentinelcli" \
+       --keyring-backend file \
+       <KEY_NAME>
+   ```
+   
     Pass flag `--recover` to recover the key.
 
 2. Query the active nodes and choose one
-
-    ```sh
-    sentinelcli query nodes \
-        --home "${HOME}/.sentinelcli" \
-        --node https://rpc.sentinel.co:443 \
-        --status Active \
-        --page 1
-    ```
-
+   
+   ```sh
+   sentinelcli query nodes \
+       --home "${HOME}/.sentinelcli" \
+       --node https://rpc.sentinel.co:443 \
+       --status Active \
+       --page 1
+   ```
+   
     Increase the page number to get more nodes
 
 3. Subscribe to a node
-
-    ```sh
-    sentinelcli tx subscription subscribe-to-node \
-        --home "${HOME}/.sentinelcli" \
-        --keyring-backend file \
-        --chain-id sentinelhub-2 \
-        --node https://rpc.sentinel.co:443 \
-        --gas-prices 0.1udvpn \
-        --from <KEY_NAME> <NODE_ADDRESS> <DEPOSIT>
-    ```
+   
+   ```sh
+   sentinelcli tx subscription subscribe-to-node \
+       --home "${HOME}/.sentinelcli" \
+       --keyring-backend file \
+       --chain-id sentinelhub-2 \
+       --node https://rpc.sentinel.co:443 \
+       --gas-prices 0.1udvpn \
+       --from <KEY_NAME> <NODE_ADDRESS> <DEPOSIT>
+   ```
 
 4. Query the active subscriptions of your account address
-
-    ```sh
-    sentinelcli query subscriptions \
-        --home "${HOME}/.sentinelcli" \
-        --node https://rpc.sentinel.co:443 \
-        --status Active \
-        --page 1 \
-        --address <ACCOUNT_ADDRESS>
-    ```
+   
+   ```sh
+   sentinelcli query subscriptions \
+       --home "${HOME}/.sentinelcli" \
+       --node https://rpc.sentinel.co:443 \
+       --status Active \
+       --page 1 \
+       --address <ACCOUNT_ADDRESS>
+   ```
 
 5. Connect
-
-    ```sh
-    sudo sentinelcli connect \
-        --home "${HOME}/.sentinelcli" \
-        --keyring-backend file \
-        --chain-id sentinelhub-2 \
-        --node https://rpc.sentinel.co:443 \
-        --gas-prices 0.1udvpn \
-        --yes \
-        --from <KEY_NAME> <SUBSCRIPTION_ID> <NODE_ADDRESS>
-    ```
+   
+   ```sh
+   sudo sentinelcli connect \
+       --home "${HOME}/.sentinelcli" \
+       --keyring-backend file \
+       --chain-id sentinelhub-2 \
+       --node https://rpc.sentinel.co:443 \
+       --gas-prices 0.1udvpn \
+       --yes \
+       --from <KEY_NAME> <SUBSCRIPTION_ID> <NODE_ADDRESS>
+   ```
 
 ## Disconnect from a dVPN node
 
 1. Disconnect
+   
+   ```sh
+   sudo sentinelcli disconnect \
+       --home "${HOME}/.sentinelcli"
+   ```
 
-    ```sh
-    sudo sentinelcli disconnect \
-        --home "${HOME}/.sentinelcli"
-    ```
-
-Click [here](https://docs.sentinel.co/clients/CLI/installation "here") to know more!
+Click [here](https://docs.sentinel.co/sentinel-cli "here") to know more!
