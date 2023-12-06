@@ -99,7 +99,11 @@ func queryActiveSession(qsc sessiontypes.QueryServiceClient, address sdk.AccAddr
 		return nil, err
 	}
 	if len(result.Sessions) > 0 {
-		return &result.Sessions[0], nil
+		if result.Sessions[0].Status == hubtypes.StatusInactivePending {
+			return nil, nil
+		} else {
+			return &result.Sessions[0], nil
+		}
 	}
 
 	return nil, nil
@@ -212,6 +216,7 @@ func ConnectCmd() *cobra.Command {
 				return err
 			}
 
+			// Add a MsgEndRequest if session is active
 			if session != nil {
 				messages = append(
 					messages,
@@ -240,6 +245,7 @@ func ConnectCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			if session == nil {
 				return errors.New("no active session found")
 			}
